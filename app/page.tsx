@@ -40,7 +40,7 @@ export default function Home() {
       <header className="site-header">
         <a className="brand" href="#top" aria-label="返回门户首页">
           <span className="brand-mark"><i /></span>
-          <span><strong>LYZ · 数字岛屿</strong><small>DIGITAL ARCHIPELAGO</small></span>
+          <span><strong>LoseYoung · 数字岛屿</strong><small>DIGITAL ARCHIPELAGO</small></span>
         </a>
         <nav aria-label="主导航">
           <a href="#projects">正在运行</a>
@@ -106,8 +106,8 @@ export default function Home() {
       </section>
 
       <footer>
-        <div><span className="brand-mark small"><i /></span><strong>LYZ · 数字岛屿</strong></div>
-        <p>© 2026 LYZ · Built quietly between stars and tides.</p>
+        <div><span className="brand-mark small"><i /></span><strong>LoseYoung · 数字岛屿</strong></div>
+        <p>© 2026 LoseYoung · Built quietly between stars and tides.</p>
         <span>星海未眠，创造继续。</span>
       </footer>
     </main>

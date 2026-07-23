@@ -20,7 +20,7 @@ test("server-renders the personal portal and Photos Island entry", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /LYZ · 数字岛屿/);
+  assert.match(html, /LoseYoung · 数字岛屿/);
   assert.match(html, /把灵感，安放在/);
   assert.match(html, /照片岛/);
   assert.match(html, /https:\/\/photos-island\.lzy793222567\.chatgpt\.site\//);
