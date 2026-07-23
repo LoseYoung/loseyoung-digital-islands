@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 const photosIslandUrl = "https://photos-island.lzy793222567.chatgpt.site/";
+const faerieIslandUrl = "https://faerie-britain-echoes.lzy793222567.chatgpt.site/";
 
 export default function Home() {
   useEffect(() => {
@@ -62,10 +63,10 @@ export default function Home() {
         <div className="archipelago" aria-hidden="true">
           <div className="orbit orbit-one"><i /></div>
           <div className="orbit orbit-two"><i /></div>
-          <div className="portal-core"><span>01</span><strong>PHOTO<br />ISLAND</strong></div>
+          <div className="portal-core"><span>02</span><strong>ACTIVE<br />ISLANDS</strong></div>
           <span className="coordinate north">31° N</span>
           <span className="coordinate east">121° E</span>
-          <span className="map-note">ONE ISLAND ONLINE</span>
+          <span className="map-note">TWO ISLANDS ONLINE</span>
         </div>
         <a className="scroll-cue" href="#projects"><i />向下探索</a>
       </section>
@@ -91,6 +92,22 @@ export default function Home() {
             <span className="project-link">进入照片岛 <i>↗</i></span>
           </div>
         </a>
+
+        <a className="project-card game-card" href={faerieIslandUrl} target="_blank" rel="noopener noreferrer" aria-label="进入妖精国余响横版 RPG">
+          <div className="project-image">
+            <img src="/faerie-britain.png" alt="妖精国余响的月光森林与阿尔托莉雅·Caster主题预览" loading="lazy" />
+            <div className="image-overlay" />
+            <span className="project-number">ISLAND / 02</span>
+            <span className="live-status"><i />公开试玩</span>
+          </div>
+          <div className="project-content">
+            <p>游戏 · 横版动作 RPG</p>
+            <h3>妖精国余响<em>Faerie Britain: Echoes</em></h3>
+            <span className="project-divider" />
+            <p className="project-description">操作阿尔托莉雅·Caster穿过无名之森，以魔术与法杖战斗，在巡礼残响中重温她的选择。御主只会在关键时刻以令咒提供一次支援。</p>
+            <span className="project-link">开始巡礼<i>→</i></span>
+          </div>
+        </a>
       </section>
 
       <section id="future" className="future section-shell">
@@ -100,7 +117,7 @@ export default function Home() {
         </header>
         <div className="future-panel" aria-disabled="true">
           <div className="future-orbit"><i /></div>
-          <div><p>NEXT ISLAND</p><h3>下一座岛屿</h3><span>尚未命名，正在生长。</span></div>
+          <div><p>NEXT COORDINATE</p><h3>第三座岛屿</h3><span>尚未命名，正在生长。</span></div>
           <small>当新的站点开放，这里将成为它的入口。</small>
         </div>
       </section>

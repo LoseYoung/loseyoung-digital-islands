@@ -35,11 +35,14 @@ test("removes starter-only assets and keeps project previews local", async () =>
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
   assert.match(page, /photos-island\.lzy793222567\.chatgpt\.site/);
+  assert.match(page, /faerie-britain-echoes\.lzy793222567\.chatgpt\.site/);
+  assert.match(page, /妖精国余响/);
   assert.match(page, /target="_blank"/);
   assert.match(page, /prefers-reduced-motion/);
   assert.match(layout, /summary_large_image/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
   await access(new URL("../public/og.png", import.meta.url));
   await access(new URL("../public/photos-island.png", import.meta.url));
+  await access(new URL("../public/faerie-britain.png", import.meta.url));
   await assert.rejects(access(new URL("../app/_sites-preview", root)));
 });
