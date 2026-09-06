@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
-import { access } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
+const root = new URL("../", import.meta.url);
+
 async function render() {
-  const { default: worker } = await import("../dist/server/index.js");
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
+  const { default: worker } = await import(workerUrl.href);
   return worker.fetch(
     new Request("https://portal.example/", { headers: { accept: "text/html", host: "portal.example", "x-forwarded-proto": "https" } }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
@@ -11,29 +15,39 @@ async function render() {
   );
 }
 
-test("portal renders all three island destinations with safe external links", async () => {
+test("server-renders the personal portal and Photos Island entry", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /LoseYoung/);
-  assert.match(html, /ISLANDS ONLINE/);
-  for (const slug of ["photos-island", "faerie-britain-echoes", "digital-island-gridwake"]) {
-    const url = `https://${slug}.lzy793222567.chatgpt.site/`;
-    const links = [...html.matchAll(/<a\b[^>]*>/g)].map(([link]) => link).filter(link => link.includes(`href="${url}"`));
-    assert.equal(links.length, 3, `${slug} is linked in header, map and project card`);
-    for (const link of links) {
-      assert.match(link, /target="_blank"/);
-      assert.match(link, /rel="noopener noreferrer"/);
-    }
-  }
+  assert.match(html, /LoseYoung · 数字岛屿/);
+  assert.match(html, /把灵感，安放在/);
+  assert.match(html, /照片岛/);
   assert.match(html, /栅域余烬/);
-  assert.doesNotMatch(html, /TWO ISLANDS|第三座岛屿|尚未命名|Your site is taking shape/);
+  assert.match(html, /THREE ISLANDS ONLINE/);
+  assert.match(html, /https:\/\/digital-island-gridwake\.lzy793222567\.chatgpt\.site\//);
+  assert.doesNotMatch(html, /TWO ISLANDS ONLINE|<h3>第三座岛屿<\/h3>/);
+  assert.match(html, /https:\/\/photos-island\.lzy793222567\.chatgpt\.site\//);
   assert.match(html, /https:\/\/portal\.example\/og\.png/);
+  assert.doesNotMatch(html, /codex-preview|Your site is taking shape|Building your site/);
 });
 
-test("all local visuals and existing share artwork are available", async () => {
-  for (const path of ["archipelago-night.webp", "photos-island.png", "faerie-britain.png", "og.png"]) {
-    await access(new URL(`../public/${path}`, import.meta.url));
-  }
+test("removes starter-only assets and keeps project previews local", async () => {
+  const [page, layout, packageJson] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../package.json", import.meta.url), "utf8"),
+  ]);
+  assert.match(page, /photos-island\.lzy793222567\.chatgpt\.site/);
+  assert.match(page, /faerie-britain-echoes\.lzy793222567\.chatgpt\.site/);
+  assert.match(page, /妖精国余响/);
+  assert.match(page, /target="_blank"/);
+  assert.match(page, /prefers-reduced-motion/);
+  assert.match(layout, /summary_large_image/);
+  assert.doesNotMatch(packageJson, /react-loading-skeleton/);
+  await access(new URL("../public/gridwake.png", import.meta.url));
+  await access(new URL("../public/og.png", import.meta.url));
+  await access(new URL("../public/photos-island.png", import.meta.url));
+  await access(new URL("../public/faerie-britain.png", import.meta.url));
+  await assert.rejects(access(new URL("../app/_sites-preview", root)));
 });
