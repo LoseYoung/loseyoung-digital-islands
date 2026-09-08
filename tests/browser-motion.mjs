@@ -38,6 +38,8 @@ await fs.mkdir('outputs', { recursive: true });
   result.cases.push('Pause stops every animation, reveals all content and persists after reload');
   await page.getByRole('button',{name:'开启页面动效'}).click();await page.waitForFunction(()=>document.documentElement.dataset.motion==='on');
   await context.close();
+  // Development CSS is injected by Vite JavaScript; check script delays against a production build.
+  if (process.env.TEST_PRODUCTION === 'true') {
   const delayed = await browser.newContext({reducedMotion:'no-preference'});
   const dp = await delayed.newPage();
   await dp.route('**/*.js', route => route.abort());
@@ -47,6 +49,7 @@ await fs.mkdir('outputs', { recursive: true });
   assert.equal(await dp.evaluate(()=>document.documentElement.dataset.motion),undefined);
   result.cases.push('Background CSS animates even while JavaScript is unavailable or still loading');
   await delayed.close();
+  }
   const reduced=await browser.newContext({viewport:{width:1440,height:960},reducedMotion:'reduce'});
   const rp=await reduced.newPage();await rp.goto(testUrl,{waitUntil:'domcontentloaded'});
   await rp.waitForFunction(()=>document.documentElement.dataset.motion==='off');
