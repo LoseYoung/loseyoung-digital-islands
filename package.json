@@ -11,7 +11,9 @@
     "start": "vinext start",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "build:pages": "node scripts/build-pages.mjs",
+    "test:pages": "node --test tests/pages-export.test.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
