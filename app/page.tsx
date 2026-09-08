@@ -3,6 +3,7 @@ import CatalogueMotion from "./catalogue-motion";
 import { catalogueNumber, forthcoming, islands } from "./islands";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const journeyRoute = "M 1210 0 C 1280 300 1190 440 1210 720 S 1290 1120 1200 1370 S 1140 1750 990 1970 S 760 2130 640 2200";
 
 function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return <span className="arrow" aria-hidden="true">{diagonal ? "↗" : "→"}</span>;
@@ -11,9 +12,8 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 export default function Home() {
   return (
     <main id="top">
-      <CatalogueMotion />
       <div className="journey-line" aria-hidden="true">
-        <svg viewBox="0 0 1280 2200" preserveAspectRatio="none" fill="none"><path className="journey-path" pathLength="1" d="M 1150 0 C 1140 210 970 250 1020 440 S 1255 750 1190 980 S 1025 1130 1190 1420 S 1180 1950 770 2200" /></svg>
+        <svg viewBox="0 0 1280 2200" preserveAspectRatio="none" fill="none"><path className="journey-track" d={journeyRoute} /><path className="journey-path" pathLength="1" d={journeyRoute} /><circle className="journey-marker" cx="1210" cy="0" r="3.5" /></svg>
       </div>
       <a className="skip-link" href="#islands">跳至岛屿目录</a>
       <header className="site-header shell">
@@ -29,7 +29,11 @@ export default function Home() {
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-atmosphere" aria-hidden="true">
           <img className="hero-landscape" src={`${basePath}/quiet-horizon.webp`} alt="" width="1672" height="941" fetchPriority="high" />
-          <div className="distant-lights"><i /><i /><i /><i /><i /><i /></div>
+          <div className="water-motion"><img src={`${basePath}/quiet-horizon.webp`} alt="" width="1672" height="941" decoding="async" /></div>
+          <div className="moon-haze" />
+          <div className="sea-glimmer"><i /><i /><i /></div>
+          <div className="distant-lights">{Array.from({ length: 18 }, (_, index) => <i key={index} style={{ "--star-x": `${7 + (index * 41) % 89}%`, "--star-y": `${9 + (index * 17) % 42}%`, "--star-delay": `${-index * 1.3}s`, "--star-duration": `${8 + index % 5}s` } as CSSProperties} />)}</div>
+          <div className="horizon-glow" />
         </div>
         <div className="hero-content shell">
           <p className="eyebrow hero-eyebrow" lang="en">A personal collection <span>—</span> always in progress</p>
@@ -39,6 +43,7 @@ export default function Home() {
         </div>
         <div className="hero-bottom shell">
           <p lang="en">A growing collection of personal worlds.</p>
+          <CatalogueMotion />
           <a href="#about" aria-label="向下阅读策展说明"><span lang="en">Scroll to discover</span><span aria-hidden="true">↓</span></a>
         </div>
         <div className="horizon" aria-hidden="true" />

@@ -141,52 +141,106 @@ a:hover .arrow { transform: translateX(3px); }
   .site-footer { grid-template-columns: 1fr; padding-top: 46px; gap: 34px; }
   .footer-bottom { flex-direction: column; align-items: flex-start; gap: 13px; margin-top: 10px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-  .island-card:hover, .island-card:hover img, a:hover .arrow { transform: none; }
-}
-
 /* Locally hosted type keeps both publishing targets independent of font CDNs. */
 @font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 400 500; font-display: swap; src: url("./fonts/cormorant-garamond-regular.ttf") format("truetype"); }
 @font-face { font-family: "Cormorant Garamond"; font-style: italic; font-weight: 400; font-display: swap; src: url("./fonts/cormorant-garamond-italic.ttf") format("truetype"); }
-.hero-atmosphere { overflow: hidden; }
-.hero-landscape { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; opacity: .76; }
-.hero-atmosphere::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #07111a70, #07111a08 80%), linear-gradient(180deg, #07111a45 0%, #07111a00 45%, #07111a18 72%, #07111a 100%); }
+/* Keep the photographic sky static; move only its water and light layers. */
+.hero-atmosphere { overflow: hidden; pointer-events: none; }
+.hero-landscape, .water-motion img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; }
+.hero-landscape { opacity: .8; }
+.hero-atmosphere::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #07111a60, #07111a08 80%), linear-gradient(180deg, #07111a35, #07111a00 45%, #07111a08 72%, #07111a 100%); }
 .hero h1 { text-shadow: 0 3px 34px #07111a44; }
 .hero-description { max-width: 520px; }
-.distant-lights { position: absolute; inset: 0; animation: distant-drift 54s ease-in-out infinite alternate; }
-.distant-lights i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #d4e1ef; opacity: .55; }
-.distant-lights i:nth-child(1) { top: 16%; left: 19%; }
-.distant-lights i:nth-child(2) { top: 22%; left: 72%; }
-.distant-lights i:nth-child(3) { top: 37%; left: 59%; width: 1px; height: 1px; }
-.distant-lights i:nth-child(4) { top: 11%; left: 44%; }
-.distant-lights i:nth-child(5) { top: 40%; left: 92%; }
-.distant-lights i:nth-child(6) { top: 8%; left: 85%; width: 1px; height: 1px; }
+.water-motion { position: absolute; inset: 0; mask-image: linear-gradient(transparent 62%, #000 72%, #000 91%, transparent); transform-origin: 80% 75%; opacity: .8; animation: water-drift 16s ease-in-out -4s infinite alternate; }
+.moon-haze { position: absolute; top: 22%; right: -8%; width: 47%; height: 58%; background: radial-gradient(ellipse, #c4d6ef35, #a5c5f312 37%, transparent 69%); opacity: .4; transform-origin: 67% 53%; animation: haze-breath 14s ease-in-out -4s infinite alternate; }
+.sea-glimmer { position: absolute; inset: 64% 0 5%; mask-image: linear-gradient(transparent, #000 20%, #000 75%, transparent); }
+.sea-glimmer i { position: absolute; display: block; right: 0; width: 48%; height: 6px; background: linear-gradient(90deg, transparent, #d5e7ff75 70%, transparent); border-radius: 50%; filter: blur(3px); opacity: .2; animation: reflection-drift 12s ease-in-out -3s infinite alternate; }
+.sea-glimmer i:nth-child(1) { top: 18%; right: -3%; }
+.sea-glimmer i:nth-child(2) { top: 45%; right: 5%; width: 35%; animation-delay: -7s; animation-duration: 16s; }
+.sea-glimmer i:nth-child(3) { top: 73%; right: -5%; width: 55%; animation-delay: -11s; animation-duration: 18s; }
+.horizon-glow { position: absolute; inset: 64% -3% auto; height: 2px; background: linear-gradient(90deg, transparent 8%, #aac8ee35 45%, #d9e9ff85 84%, transparent); box-shadow: 0 0 17px 3px #a5c4eb12; animation: horizon-breath 12s ease-in-out -3s infinite alternate; }
+.distant-lights { position: absolute; inset: 0; animation: distant-drift 48s linear -12s infinite alternate; }
+.distant-lights i { position: absolute; top: var(--star-y); left: var(--star-x); width: 2px; height: 2px; border-radius: 50%; background: #d4e1ef; box-shadow: 0 0 6px 1px #c2dfff30; animation: starlight var(--star-duration) ease-in-out var(--star-delay) infinite alternate; }
+.distant-lights i:nth-child(4n) { width: 3px; height: 3px; }
 .horizon { animation: horizon-unfold 1.4s var(--ease) 1.1s both; }
 .site-header { animation: exposure 1s var(--ease) .2s both; }
 .hero-eyebrow { animation: exposure 1.2s var(--ease) .3s both; }
 .hero h1 { animation: exposure-rise 1.2s var(--ease) .45s both; }
+.hero h1 > span { clip-path: inset(0 -3% -18%); }
 .hero-description { animation: exposure 1.2s var(--ease) .7s both; }
 .hero-action, .hero-bottom { animation: exposure 1.2s var(--ease) .9s both; }
-.journey-line { position: absolute; top: 85svh; right: 0; bottom: 210px; left: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.hero-bottom a > span:last-child { animation: scroll-invitation 3.2s ease-in-out -1s infinite; }
+.site-header nav a { position: relative; }
+.site-header nav a::after { content: ""; position: absolute; bottom: 7px; left: 0; right: 0; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease); }
+.site-header nav a:is(:hover, :focus-visible)::after { transform: scaleX(1); }
+.text-link { position: relative; }
+.text-link::after { content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: #e6efff; transform: scaleX(0); transform-origin: left; transition: transform .65s var(--ease); }
+.text-link:is(:hover, :focus-visible)::after { transform: scaleX(1); }
+.island-card:focus-visible .island-caption { border-color: var(--ink); color: var(--ink); }
+.forthcoming-entry { transition: border-color .6s, background .6s; }
+.forthcoming-entry h3 { transition: transform .6s var(--ease), color .6s; }
+.future-rule { transition: width .8s var(--ease), background .6s; }
+.forthcoming-entry:hover { border-color: #a8c3e477; background: linear-gradient(#b7c8df04, transparent); }
+.forthcoming-entry:hover h3 { transform: translateX(4px); color: #dce6f2; }
+.forthcoming-entry:hover .future-rule { width: 72px; background: #b7c8df99; }
+.journey-line { position: absolute; top: 85svh; right: 0; bottom: 160px; left: 0; z-index: 2; pointer-events: none; overflow: hidden; }
 .journey-line svg { height: 100%; width: 100%; }
-.journey-path { stroke: #9fb8d9; stroke-width: 1; vector-effect: non-scaling-stroke; opacity: .14; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--journey-progress, 1)); }
-[data-reveal] { transition: opacity .85s var(--ease), transform .85s var(--ease); transition-delay: var(--reveal-delay, 0ms); }
-[data-reveal-state="pending"] { opacity: 0; transform: translateY(18px); }
+.journey-track, .journey-path { stroke: #a7c7ee; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.journey-track { opacity: .07; }
+.journey-path { opacity: .42; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--journey-progress, 1)); }
+.journey-marker { fill: #d1e5ff; filter: drop-shadow(0 0 5px #b9d7ff); opacity: .8; animation: marker-breath 4s ease-in-out infinite alternate; }
+[data-reveal] { transition: opacity .95s var(--ease), transform .95s var(--ease); transition-delay: var(--reveal-delay, 0ms); }
+[data-reveal-state="pending"] { opacity: 0; transform: translateY(20px); }
 [data-reveal-state="visible"] { opacity: 1; transform: none; }
+.section-heading { position: relative; }
+.section-heading::after { content: ""; position: absolute; left: 0; right: 0; bottom: -24px; height: 1px; background: linear-gradient(90deg, #b8d1f244, transparent 88%); transform: scaleX(1); transform-origin: left; transition: transform 1.4s var(--ease) .15s; }
+.section-heading[data-reveal-state="pending"]::after { transform: scaleX(.08); }
+.motion-toggle { position: relative; margin-left: auto; display: inline-flex; align-items: center; gap: 9px; padding: 12px 8px; min-height: 44px; background: transparent; border: 0; color: #b7c5d6; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.motion-toggle:hover { color: #f3f6fa; }
+.motion-toggle:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+.motion-indicator { width: 6px; height: 6px; border: 1px solid currentColor; border-radius: 50%; }
+.motion-toggle[aria-pressed="true"] .motion-indicator { background: currentColor; box-shadow: 0 0 7px #b7c8df66; }
+html[data-hero-visible="false"] .hero-atmosphere *, html[data-page-visible="false"] .hero-atmosphere * { animation-play-state: paused !important; }
 @keyframes exposure { from { opacity: 0; } to { opacity: 1; } }
 @keyframes exposure-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes horizon-unfold { from { opacity: 0; transform: scaleX(.12); } to { opacity: 1; transform: scaleX(1); } }
-@keyframes distant-drift { from { transform: translate3d(0, 0, 0); opacity: .85; } to { transform: translate3d(8px, -12px, 0); opacity: 1; } }
+@keyframes distant-drift { from { transform: translate3d(-6px, 5px, 0); } to { transform: translate3d(10px, -11px, 0); } }
+@keyframes starlight { from { opacity: .22; } to { opacity: .92; } }
+@keyframes water-drift { from { transform: scale(1.018) translate3d(-5px, -1px, 0); opacity: .45; } to { transform: scale(1.036) translate3d(7px, 3px, 0); opacity: .88; } }
+@keyframes haze-breath { from { opacity: .3; transform: scale(.94) translateX(-8px); } to { opacity: .82; transform: scale(1.1) translateX(12px); } }
+@keyframes reflection-drift { from { transform: translate3d(-20px, -2px, 0) scaleX(.88); opacity: .2; } to { transform: translate3d(18px, 4px, 0) scaleX(1.1); opacity: .72; } }
+@keyframes horizon-breath { from { opacity: .3; transform: scaleX(.96); } to { opacity: .85; transform: scaleX(1.02); } }
+@keyframes scroll-invitation { 0%, 100% { transform: translateY(-2px); opacity: .5; } 50% { transform: translateY(5px); opacity: 1; } }
+@keyframes marker-breath { from { opacity: .48; } to { opacity: .95; } }
 @media (max-width: 640px) {
-  .hero-landscape { object-position: 68% center; opacity: .65; }
+  .hero-landscape, .water-motion img { object-position: 68% center; }
+  .hero-landscape { opacity: .72; }
   .hero-atmosphere::after { background: linear-gradient(180deg, #07111a50, #07111a15 60%, #07111a); }
-  .journey-line { opacity: .5; }
-  .distant-lights { animation: none; }
-  [data-reveal-state="pending"] { transform: translateY(10px); }
+  .hero-bottom { gap: 12px; }
+  .hero-bottom p { max-width: 155px; }
+  .motion-toggle { padding-inline: 0; }
+  .moon-haze { right: -30%; width: 90%; }
+  .journey-line { opacity: .65; }
+  .distant-lights { animation-duration: 60s; }
+  .sea-glimmer i { filter: blur(2px); }
+  [data-reveal-state="pending"] { transform: translateY(12px); }
 }
+/* System preference is the default. A deliberate Motion on choice can override it. */
+html[data-motion="off"] { scroll-behavior: auto; }
+html[data-motion="off"] *, html[data-motion="off"] *::before, html[data-motion="off"] *::after { animation: none !important; transition: none !important; }
+html[data-motion="off"] [data-reveal-state="pending"] { opacity: 1; transform: none; }
+html[data-motion="off"] .journey-path { stroke-dashoffset: 0; opacity: .16; }
+html[data-motion="off"] .journey-marker { display: none; }
+html[data-motion="off"] .water-motion, html[data-motion="off"] .sea-glimmer, html[data-motion="off"] .moon-haze { opacity: .25; transform: none; }
+html[data-motion="off"] .island-card:hover, html[data-motion="off"] .island-card:hover img, html[data-motion="off"] .forthcoming-entry:hover h3, html[data-motion="off"] a:hover .arrow { transform: none; }
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal-state="pending"] { opacity: 1; transform: none; }
-  .journey-path { stroke-dashoffset: 0; }
+  html:not([data-motion="on"]) { scroll-behavior: auto; }
+  html:not([data-motion="on"]) *, html:not([data-motion="on"]) *::before, html:not([data-motion="on"]) *::after { animation: none !important; transition: none !important; }
+  html:not([data-motion="on"]) [data-reveal-state="pending"] { opacity: 1; transform: none; }
+  html:not([data-motion="on"]) .journey-path { stroke-dashoffset: 0; }
+  html:not([data-motion="on"]) .journey-marker { display: none; }
 }
+
+/* No-JS output is a static, readable catalogue; controls appear after hydration. */
+html:not([data-motion]) .motion-toggle { visibility: hidden; }
+html:not([data-motion]) .hero-atmosphere *, html:not([data-motion]) .journey-marker, html:not([data-motion]) .hero-bottom a > span:last-child { animation: none !important; }

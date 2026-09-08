@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+const runtimeRequire = createRequire(import.meta.url);
+const { chromium } = runtimeRequire(process.env.PLAYWRIGHT_MODULE || 'playwright');
+import fs from 'node:fs/promises';
+const testUrl = process.env.TEST_URL || 'http://localhost:3000/';
+await fs.mkdir('outputs', { recursive: true });
+(async () => {
+ const browser = await chromium.launch({ headless: true });
+ const result = { cases: [], errors: [] };
+ try {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, reducedMotion: 'no-preference' });
+  const page = await context.newPage(); page.on('pageerror', e => result.errors.push(e.message));
+  await page.goto(testUrl, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => document.documentElement.dataset.motion === 'on');
+  await page.waitForTimeout(2800);
+  const snapshot = () => page.evaluate(() => Object.fromEntries(['.water-motion', '.moon-haze', '.sea-glimmer i', '.distant-lights i', '.horizon-glow'].map(s => { const c=getComputedStyle(document.querySelector(s)); return [s,{opacity:Number(c.opacity), transform:c.transform, animation:c.animationName}]; })));
+  const before=await snapshot();await page.screenshot({path:'outputs/motion-after-a.png'});
+  await page.waitForTimeout(3000);const after=await snapshot();await page.screenshot({path:'outputs/motion-after-b.png'});
+  for(const s of ['.water-motion','.moon-haze','.sea-glimmer i','.horizon-glow']) {
+   assert.notEqual(after[s].animation,'none',s+' must animate');
+   assert.ok(Math.abs(after[s].opacity-before[s].opacity)>.025 || after[s].transform!==before[s].transform,s+' must visibly change over 3 seconds');
+  }
+  result.cases.push('Continuous water, haze, reflected light and horizon change over time'); result.background={before,after};
+  const pending=await page.locator('[data-reveal-state="pending"]').count(); assert.ok(pending>0);
+  await page.locator('.hero-action').first().click();
+  await page.waitForTimeout(1500);
+  const state=await page.evaluate(()=>({pending:document.querySelectorAll('#islands [data-reveal-state="pending"]').length,progress:parseFloat(document.documentElement.style.getPropertyValue('--journey-progress')),marker:document.querySelector('.journey-marker').getAttribute('cy')}));
+  assert.equal(state.pending,0);assert.ok(state.progress>0);assert.ok(Number(state.marker)>0);
+  await page.screenshot({path:'outputs/motion-scroll.png'});
+  result.cases.push('Section links reveal all destination content and advance the illuminated trail');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.waitForTimeout(250);
+  await page.getByRole('button',{name:'暂停页面动效'}).click();
+  await page.waitForFunction(()=>document.documentElement.dataset.motion==='off');
+  assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
+  assert.equal(await page.locator('[data-reveal-state="pending"]').count(),0);
+  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.documentElement.dataset.motion==='off');
+  result.cases.push('Pause stops every animation, reveals all content and persists after reload');
+  await page.getByRole('button',{name:'开启页面动效'}).click();await page.waitForFunction(()=>document.documentElement.dataset.motion==='on');
+  await context.close();
+  const reduced=await browser.newContext({viewport:{width:1440,height:960},reducedMotion:'reduce'});
+  const rp=await reduced.newPage();await rp.goto(testUrl,{waitUntil:'domcontentloaded'});
+  await rp.waitForFunction(()=>document.documentElement.dataset.motion==='off');
+  assert.equal(await rp.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
+  await rp.getByRole('button',{name:'开启页面动效'}).click();await rp.waitForFunction(()=>document.documentElement.dataset.motion==='on');
+  assert.ok(await rp.evaluate(()=>document.getAnimations().some(a=>a.playState==='running'&&a.animationName==='water-drift')));
+  result.cases.push('Reduced-motion system preference is respected; explicit opt-in can enable motion');
+  await reduced.close();
+  const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'});
+  const mp=await mobile.newPage();await mp.goto(testUrl,{waitUntil:'domcontentloaded'});await mp.waitForFunction(()=>document.documentElement.dataset.motion==='on');await mp.waitForTimeout(2500);
+  assert.equal(await mp.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  assert.ok(await mp.evaluate(()=>document.getAnimations().some(a=>a.playState==='running'&&a.animationName==='water-drift')));
+  await mp.screenshot({path:'outputs/motion-mobile.png',fullPage:true});
+  await mp.getByRole('button',{name:'暂停页面动效'}).tap();await mp.waitForFunction(()=>document.documentElement.dataset.motion==='off');
+  result.cases.push('Mobile preserves continuous background motion, fits viewport and supports touch pause');
+  await mobile.close();
+  const nojs=await browser.newContext({javaScriptEnabled:false});const np=await nojs.newPage();await np.goto(testUrl,{waitUntil:'domcontentloaded'});
+  assert.ok(await np.getByRole('heading',{name:'Selected Islands'}).isVisible());await nojs.close();
+  result.cases.push('Catalogue remains readable without JavaScript');
+  assert.deepEqual(result.errors,[]);
+  await fs.writeFile('outputs/motion-verification.json',JSON.stringify(result,null,2));
+  console.log(JSON.stringify(result,null,2));
+ } finally { await browser.close(); }
+})().catch(e=>{console.error(e);process.exitCode=1});
