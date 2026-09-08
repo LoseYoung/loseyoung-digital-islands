@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import test from "node:test";
+import { assertCatalogue } from "./catalogue-assertions.mjs";
 
 const output = resolve("out");
 const repository = process.env.GITHUB_REPOSITORY || "LoseYoung/loseyoung-digital-islands";
@@ -13,7 +14,8 @@ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ||
 
 test("Pages 导出完整门户并保留三个子站入口", async () => {
   const html = await readFile(resolve(output, "index.html"), "utf8");
-  for (const text of ["LoseYoung · 数字岛屿", "照片岛", "妖精国余响", "栅域余烬"]) {
+  assertCatalogue(html);
+  for (const text of ["Digital Islands", "照片岛", "妖精国余响", "栅域余烬"]) {
     assert.ok(html.includes(text), `缺少门户内容：${text}`);
   }
   for (const host of [
@@ -31,6 +33,7 @@ test("Pages 的图片、脚本和样式均能在发布子目录中找到", async
   const html = await readFile(resolve(output, "index.html"), "utf8");
   // 检查实际导出的资源引用，防止仓库子路径丢失导致上线后空白或图片 404。
   const resources = [...html.matchAll(/<(?:script|link|img)\b[^>]*\b(?:src|href)="([^"]+)"/g)]
+    .filter((match) => !/rel="(?:preconnect|dns-prefetch)"/.test(match[0]))
     .map((match) => match[1].replaceAll("&amp;", "&"))
     .filter((url) => url.startsWith("/"));
   assert.ok(resources.some((url) => url.includes("/_next/")), "缺少前端构建资源");
@@ -41,9 +44,29 @@ test("Pages 的图片、脚本和样式均能在发布子目录中找到", async
     assert.ok(file.startsWith(output + "/") || file.startsWith(output + "\\"), "资源不能越出发布目录");
     await access(file);
   }
-  for (const filename of ["photos-island.png", "faerie-britain.png", "gridwake.png"]) {
+  for (const filename of ["photos-island.png", "faerie-britain.png", "gridwake.png", "quiet-horizon.webp"]) {
     assert.ok(html.includes(`src="${basePath}/${filename}"`), `缺少封面引用：${filename}`);
     await access(resolve(output, filename));
   }
   await access(resolve(output, "og.png"));
+});
+
+test("Pages 本地字体使用可解析的子目录资源路径", async () => {
+  const html = await readFile(resolve(output, "index.html"), "utf8");
+  const styles = [...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g)];
+  let fonts = 0;
+  for (const [, stylesheet] of styles) {
+    const cssUrl = new URL(stylesheet, siteUrl);
+    const cssFile = resolve(output, `.${cssUrl.pathname.slice(basePath.length)}`);
+    const css = await readFile(cssFile, "utf8");
+    for (const [, rawUrl] of css.matchAll(/url\(["']?([^"')]+)["']?\)/g)) {
+      if (rawUrl.startsWith("data:")) continue;
+      const url = new URL(rawUrl, cssUrl);
+      assert.equal(url.origin, new URL(siteUrl).origin, "字体和背景应本地托管");
+      assert.ok(url.pathname.startsWith(`${basePath}/`), `CSS 资源缺少子路径：${url}`);
+      await access(resolve(output, `.${url.pathname.slice(basePath.length)}`));
+      if (/\.(ttf|woff2?)$/.test(url.pathname)) fonts++;
+    }
+  }
+  assert.ok(fonts >= 2, "衬线标题的正体和斜体应随站点导出");
 });
