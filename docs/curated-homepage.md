@@ -65,3 +65,5 @@ GitHub PR 构建与正式发布是不同步骤；现有 Sites 的项目关联保
 浏览器回归脚本为 `tests/browser-motion.mjs`。使用现有 Playwright 安装运行，无需修改应用依赖；将 `PLAYWRIGHT_MODULE` 指向 Playwright 包路径（未指定时使用 `playwright`），`TEST_URL` 指向待验收页面。检查报告和桌面、手机截图输出到被 Git 忽略的 `outputs/`。
 
 覆盖持续背景变化、锚点和轨迹、暂停和刷新记忆、系统减少动态效果与主动开启、触屏布局与暂停、无 JavaScript 阅读六组行为。分别对 Sites 本地运行与 Pages 实际静态导出验证。
+
+补充弱网验证：背景 CSS 不依赖 React 初始化，在 JavaScript 资源加载缓慢时也能先运行。浏览器明确禁用 JavaScript 时通过 `scripting: none` 保持静态；减少动态效果偏好仍优先生效。额外用阻断脚本请求的浏览器场景验证背景仍在运行。

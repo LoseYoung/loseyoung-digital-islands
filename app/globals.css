@@ -241,6 +241,8 @@ html[data-motion="off"] .island-card:hover, html[data-motion="off"] .island-card
   html:not([data-motion="on"]) .journey-marker { display: none; }
 }
 
-/* No-JS output is a static, readable catalogue; controls appear after hydration. */
+/* Atmospheric CSS starts even on a slow script connection; no-JS stays static. */
 html:not([data-motion]) .motion-toggle { visibility: hidden; }
-html:not([data-motion]) .hero-atmosphere *, html:not([data-motion]) .journey-marker, html:not([data-motion]) .hero-bottom a > span:last-child { animation: none !important; }
+@media (scripting: none) {
+  .hero-atmosphere *, .journey-marker, .hero-bottom a > span:last-child { animation: none !important; }
+}
