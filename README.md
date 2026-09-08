@@ -32,14 +32,14 @@
 | 类别 | 当前使用 |
 | --- | --- |
 | 界面 | React 19.2.6、TypeScript 5.9.3 |
-| 路由与渲染 | Next.js App Router API；实际开发、构建和启动使用 vinext 0.0.50 |
+| 路由与渲染 | Next.js App Router API；Sites 使用 vinext 0.0.50；Pages 使用 Next.js 16.2.6 静态导出 |
 | 构建 | Vite 8.0.13、Cloudflare Vite 插件 |
 | 样式 | 自定义全局 CSS、Tailwind CSS 4.2.1 / PostCSS |
-| 运行与托管 | Cloudflare Workers 兼容入口、OpenAI Sites |
+| 运行与托管 | OpenAI Sites / Cloudflare Workers、GitHub Pages |
 | 检查 | ESLint 9、Node.js 内置测试运行器 |
 | 可选扩展 | Drizzle ORM / Kit、Cloudflare D1 / R2 配置、ChatGPT 登录辅助函数 |
 
-项目保留了 Next.js 16.2.6 依赖，但 `package.json` 中的运行脚本调用的是 `vinext`。D1、R2 和登录辅助函数当前没有接入门户首页。
+默认开发与 Sites 构建脚本调用 `vinext`；`build:pages` 使用已有的 Next.js 依赖生成纯静态页面。D1、R2 和登录辅助函数当前没有接入门户首页。
 
 ## 目录结构
 
@@ -66,14 +66,18 @@
 │   └── schema.ts               # 当前为空，尚无业务数据表
 ├── drizzle/                    # 数据库迁移元数据，目前无业务迁移
 ├── examples/d1/                 # 保留的 D1 示例，不是门户实际 API
+├── .github/workflows/pages.yml # GitHub 自动构建、检查与 Pages 发布
+├── scripts/build-pages.mjs     # 静态导出与发布地址配置
 ├── tests/
-│   └── rendered-html.test.mjs   # 门户服务端渲染与本地资源检查
+│   ├── rendered-html.test.mjs   # 门户服务端渲染与本地资源检查
+│   └── pages-export.test.mjs    # 静态页面内容与子路径资源检查
 ├── vite.config.ts              # vinext、Sites 与 Cloudflare 构建配置
-├── next.config.ts              # Next.js 兼容配置
+├── next.config.ts              # Pages 静态导出与基础路径配置
 ├── drizzle.config.ts           # 可选的数据库迁移生成配置
 ├── eslint.config.mjs           # ESLint 配置
 ├── postcss.config.mjs          # Tailwind CSS / PostCSS 配置
 ├── tsconfig.json               # TypeScript 配置
+├── tsconfig.pages.json         # Pages 前端类型检查范围
 ├── package.json                # 项目依赖及运行脚本
 └── package-lock.json           # npm 依赖锁文件
 ```
@@ -107,7 +111,9 @@ npm run dev
 | 命令 | 用途 |
 | --- | --- |
 | `npm run dev` | 启动 vinext 开发服务器 |
-| `npm run build` | 生成生产构建 |
+| `npm run build` | 生成 Sites 生产构建 |
+| `npm run build:pages` | 生成 GitHub Pages 静态文件到 `out/` |
+| `npm run test:pages` | 检查已导出的 Pages 页面、分享地址及资源 |
 | `npm start` | 调用 `vinext start` 启动生产预览，需先构建 |
 | `npm run lint` | 执行 ESLint 检查 |
 | `npm test` | 先构建，再执行门户 HTML 渲染和资源检查 |
@@ -145,11 +151,30 @@ npm start
 
 维护现有站点时应保留 `.openai/hosting.json` 中的项目关联。真实的 Cloudflare 资源和部署绑定由 Sites 管理，本仓库没有手写的 `wrangler.jsonc`。
 
-**GitHub 提交与 Sites 发布是两个步骤。** 当前仓库未包含 GitHub Actions 部署工作流，也没有 `npm run deploy` 脚本；仅推送到 GitHub 不代表站点已重新发布。
+**GitHub 提交与 Sites 发布是两个步骤。** 下方工作流只发布 GitHub Pages，不会更新已有 Sites 站点。
 
-### 其他托管环境
+### GitHub Pages 自动构建与发布
 
-当前构建面向 Cloudflare Workers 兼容运行时，布局还会读取请求头生成分享链接。迁移到其他平台时，需要适配运行时、静态资源绑定及部署配置；当前配置不能直接作为 GitHub Pages 的纯静态站点发布。
+GitHub Free 需要将仓库设为公开，才能使用此 Pages 发布方式。
+
+1. 在仓库 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**。
+2. 推送到 `main` 后，`.github/workflows/pages.yml` 自动安装依赖，验证 Sites 构建，再执行 Pages 静态导出与资源检查。
+3. 所有检查通过后上传 `out/` 并发布。可在仓库 **Actions** 查看构建日志和部署结果。
+4. 发布地址：[LoseYoung · 数字岛屿（GitHub Pages）](https://loseyoung.github.io/loseyoung-digital-islands/)。
+
+PR 只运行构建检查；公开仓库的 `main` 才会触发部署。也可以在 Actions 页面手动运行此工作流。
+
+本地生成同样的静态文件：
+
+```bash
+npm ci
+npm run build:pages
+npm run test:pages
+```
+
+脚本默认使用当前仓库的发布子路径 `/loseyoung-digital-islands` 和完整 Pages 地址，确保封面、脚本、样式及分享图片路径正确。复制仓库后，GitHub Actions 会根据 `GITHUB_REPOSITORY` 自动确定地址；使用自定义域名时，可显式设置 `NEXT_PUBLIC_BASE_PATH`（根目录为空字符串）和 `NEXT_PUBLIC_SITE_URL`。
+
+Pages 发布的是本仓库的门户静态页面。三个岛屿仍链接到各自站点，照片上传、登录或数据库等服务端功能不会由 Pages 提供。
 
 ## 当前状态
 

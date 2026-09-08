@@ -6,6 +6,9 @@ const photosIslandUrl = "https://photos-island.lzy793222567.chatgpt.site/";
 const gridwakeIslandUrl = "https://digital-island-gridwake.lzy793222567.chatgpt.site/";
 const faerieIslandUrl = "https://faerie-britain-echoes.lzy793222567.chatgpt.site/";
 
+// GitHub 项目站点使用仓库子路径，Sites 默认仍从根路径加载封面。
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 export default function Home() {
   useEffect(() => {
     let frame = 0;
@@ -80,7 +83,7 @@ export default function Home() {
 
         <a className="project-card" href={photosIslandUrl} target="_blank" rel="noopener noreferrer" aria-label="进入照片岛公开画廊">
           <div className="project-image">
-            <img src="/photos-island.png" alt="照片岛屿的星空、海岸与森林主题预览" loading="lazy" />
+            <img src={`${basePath}/photos-island.png`} alt="照片岛屿的星空、海岸与森林主题预览" loading="lazy" />
             <div className="image-overlay" />
             <span className="project-number">ISLAND / 01</span>
             <span className="live-status"><i />公开访问</span>
@@ -96,7 +99,7 @@ export default function Home() {
 
         <a className="project-card game-card" href={faerieIslandUrl} target="_blank" rel="noopener noreferrer" aria-label="进入妖精国余响横版 RPG">
           <div className="project-image">
-            <img src="/faerie-britain.png" alt="妖精国余响的月光森林与阿尔托莉雅·Caster主题预览" loading="lazy" />
+            <img src={`${basePath}/faerie-britain.png`} alt="妖精国余响的月光森林与阿尔托莉雅·Caster主题预览" loading="lazy" />
             <div className="image-overlay" />
             <span className="project-number">ISLAND / 02</span>
             <span className="live-status"><i />公开试玩</span>
@@ -112,7 +115,7 @@ export default function Home() {
 
         <a className="project-card game-card" href={gridwakeIslandUrl} target="_blank" rel="noopener noreferrer" aria-label="进入栅域余烬像素生存 FPS">
           <div className="project-image">
-            <img src="/gridwake.png" alt="栅域余烬游戏主题封面" loading="lazy" />
+            <img src={`${basePath}/gridwake.png`} alt="栅域余烬游戏主题封面" loading="lazy" />
             <div className="image-overlay" />
             <span className="project-number">ISLAND / 03</span>
             <span className="live-status"><i />公开试玩</span>
