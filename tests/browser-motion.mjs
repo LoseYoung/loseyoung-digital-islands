@@ -38,6 +38,18 @@ await fs.mkdir('outputs', { recursive: true });
   result.cases.push('Pause stops every animation, reveals all content and persists after reload');
   await page.getByRole('button',{name:'开启页面动效'}).click();await page.waitForFunction(()=>document.documentElement.dataset.motion==='on');
   await context.close();
+  // Development CSS is injected by Vite JavaScript; check script delays against a production build.
+  if (process.env.TEST_PRODUCTION === 'true') {
+  const delayed = await browser.newContext({reducedMotion:'no-preference'});
+  const dp = await delayed.newPage();
+  await dp.route('**/*.js', route => route.abort());
+  await dp.goto(testUrl, {waitUntil:'domcontentloaded'});
+  await dp.waitForTimeout(2800);
+  assert.ok(await dp.evaluate(()=>document.getAnimations().some(a=>a.playState==='running' && a.animationName==='water-drift')));
+  assert.equal(await dp.evaluate(()=>document.documentElement.dataset.motion),undefined);
+  result.cases.push('Background CSS animates even while JavaScript is unavailable or still loading');
+  await delayed.close();
+  }
   const reduced=await browser.newContext({viewport:{width:1440,height:960},reducedMotion:'reduce'});
   const rp=await reduced.newPage();await rp.goto(testUrl,{waitUntil:'domcontentloaded'});
   await rp.waitForFunction(()=>document.documentElement.dataset.motion==='off');
@@ -55,7 +67,7 @@ await fs.mkdir('outputs', { recursive: true });
   result.cases.push('Mobile preserves continuous background motion, fits viewport and supports touch pause');
   await mobile.close();
   const nojs=await browser.newContext({javaScriptEnabled:false});const np=await nojs.newPage();await np.goto(testUrl,{waitUntil:'domcontentloaded'});
-  assert.ok(await np.getByRole('heading',{name:'Selected Islands'}).isVisible());await nojs.close();
+  assert.ok(await np.getByRole('heading',{name:'Selected Islands'}).isVisible());await np.waitForTimeout(2800);assert.equal(await np.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);await nojs.close();
   result.cases.push('Catalogue remains readable without JavaScript');
   assert.deepEqual(result.errors,[]);
   await fs.writeFile('outputs/motion-verification.json',JSON.stringify(result,null,2));
