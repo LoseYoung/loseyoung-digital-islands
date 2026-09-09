@@ -1,0 +1,42 @@
+name: Import selected hero photo
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fetch-hero-photo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-photo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download selected Unsplash photo
+        run: |
+          set -euo pipefail
+          mkdir -p public
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://images.unsplash.com/photo-1672857663219-0de23c859504?auto=format&fit=max&fm=jpg&q=88&w=3840' \
+            -o public/moonlit-ocean-pramod-tiwari.jpg
+          test -s public/moonlit-ocean-pramod-tiwari.jpg
+          file public/moonlit-ocean-pramod-tiwari.jpg
+
+      - name: Commit imported photo
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/moonlit-ocean-pramod-tiwari.jpg
+          if git diff --cached --quiet; then
+            echo '图片已存在，无需重复提交'
+            exit 0
+          fi
+          git commit -m 'feat: add photographic moonlit ocean hero'
+          git push
