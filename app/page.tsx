@@ -24,7 +24,7 @@ export default function Home() {
 
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-atmosphere" aria-hidden="true">
-          <img className="hero-landscape" src={`${basePath}/moonlit-ocean-4k.svg`} alt="" width="3840" height="2160" fetchPriority="high" />
+          <img className="hero-landscape" src={`${basePath}/moonlit-ocean-pramod-tiwari.jpg`} alt="" width="3840" height="2160" fetchPriority="high" />
           <div className="light-rays" />
           <div className="water-silk" />
           <div className="moon-haze" />
