@@ -76,9 +76,9 @@ export default function Home() {
       <section id="future" className="forthcoming shell section-space" aria-labelledby="future-title" data-chapter>
         <header className="section-heading" data-reveal><div><p className="eyebrow" lang="en">An unfinished index</p><h2 id="future-title" lang="en">More to <em>Arrive</em></h2></div><p lang="en">The collection remains open.</p></header>
         <div className="forthcoming-grid">
-          {forthcoming.map((island) => (
+          {forthcoming.map((island, index) => (
             <article className="forthcoming-entry" key={island.title} data-reveal aria-label={`${island.title} · 尚未开放`}>
-              <span className="future-number">{catalogueNumber(islands.length + forthcoming.indexOf(island))}</span><h3 lang="en">{island.title}</h3><p lang="en">{island.note}</p><span className="future-rule" aria-hidden="true" />
+              <span className="future-number">{catalogueNumber(islands.length + index)}</span><h3 lang="en">{island.title}</h3><p lang="en">{island.note}</p><span className="future-rule" aria-hidden="true" />
             </article>
           ))}
         </div>
