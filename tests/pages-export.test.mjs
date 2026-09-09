@@ -44,8 +44,8 @@ test("Pages 的图片、脚本和样式均能在发布子目录中找到", async
     assert.ok(file.startsWith(output + "/") || file.startsWith(output + "\\"), "资源不能越出发布目录");
     await access(file);
   }
-  for (const filename of ["photos-island.png", "faerie-britain.png", "gridwake.png", "quiet-horizon.webp"]) {
-    assert.ok(html.includes(`src="${basePath}/${filename}"`), `缺少封面引用：${filename}`);
+  for (const filename of ["photos-island.png", "faerie-britain.png", "gridwake.png", "moonlit-ocean-4k.svg"]) {
+    assert.ok(html.includes(`src="${basePath}/${filename}"`), `缺少封面或背景引用：${filename}`);
     await access(resolve(output, filename));
   }
   await access(resolve(output, "og.png"));
