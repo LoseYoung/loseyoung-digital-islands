@@ -3,7 +3,6 @@ import CatalogueMotion from "./catalogue-motion";
 import { catalogueNumber, forthcoming, islands } from "./islands";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-const journeyRoute = "M 1210 0 C 1280 300 1190 440 1210 720 S 1290 1120 1200 1370 S 1140 1750 990 1970 S 760 2130 640 2200";
 
 function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return <span className="arrow" aria-hidden="true">{diagonal ? "↗" : "→"}</span>;
@@ -12,9 +11,6 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 export default function Home() {
   return (
     <main id="top">
-      <div className="journey-line" aria-hidden="true">
-        <svg viewBox="0 0 1280 2200" preserveAspectRatio="none" fill="none"><path className="journey-track" d={journeyRoute} /><path className="journey-path" pathLength="1" d={journeyRoute} /><circle className="journey-marker" cx="1210" cy="0" r="3.5" /></svg>
-      </div>
       <a className="skip-link" href="#islands">跳至岛屿目录</a>
       <header className="site-header shell">
         <a className="brand" href="#top" lang="en" aria-label="Digital Islands 首页">Digital Islands<span className="brand-period">.</span></a>
@@ -29,7 +25,8 @@ export default function Home() {
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-atmosphere" aria-hidden="true">
           <img className="hero-landscape" src={`${basePath}/quiet-horizon.webp`} alt="" width="1672" height="941" fetchPriority="high" />
-          <div className="water-motion"><img src={`${basePath}/quiet-horizon.webp`} alt="" width="1672" height="941" decoding="async" /></div>
+          <div className="light-rays" />
+          <div className="water-silk" />
           <div className="moon-haze" />
           <div className="sea-glimmer"><i /><i /><i /></div>
           <div className="distant-lights">{Array.from({ length: 18 }, (_, index) => <i key={index} style={{ "--star-x": `${7 + (index * 41) % 89}%`, "--star-y": `${9 + (index * 17) % 42}%`, "--star-delay": `${-index * 1.3}s`, "--star-duration": `${8 + index % 5}s` } as CSSProperties} />)}</div>
@@ -37,7 +34,7 @@ export default function Home() {
         </div>
         <div className="hero-content shell">
           <p className="eyebrow hero-eyebrow" lang="en">A personal collection <span>—</span> always in progress</p>
-          <h1 id="hero-title" lang="en"><span>Somewhere Between</span><span>Real and <em>Imagined</em></span></h1>
+          <h1 id="hero-title" lang="en"><span className="hero-title-line">Somewhere Between</span><span className="hero-title-line">Real and <em>Imagined</em></span></h1>
           <p className="hero-description">那些被看见的、被保存的、被想象过的，<br />都在这里，保持各自的距离。</p>
           <a className="text-link hero-action" href="#islands" lang="en">Browse the Collection <Arrow /></a>
         </div>
@@ -49,7 +46,7 @@ export default function Home() {
         <div className="horizon" aria-hidden="true" />
       </section>
 
-      <section id="about" className="curatorial shell section-space" aria-labelledby="note-title">
+      <section id="about" className="curatorial shell section-space" aria-labelledby="note-title" data-chapter>
         <div className="section-label" data-reveal><span className="index-mark" aria-hidden="true">I</span><h2 id="note-title" lang="en">Curatorial Note</h2></div>
         <div className="note-copy" data-reveal>
           <p className="note-english" lang="en">Some places begin with a memory.<br />Some with an image, a story,<br />or a distant idea.</p>
@@ -58,14 +55,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="islands" className="collection shell section-space" aria-labelledby="islands-title">
+      <section id="islands" className="collection shell section-space" aria-labelledby="islands-title" data-chapter>
         <header className="section-heading" data-reveal>
           <div><p className="eyebrow" lang="en">The collection</p><h2 id="islands-title" lang="en">Selected <em>Islands</em></h2></div>
           <p>正在形成中的目录里，<br />目前可进入的部分。</p>
         </header>
         <div className="island-grid">
           {islands.map((island, index) => (
-            <article key={island.id} className="island-entry" data-reveal style={{ "--reveal-delay": `${(index % 3) * 100}ms` } as CSSProperties}>
+            <article key={island.id} className="island-entry" data-reveal="card" style={{ "--reveal-delay": `${(index % 3) * 100}ms` } as CSSProperties}>
               <a className="island-card" href={island.url} target="_blank" rel="noopener noreferrer" aria-label={`${island.name} · 在新标签页打开`}>
                 <div className="island-topline"><span>{catalogueNumber(index)}</span><span lang="en">{island.category}</span><Arrow diagonal /></div>
                 <div className="island-image"><img src={`${basePath}${island.cover}`} alt={island.coverAlt} width="1536" height="1024" loading="lazy" decoding="async" /></div>
@@ -76,12 +73,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="future" className="forthcoming shell section-space" aria-labelledby="future-title">
+      <section id="future" className="forthcoming shell section-space" aria-labelledby="future-title" data-chapter>
         <header className="section-heading" data-reveal><div><p className="eyebrow" lang="en">An unfinished index</p><h2 id="future-title" lang="en">More to <em>Arrive</em></h2></div><p lang="en">The collection remains open.</p></header>
         <div className="forthcoming-grid">
-          {forthcoming.map((island, index) => (
+          {forthcoming.map((island) => (
             <article className="forthcoming-entry" key={island.title} data-reveal aria-label={`${island.title} · 尚未开放`}>
-              <span className="future-number">{catalogueNumber(islands.length + index)}</span><h3 lang="en">{island.title}</h3><p lang="en">{island.note}</p><span className="future-rule" aria-hidden="true" />
+              <span className="future-number">{catalogueNumber(islands.length + forthcoming.indexOf(island))}</span><h3 lang="en">{island.title}</h3><p lang="en">{island.note}</p><span className="future-rule" aria-hidden="true" />
             </article>
           ))}
         </div>
