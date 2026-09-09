@@ -27,6 +27,8 @@ function subscribeToMotion(notify: () => void) {
   };
 }
 
+const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
 export default function CatalogueMotion() {
   const enabled = useSyncExternalStore(subscribeToMotion, motionEnabled, () => true);
 
@@ -34,12 +36,15 @@ export default function CatalogueMotion() {
     const root = document.documentElement;
     const entries = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
     const chapters = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal='card']"));
     const hero = document.querySelector<HTMLElement>(".hero");
     root.dataset.motion = enabled ? "on" : "off";
 
     if (!enabled) {
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
       chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
+      root.style.removeProperty("--hero-progress");
+      cards.forEach((card) => card.style.removeProperty("--card-shift"));
       return () => { delete root.dataset.motion; };
     }
 
@@ -55,12 +60,15 @@ export default function CatalogueMotion() {
             revealObserver?.unobserve(change.target);
           }
         }
-      }, { threshold: 0.12, rootMargin: "0px 0px -48px 0px" });
+      }, { threshold: 0.1, rootMargin: "0px 0px -14% 0px" });
 
       for (const entry of entries) {
-        if (entry.getBoundingClientRect().top >= window.innerHeight * .82) {
+        const bounds = entry.getBoundingClientRect();
+        if (bounds.top >= window.innerHeight * .72) {
           entry.setAttribute("data-reveal-state", "pending");
           revealObserver.observe(entry);
+        } else {
+          entry.setAttribute("data-reveal-state", "visible");
         }
       }
 
@@ -71,10 +79,11 @@ export default function CatalogueMotion() {
             chapterObserver?.unobserve(change.target);
           }
         }
-      }, { threshold: 0.05, rootMargin: "0px 0px -12% 0px" });
+      }, { threshold: 0.04, rootMargin: "0px 0px -10% 0px" });
 
       for (const chapter of chapters) {
-        if (chapter.getBoundingClientRect().top >= window.innerHeight * .88) {
+        const bounds = chapter.getBoundingClientRect();
+        if (bounds.top >= window.innerHeight * .68) {
           chapter.setAttribute("data-chapter-state", "pending");
           chapterObserver.observe(chapter);
         } else {
@@ -84,9 +93,34 @@ export default function CatalogueMotion() {
 
       heroObserver = new IntersectionObserver(([entry]) => {
         root.dataset.heroVisible = String(entry.isIntersecting);
-      });
+      }, { rootMargin: "80px" });
       if (hero) heroObserver.observe(hero);
+    } else {
+      entries.forEach((entry) => entry.setAttribute("data-reveal-state", "visible"));
+      chapters.forEach((chapter) => chapter.setAttribute("data-chapter-state", "visible"));
     }
+
+    let frame = 0;
+    const updateScrollMotion = () => {
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      if (hero) {
+        const bounds = hero.getBoundingClientRect();
+        const progress = clamp(-bounds.top / Math.max(bounds.height * .82, 1));
+        root.style.setProperty("--hero-progress", progress.toFixed(4));
+      }
+
+      for (const card of cards) {
+        const bounds = card.getBoundingClientRect();
+        if (bounds.bottom < -120 || bounds.top > viewportHeight + 120) continue;
+        const center = bounds.top + bounds.height / 2;
+        const relative = clamp((viewportHeight / 2 - center) / (viewportHeight * .72), -1, 1);
+        card.style.setProperty("--card-shift", `${(relative * 7).toFixed(2)}px`);
+      }
+      frame = 0;
+    };
+    const scheduleScrollMotion = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateScrollMotion);
+    };
 
     const revealFocus = (event: FocusEvent) => {
       if (!(event.target instanceof Element)) return;
@@ -100,24 +134,36 @@ export default function CatalogueMotion() {
       const section = document.getElementById(id);
       section?.setAttribute("data-chapter-state", "visible");
       section?.querySelectorAll("[data-reveal]").forEach((entry) => entry.setAttribute("data-reveal-state", "visible"));
+      scheduleScrollMotion();
     };
 
     const visibility = () => { root.dataset.pageVisible = String(!document.hidden); };
+    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(scheduleScrollMotion) : undefined;
+    resizeObserver?.observe(document.body);
+    window.addEventListener("scroll", scheduleScrollMotion, { passive: true });
+    window.addEventListener("resize", scheduleScrollMotion, { passive: true });
     window.addEventListener("hashchange", revealFragment);
     document.addEventListener("focusin", revealFocus);
     document.addEventListener("visibilitychange", visibility);
     visibility();
+    updateScrollMotion();
     revealFragment();
 
     return () => {
       revealObserver?.disconnect();
       chapterObserver?.disconnect();
       heroObserver?.disconnect();
+      resizeObserver?.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleScrollMotion);
+      window.removeEventListener("resize", scheduleScrollMotion);
       window.removeEventListener("hashchange", revealFragment);
       document.removeEventListener("focusin", revealFocus);
       document.removeEventListener("visibilitychange", visibility);
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
       chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
+      cards.forEach((card) => card.style.removeProperty("--card-shift"));
+      root.style.removeProperty("--hero-progress");
       delete root.dataset.motion;
       delete root.dataset.heroVisible;
       delete root.dataset.pageVisible;
