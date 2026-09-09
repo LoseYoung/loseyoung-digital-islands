@@ -1,0 +1,336 @@
+/* A + C motion direction: moonlit atmosphere + cinematic catalogue reveals. */
+
+/* Keep the photograph legible. Motion lives in independent light/water layers. */
+.hero-atmosphere {
+  overflow: hidden;
+  pointer-events: none;
+  background: #07111a;
+}
+
+.hero-landscape {
+  opacity: .96;
+  filter: saturate(.82) contrast(1.08) brightness(.82);
+  transform: scale(1.002);
+}
+
+.hero-atmosphere::after {
+  background:
+    linear-gradient(90deg, rgba(7, 17, 26, .46), rgba(7, 17, 26, .08) 52%, rgba(7, 17, 26, .02) 82%),
+    linear-gradient(180deg, rgba(7, 17, 26, .18), transparent 42%, rgba(7, 17, 26, .04) 69%, #07111a 100%);
+}
+
+/* Light Rays: restrained, moon-like shafts entering from the upper-right. */
+.light-rays {
+  position: absolute;
+  z-index: 1;
+  top: -12%;
+  right: -8%;
+  width: 64%;
+  height: 82%;
+  opacity: .27;
+  transform: rotate(-4deg);
+  transform-origin: 100% 0;
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(180deg, #000 0%, #000 52%, transparent 96%);
+  animation: light-rays-breathe 18s ease-in-out -6s infinite alternate;
+}
+
+.light-rays::before,
+.light-rays::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform-origin: 100% 0;
+}
+
+.light-rays::before {
+  background:
+    conic-gradient(from 201deg at 100% 0%,
+      transparent 0 7deg,
+      rgba(214, 231, 251, .22) 8deg 10deg,
+      transparent 11deg 16deg,
+      rgba(185, 211, 241, .13) 17deg 20deg,
+      transparent 21deg 28deg,
+      rgba(226, 238, 252, .18) 29deg 31deg,
+      transparent 32deg 42deg,
+      rgba(176, 205, 237, .1) 43deg 47deg,
+      transparent 48deg 72deg);
+}
+
+.light-rays::after {
+  inset: 6% 0 8% 18%;
+  background: radial-gradient(ellipse at 82% 8%, rgba(214, 232, 252, .2), rgba(174, 205, 238, .07) 26%, transparent 66%);
+  opacity: .75;
+  animation: light-field-drift 24s ease-in-out -9s infinite alternate;
+}
+
+/* Silk: only the sea surface moves; the sky and horizon remain photographic. */
+.water-silk {
+  position: absolute;
+  z-index: 1;
+  left: -8%;
+  right: -8%;
+  bottom: -3%;
+  height: 39%;
+  overflow: hidden;
+  opacity: .43;
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 77%, transparent 100%);
+}
+
+.water-silk::before,
+.water-silk::after {
+  content: "";
+  position: absolute;
+  left: -8%;
+  width: 116%;
+  height: 120%;
+  border-radius: 50%;
+}
+
+.water-silk::before {
+  top: 4%;
+  background:
+    repeating-radial-gradient(ellipse at 78% -16%, transparent 0 18px, rgba(199, 222, 248, .15) 20px 21px, transparent 23px 39px),
+    repeating-radial-gradient(ellipse at 24% -8%, transparent 0 28px, rgba(149, 187, 228, .08) 30px 31px, transparent 33px 55px);
+  transform: scaleX(1.08) scaleY(.54) translate3d(-1%, 1%, 0);
+  animation: silk-current-a 20s ease-in-out -7s infinite alternate;
+}
+
+.water-silk::after {
+  top: 23%;
+  background:
+    repeating-radial-gradient(ellipse at 60% -20%, transparent 0 24px, rgba(220, 235, 252, .11) 26px 27px, transparent 29px 48px),
+    linear-gradient(90deg, transparent 20%, rgba(194, 219, 246, .05) 58%, transparent 92%);
+  transform: scaleX(1.15) scaleY(.42) translate3d(2%, -2%, 0);
+  animation: silk-current-b 26s ease-in-out -12s infinite alternate;
+}
+
+/* Existing atmospheric accents are quieter now and no longer soften the whole scene. */
+.moon-haze {
+  z-index: 1;
+  opacity: .2;
+  width: 42%;
+  height: 48%;
+  top: 17%;
+  right: -4%;
+  background: radial-gradient(ellipse, rgba(203, 220, 241, .2), rgba(165, 197, 235, .055) 40%, transparent 72%);
+  animation: moon-haze-breathe 22s ease-in-out -8s infinite alternate;
+}
+
+.sea-glimmer {
+  z-index: 2;
+  opacity: .58;
+}
+
+.sea-glimmer i {
+  height: 1px;
+  filter: none;
+  opacity: .14;
+  background: linear-gradient(90deg, transparent, rgba(218, 235, 253, .6) 72%, transparent);
+  animation-duration: 20s;
+}
+
+.horizon-glow {
+  z-index: 2;
+  opacity: .55;
+  height: 1px;
+  box-shadow: 0 0 12px rgba(165, 196, 235, .08);
+  animation-duration: 18s;
+}
+
+.distant-lights {
+  z-index: 2;
+  opacity: .66;
+  animation-duration: 72s;
+}
+
+.distant-lights i {
+  box-shadow: 0 0 4px rgba(194, 223, 255, .2);
+}
+
+/* Focus reveal: title resolves into clarity rather than simply sliding upward. */
+.hero h1 {
+  animation: none;
+  text-shadow: 0 2px 28px rgba(7, 17, 26, .32);
+}
+
+.hero-title-line {
+  display: block;
+  opacity: 0;
+  filter: blur(10px);
+  transform: translate3d(0, 13px, 0) scale(.995);
+  animation: title-focus 1.35s var(--ease) both;
+}
+
+.hero-title-line:nth-child(1) { animation-delay: .42s; }
+.hero-title-line:nth-child(2) { animation-delay: .58s; }
+
+/* Cinematic chapter reveal: sections arrive like a dark exhibition curtain lifting. */
+[data-chapter] {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-chapter]::before {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  inset: 0 -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, #07111a 0%, rgba(7, 17, 26, .985) 68%, rgba(7, 17, 26, .82) 88%, transparent 100%);
+  clip-path: inset(0 0 100% 0);
+  transform-origin: top;
+  transition: clip-path 1.25s var(--ease);
+}
+
+[data-chapter-state="pending"]::before {
+  clip-path: inset(0 0 0 0);
+}
+
+[data-chapter-state="visible"]::before {
+  clip-path: inset(0 0 100% 0);
+}
+
+/* Replace generic template-like lift with slower, masked catalogue reveals. */
+[data-reveal] {
+  transition:
+    opacity 1.05s var(--ease),
+    transform 1.05s var(--ease),
+    filter 1.05s var(--ease);
+}
+
+[data-reveal-state="pending"] {
+  opacity: 0;
+  transform: translateY(14px);
+  filter: blur(4px);
+}
+
+[data-reveal-state="visible"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+[data-reveal="card"] {
+  overflow: visible;
+}
+
+[data-reveal="card"] .island-image {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1.15s var(--ease);
+}
+
+[data-reveal="card"] .island-image img {
+  transform: scale(1.018);
+  transition: transform 1.25s var(--ease), filter .8s var(--ease);
+}
+
+[data-reveal="card"][data-reveal-state="pending"] .island-image {
+  clip-path: inset(0 0 100% 0);
+}
+
+[data-reveal="card"][data-reveal-state="visible"] .island-image img {
+  transform: scale(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .island-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .island-card:hover img {
+    transform: scale(1.018);
+    filter: saturate(.88) brightness(.96);
+  }
+}
+
+/* Remove the old scrolling route visually even during a mixed-version deploy. */
+.journey-line { display: none !important; }
+
+@keyframes title-focus {
+  0% { opacity: 0; filter: blur(10px); transform: translate3d(0, 13px, 0) scale(.995); }
+  55% { opacity: .84; }
+  100% { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes light-rays-breathe {
+  from { opacity: .2; transform: rotate(-4deg) scale(1); }
+  to { opacity: .31; transform: rotate(-3.2deg) scale(1.025); }
+}
+
+@keyframes light-field-drift {
+  from { transform: translate3d(-1.5%, 0, 0) scale(.98); opacity: .5; }
+  to { transform: translate3d(2%, 1%, 0) scale(1.03); opacity: .86; }
+}
+
+@keyframes silk-current-a {
+  from { transform: scaleX(1.08) scaleY(.54) translate3d(-1.5%, 1%, 0); opacity: .52; }
+  to { transform: scaleX(1.13) scaleY(.5) translate3d(2%, -1%, 0); opacity: .9; }
+}
+
+@keyframes silk-current-b {
+  from { transform: scaleX(1.15) scaleY(.42) translate3d(2%, -2%, 0); opacity: .42; }
+  to { transform: scaleX(1.08) scaleY(.47) translate3d(-2%, 1%, 0); opacity: .74; }
+}
+
+@keyframes moon-haze-breathe {
+  from { opacity: .13; transform: scale(.98) translateX(-4px); }
+  to { opacity: .24; transform: scale(1.045) translateX(6px); }
+}
+
+@media (max-width: 640px) {
+  .hero-landscape {
+    opacity: .92;
+    filter: saturate(.78) contrast(1.06) brightness(.76);
+  }
+
+  .light-rays {
+    top: -7%;
+    right: -28%;
+    width: 94%;
+    height: 73%;
+    opacity: .2;
+  }
+
+  .water-silk {
+    height: 34%;
+    opacity: .34;
+  }
+
+  .moon-haze {
+    right: -28%;
+    width: 76%;
+    opacity: .15;
+  }
+
+  [data-reveal-state="pending"] {
+    transform: translateY(10px);
+    filter: blur(3px);
+  }
+}
+
+html[data-motion="off"] .light-rays,
+html[data-motion="off"] .water-silk,
+html[data-motion="off"] .moon-haze {
+  animation: none !important;
+  transform: none;
+}
+
+html[data-motion="off"] .light-rays { opacity: .12; }
+html[data-motion="off"] .water-silk { opacity: .18; }
+html[data-motion="off"] [data-chapter]::before { display: none; }
+html[data-motion="off"] .hero-title-line { opacity: 1; filter: none; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="on"]) .light-rays,
+  html:not([data-motion="on"]) .water-silk,
+  html:not([data-motion="on"]) .moon-haze {
+    animation: none !important;
+    transform: none;
+  }
+
+  html:not([data-motion="on"]) [data-chapter]::before { display: none; }
+  html:not([data-motion="on"]) .hero-title-line { opacity: 1; filter: none; transform: none; }
+}
