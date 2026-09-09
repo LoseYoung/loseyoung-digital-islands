@@ -1,40 +1,66 @@
-/* A + C motion direction: moonlit atmosphere + cinematic catalogue reveals. */
+/* A + C direction: clear moonlit atmosphere + cinematic catalogue motion. */
 
-/* Keep the photograph legible. Motion lives in independent light/water layers. */
+/* Wider exhibition canvas: keep breathing room without shrinking the work. */
+.shell { width: min(calc(100% - 96px), 1580px); }
+.section-space { padding-block: clamp(88px, 6vw, 112px); }
+.collection { padding-top: 78px; }
+.section-heading { margin-bottom: 48px; }
+.island-grid, .forthcoming-grid { gap: 28px; }
+.island-topline { margin-bottom: 16px; }
+.island-copy { padding-top: 22px; }
+.island-copy > p { margin-bottom: 24px; }
+.island-image { aspect-ratio: 3 / 2; }
+.island-image img { object-fit: cover; }
+.forthcoming { padding-bottom: 104px; }
+
+/* Crisp 4K hero. Motion is layered over the artwork instead of blurring it. */
+.hero { min-height: max(720px, calc(100svh - 106px)); }
 .hero-atmosphere {
   overflow: hidden;
   pointer-events: none;
-  background: #07111a;
+  background: #06111c;
 }
-
 .hero-landscape {
-  opacity: .96;
-  filter: saturate(.82) contrast(1.08) brightness(.82);
-  transform: scale(1.002);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 52%;
+  opacity: 1;
+  filter: saturate(1.04) contrast(1.08) brightness(.92);
+  transform: translate3d(0, calc(var(--hero-progress, 0) * 18px), 0) scale(1.025);
+  transition: filter .8s ease;
+  will-change: transform;
 }
-
 .hero-atmosphere::after {
   background:
-    linear-gradient(90deg, rgba(7, 17, 26, .46), rgba(7, 17, 26, .08) 52%, rgba(7, 17, 26, .02) 82%),
-    linear-gradient(180deg, rgba(7, 17, 26, .18), transparent 42%, rgba(7, 17, 26, .04) 69%, #07111a 100%);
+    linear-gradient(90deg, rgba(5, 13, 22, .3), rgba(5, 13, 22, .06) 50%, transparent 82%),
+    linear-gradient(180deg, rgba(4, 11, 19, .1), transparent 44%, rgba(3, 10, 17, .03) 72%, rgba(3, 10, 17, .48) 100%);
 }
+.hero-content {
+  padding-bottom: 94px;
+  transform: translate3d(0, calc(var(--hero-progress, 0) * -24px), 0);
+  opacity: calc(1 - var(--hero-progress, 0) * .34);
+  will-change: transform, opacity;
+}
+h1 { max-width: 1260px; }
+.hero-description { max-width: 540px; }
 
-/* Light Rays: restrained, moon-like shafts entering from the upper-right. */
+/* More visible moon rays while staying slow and soft. */
 .light-rays {
   position: absolute;
-  z-index: 1;
-  top: -12%;
-  right: -8%;
-  width: 64%;
-  height: 82%;
-  opacity: .27;
-  transform: rotate(-4deg);
+  z-index: 2;
+  top: -14%;
+  right: -5%;
+  width: 67%;
+  height: 88%;
+  opacity: .4;
   transform-origin: 100% 0;
   mix-blend-mode: screen;
-  mask-image: linear-gradient(180deg, #000 0%, #000 52%, transparent 96%);
-  animation: light-rays-breathe 18s ease-in-out -6s infinite alternate;
+  mask-image: linear-gradient(180deg, #000 0 58%, transparent 98%);
+  animation: light-rays-breathe 12s ease-in-out -4s infinite alternate;
 }
-
 .light-rays::before,
 .light-rays::after {
   content: "";
@@ -42,295 +68,196 @@
   inset: 0;
   transform-origin: 100% 0;
 }
-
 .light-rays::before {
-  background:
-    conic-gradient(from 201deg at 100% 0%,
-      transparent 0 7deg,
-      rgba(214, 231, 251, .22) 8deg 10deg,
-      transparent 11deg 16deg,
-      rgba(185, 211, 241, .13) 17deg 20deg,
-      transparent 21deg 28deg,
-      rgba(226, 238, 252, .18) 29deg 31deg,
-      transparent 32deg 42deg,
-      rgba(176, 205, 237, .1) 43deg 47deg,
-      transparent 48deg 72deg);
+  background: conic-gradient(from 201deg at 100% 0%,
+    transparent 0 6deg,
+    rgba(221, 237, 255, .25) 7deg 10deg,
+    transparent 11deg 15deg,
+    rgba(194, 220, 248, .16) 16deg 21deg,
+    transparent 22deg 28deg,
+    rgba(232, 243, 255, .2) 29deg 32deg,
+    transparent 33deg 42deg,
+    rgba(179, 211, 244, .12) 43deg 48deg,
+    transparent 49deg 72deg);
 }
-
 .light-rays::after {
-  inset: 6% 0 8% 18%;
-  background: radial-gradient(ellipse at 82% 8%, rgba(214, 232, 252, .2), rgba(174, 205, 238, .07) 26%, transparent 66%);
-  opacity: .75;
-  animation: light-field-drift 24s ease-in-out -9s infinite alternate;
+  inset: 7% 0 9% 16%;
+  background: radial-gradient(ellipse at 83% 8%, rgba(220, 235, 252, .24), rgba(169, 204, 240, .08) 30%, transparent 68%);
+  animation: light-field-drift 18s ease-in-out -6s infinite alternate;
 }
 
-/* Silk: only the sea surface moves; the sky and horizon remain photographic. */
+/* Silk-like water motion only below the horizon. */
 .water-silk {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   left: -8%;
   right: -8%;
-  bottom: -3%;
-  height: 39%;
+  bottom: -5%;
+  height: 42%;
   overflow: hidden;
-  opacity: .43;
+  opacity: .58;
   mix-blend-mode: screen;
-  mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 77%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 18%, #000 82%, transparent 100%);
 }
-
 .water-silk::before,
 .water-silk::after {
   content: "";
   position: absolute;
-  left: -8%;
-  width: 116%;
+  left: -10%;
+  width: 120%;
   height: 120%;
   border-radius: 50%;
 }
-
 .water-silk::before {
-  top: 4%;
+  top: 2%;
   background:
-    repeating-radial-gradient(ellipse at 78% -16%, transparent 0 18px, rgba(199, 222, 248, .15) 20px 21px, transparent 23px 39px),
-    repeating-radial-gradient(ellipse at 24% -8%, transparent 0 28px, rgba(149, 187, 228, .08) 30px 31px, transparent 33px 55px);
-  transform: scaleX(1.08) scaleY(.54) translate3d(-1%, 1%, 0);
-  animation: silk-current-a 20s ease-in-out -7s infinite alternate;
+    repeating-radial-gradient(ellipse at 76% -15%, transparent 0 18px, rgba(205, 227, 250, .19) 20px 21px, transparent 23px 41px),
+    repeating-radial-gradient(ellipse at 26% -10%, transparent 0 30px, rgba(142, 183, 225, .11) 32px 33px, transparent 35px 58px);
+  animation: silk-current-a 15s ease-in-out -5s infinite alternate;
 }
-
 .water-silk::after {
-  top: 23%;
-  background:
-    repeating-radial-gradient(ellipse at 60% -20%, transparent 0 24px, rgba(220, 235, 252, .11) 26px 27px, transparent 29px 48px),
-    linear-gradient(90deg, transparent 20%, rgba(194, 219, 246, .05) 58%, transparent 92%);
-  transform: scaleX(1.15) scaleY(.42) translate3d(2%, -2%, 0);
-  animation: silk-current-b 26s ease-in-out -12s infinite alternate;
+  top: 24%;
+  background: repeating-radial-gradient(ellipse at 60% -18%, transparent 0 24px, rgba(224, 238, 253, .14) 26px 27px, transparent 29px 49px);
+  animation: silk-current-b 20s ease-in-out -9s infinite alternate;
 }
+.moon-haze { opacity: .22; animation: moon-haze-breathe 16s ease-in-out -5s infinite alternate; }
+.sea-glimmer { z-index: 3; opacity: .66; }
+.sea-glimmer i { height: 1px; filter: none; opacity: .18; animation-duration: 16s; }
+.horizon-glow { z-index: 3; opacity: .6; height: 1px; }
+.distant-lights { z-index: 3; opacity: .62; animation-duration: 54s; }
 
-/* Existing atmospheric accents are quieter now and no longer soften the whole scene. */
-.moon-haze {
-  z-index: 1;
-  opacity: .2;
-  width: 42%;
-  height: 48%;
-  top: 17%;
-  right: -4%;
-  background: radial-gradient(ellipse, rgba(203, 220, 241, .2), rgba(165, 197, 235, .055) 40%, transparent 72%);
-  animation: moon-haze-breathe 22s ease-in-out -8s infinite alternate;
-}
-
-.sea-glimmer {
-  z-index: 2;
-  opacity: .58;
-}
-
-.sea-glimmer i {
-  height: 1px;
-  filter: none;
-  opacity: .14;
-  background: linear-gradient(90deg, transparent, rgba(218, 235, 253, .6) 72%, transparent);
-  animation-duration: 20s;
-}
-
-.horizon-glow {
-  z-index: 2;
-  opacity: .55;
-  height: 1px;
-  box-shadow: 0 0 12px rgba(165, 196, 235, .08);
-  animation-duration: 18s;
-}
-
-.distant-lights {
-  z-index: 2;
-  opacity: .66;
-  animation-duration: 72s;
-}
-
-.distant-lights i {
-  box-shadow: 0 0 4px rgba(194, 223, 255, .2);
-}
-
-/* Focus reveal: title resolves into clarity rather than simply sliding upward. */
-.hero h1 {
-  animation: none;
-  text-shadow: 0 2px 28px rgba(7, 17, 26, .32);
-}
-
+/* Title resolves into focus on entry. */
+.hero h1 { animation: none; text-shadow: 0 2px 28px rgba(2, 10, 18, .34); }
 .hero-title-line {
   display: block;
   opacity: 0;
-  filter: blur(10px);
-  transform: translate3d(0, 13px, 0) scale(.995);
-  animation: title-focus 1.35s var(--ease) both;
+  filter: blur(12px);
+  transform: translate3d(0, 18px, 0) scale(.992);
+  animation: title-focus 1.45s var(--ease) both;
 }
+.hero-title-line:nth-child(1) { animation-delay: .34s; }
+.hero-title-line:nth-child(2) { animation-delay: .54s; }
 
-.hero-title-line:nth-child(1) { animation-delay: .42s; }
-.hero-title-line:nth-child(2) { animation-delay: .58s; }
-
-/* Cinematic chapter reveal: sections arrive like a dark exhibition curtain lifting. */
+/* Chapter motion: a visible lift plus a soft wash, not a progress line. */
 [data-chapter] {
   position: relative;
   isolation: isolate;
+  transition: opacity .85s var(--ease), transform 1.05s var(--ease);
 }
-
 [data-chapter]::before {
   content: "";
   position: absolute;
-  z-index: 8;
-  inset: 0 -1px;
+  z-index: -1;
+  left: -4%;
+  right: -4%;
+  top: -28px;
+  height: 240px;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, #07111a 0%, rgba(7, 17, 26, .985) 68%, rgba(7, 17, 26, .82) 88%, transparent 100%);
-  clip-path: inset(0 0 100% 0);
-  transform-origin: top;
-  transition: clip-path 1.25s var(--ease);
+  opacity: 0;
+  transform: translateY(34px) scale(.96);
+  background: radial-gradient(ellipse at 42% 100%, rgba(151, 190, 229, .1), transparent 66%);
 }
+[data-chapter-state="pending"] { opacity: .42; transform: translateY(34px); }
+[data-chapter-state="visible"] { opacity: 1; transform: none; }
+[data-chapter-state="visible"]::before { animation: chapter-wash 1.25s var(--ease) both; }
 
-[data-chapter-state="pending"]::before {
-  clip-path: inset(0 0 0 0);
-}
-
-[data-chapter-state="visible"]::before {
-  clip-path: inset(0 0 100% 0);
-}
-
-/* Replace generic template-like lift with slower, masked catalogue reveals. */
 [data-reveal] {
   transition:
     opacity 1.05s var(--ease),
     transform 1.05s var(--ease),
     filter 1.05s var(--ease);
+  transition-delay: var(--reveal-delay, 0ms);
 }
-
 [data-reveal-state="pending"] {
   opacity: 0;
-  transform: translateY(14px);
-  filter: blur(4px);
+  transform: translateY(30px);
+  filter: blur(7px);
 }
-
-[data-reveal-state="visible"] {
-  opacity: 1;
-  transform: none;
-  filter: none;
-}
-
-[data-reveal="card"] {
-  overflow: visible;
-}
+[data-reveal-state="visible"] { opacity: 1; transform: none; filter: none; }
 
 [data-reveal="card"] .island-image {
   clip-path: inset(0 0 0 0);
   transition: clip-path 1.15s var(--ease);
 }
-
 [data-reveal="card"] .island-image img {
-  transform: scale(1.018);
-  transition: transform 1.25s var(--ease), filter .8s var(--ease);
+  transform: translate3d(0, var(--card-shift, 0px), 0) scale(1.035);
+  transition: transform 1.2s var(--ease), filter .75s var(--ease);
+  will-change: transform;
 }
-
-[data-reveal="card"][data-reveal-state="pending"] .island-image {
-  clip-path: inset(0 0 100% 0);
-}
-
-[data-reveal="card"][data-reveal-state="visible"] .island-image img {
-  transform: scale(1);
-}
+[data-reveal="card"][data-reveal-state="pending"] .island-image { clip-path: inset(0 0 100% 0); }
+[data-reveal="card"][data-reveal-state="visible"] .island-image img { transform: translate3d(0, var(--card-shift, 0px), 0) scale(1.02); }
 
 @media (hover: hover) and (pointer: fine) {
-  .island-card:hover {
-    transform: translateY(-2px);
-  }
-
-  .island-card:hover img {
-    transform: scale(1.018);
-    filter: saturate(.88) brightness(.96);
-  }
+  .island-card:hover { transform: translateY(-2px); }
+  .island-card:hover img { filter: saturate(.92) brightness(.98); }
 }
 
-/* Remove the old scrolling route visually even during a mixed-version deploy. */
 .journey-line { display: none !important; }
 
 @keyframes title-focus {
-  0% { opacity: 0; filter: blur(10px); transform: translate3d(0, 13px, 0) scale(.995); }
-  55% { opacity: .84; }
-  100% { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+  0% { opacity: 0; filter: blur(12px); transform: translate3d(0, 18px, 0) scale(.992); }
+  62% { opacity: .9; }
+  100% { opacity: 1; filter: blur(0); transform: none; }
 }
-
 @keyframes light-rays-breathe {
-  from { opacity: .2; transform: rotate(-4deg) scale(1); }
-  to { opacity: .31; transform: rotate(-3.2deg) scale(1.025); }
+  from { opacity: .3; transform: rotate(-4.5deg) scale(1); }
+  to { opacity: .52; transform: rotate(-3.3deg) scale(1.035); }
 }
-
 @keyframes light-field-drift {
-  from { transform: translate3d(-1.5%, 0, 0) scale(.98); opacity: .5; }
-  to { transform: translate3d(2%, 1%, 0) scale(1.03); opacity: .86; }
+  from { transform: translate3d(-2%, 0, 0) scale(.98); opacity: .5; }
+  to { transform: translate3d(2.5%, 1.5%, 0) scale(1.04); opacity: .95; }
 }
-
 @keyframes silk-current-a {
-  from { transform: scaleX(1.08) scaleY(.54) translate3d(-1.5%, 1%, 0); opacity: .52; }
-  to { transform: scaleX(1.13) scaleY(.5) translate3d(2%, -1%, 0); opacity: .9; }
+  from { transform: scaleX(1.08) scaleY(.52) translate3d(-2%, 1%, 0); opacity: .55; }
+  to { transform: scaleX(1.14) scaleY(.48) translate3d(2.5%, -1%, 0); opacity: .95; }
 }
-
 @keyframes silk-current-b {
-  from { transform: scaleX(1.15) scaleY(.42) translate3d(2%, -2%, 0); opacity: .42; }
-  to { transform: scaleX(1.08) scaleY(.47) translate3d(-2%, 1%, 0); opacity: .74; }
+  from { transform: scaleX(1.16) scaleY(.43) translate3d(2%, -2%, 0); opacity: .4; }
+  to { transform: scaleX(1.08) scaleY(.48) translate3d(-2.5%, 1%, 0); opacity: .82; }
 }
-
 @keyframes moon-haze-breathe {
-  from { opacity: .13; transform: scale(.98) translateX(-4px); }
-  to { opacity: .24; transform: scale(1.045) translateX(6px); }
+  from { opacity: .14; transform: scale(.98) translateX(-5px); }
+  to { opacity: .28; transform: scale(1.055) translateX(8px); }
+}
+@keyframes chapter-wash {
+  0% { opacity: 0; transform: translateY(34px) scale(.96); }
+  45% { opacity: .95; }
+  100% { opacity: 0; transform: translateY(-24px) scale(1.03); }
 }
 
+@media (max-width: 1180px) {
+  .shell { width: calc(100% - 64px); }
+  .island-grid, .forthcoming-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px 28px; }
+}
 @media (max-width: 640px) {
-  .hero-landscape {
-    opacity: .92;
-    filter: saturate(.78) contrast(1.06) brightness(.76);
-  }
-
-  .light-rays {
-    top: -7%;
-    right: -28%;
-    width: 94%;
-    height: 73%;
-    opacity: .2;
-  }
-
-  .water-silk {
-    height: 34%;
-    opacity: .34;
-  }
-
-  .moon-haze {
-    right: -28%;
-    width: 76%;
-    opacity: .15;
-  }
-
-  [data-reveal-state="pending"] {
-    transform: translateY(10px);
-    filter: blur(3px);
-  }
+  .shell { width: calc(100% - 36px); }
+  .section-space { padding-block: 72px; }
+  .hero { min-height: calc(100svh - 88px); }
+  .hero-landscape { object-position: 64% center; filter: saturate(.98) contrast(1.06) brightness(.84); }
+  .hero-content { padding-bottom: 74px; }
+  .light-rays { top: -8%; right: -30%; width: 96%; height: 76%; opacity: .3; }
+  .water-silk { height: 36%; opacity: .46; }
+  .moon-haze { right: -26%; width: 76%; }
+  .island-grid, .forthcoming-grid { grid-template-columns: 1fr; gap: 46px; }
+  [data-reveal-state="pending"] { transform: translateY(22px); filter: blur(5px); }
 }
 
 html[data-motion="off"] .light-rays,
 html[data-motion="off"] .water-silk,
-html[data-motion="off"] .moon-haze {
-  animation: none !important;
-  transform: none;
-}
-
-html[data-motion="off"] .light-rays { opacity: .12; }
+html[data-motion="off"] .moon-haze { animation: none !important; transform: none; }
+html[data-motion="off"] .light-rays { opacity: .14; }
 html[data-motion="off"] .water-silk { opacity: .18; }
 html[data-motion="off"] [data-chapter]::before { display: none; }
 html[data-motion="off"] .hero-title-line { opacity: 1; filter: none; transform: none; }
+html[data-motion="off"] .hero-content,
+html[data-motion="off"] .hero-landscape { transform: none; opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   html:not([data-motion="on"]) .light-rays,
   html:not([data-motion="on"]) .water-silk,
-  html:not([data-motion="on"]) .moon-haze {
-    animation: none !important;
-    transform: none;
-  }
-
+  html:not([data-motion="on"]) .moon-haze { animation: none !important; transform: none; }
   html:not([data-motion="on"]) [data-chapter]::before { display: none; }
   html:not([data-motion="on"]) .hero-title-line { opacity: 1; filter: none; transform: none; }
+  html:not([data-motion="on"]) .hero-content,
+  html:not([data-motion="on"]) .hero-landscape { transform: none; opacity: 1; }
 }
