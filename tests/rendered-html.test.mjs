@@ -21,12 +21,12 @@ test("Sites server-renders the entire catalogue and safe navigation without Java
   assertCatalogue(html);
   assert.match(html, /https:\/\/loseyoung-digital-islands\.lzy793222567\.chatgpt\.site\/og\.png/);
   assert.doesNotMatch(html, /untrusted\.example|portal\.example/);
-  assert.match(html, /src="\/quiet-horizon\.webp"/);
+  assert.match(html, /src="\/moonlit-ocean-4k\.svg"/);
 });
 
 test("keeps imagery, fonts and reduced-motion fallback local", async () => {
   await Promise.all([
-    "public/quiet-horizon.webp", "public/og.png", "public/photos-island.png",
+    "public/moonlit-ocean-4k.svg", "public/og.png", "public/photos-island.png",
     "public/faerie-britain.png", "public/gridwake.png", "app/fonts/OFL.txt",
     "app/fonts/cormorant-garamond-regular.ttf", "app/fonts/cormorant-garamond-italic.ttf",
   ].map((file) => access(new URL(`../${file}`, import.meta.url))));
