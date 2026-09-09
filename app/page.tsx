@@ -24,12 +24,12 @@ export default function Home() {
 
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-atmosphere" aria-hidden="true">
-          <img className="hero-landscape" src={`${basePath}/quiet-horizon.webp`} alt="" width="1672" height="941" fetchPriority="high" />
+          <img className="hero-landscape" src={`${basePath}/moonlit-ocean-4k.svg`} alt="" width="3840" height="2160" fetchPriority="high" />
           <div className="light-rays" />
           <div className="water-silk" />
           <div className="moon-haze" />
           <div className="sea-glimmer"><i /><i /><i /></div>
-          <div className="distant-lights">{Array.from({ length: 18 }, (_, index) => <i key={index} style={{ "--star-x": `${7 + (index * 41) % 89}%`, "--star-y": `${9 + (index * 17) % 42}%`, "--star-delay": `${-index * 1.3}s`, "--star-duration": `${8 + index % 5}s` } as CSSProperties} />)}</div>
+          <div className="distant-lights">{Array.from({ length: 12 }, (_, index) => <i key={index} style={{ "--star-x": `${9 + (index * 47) % 86}%`, "--star-y": `${8 + (index * 23) % 44}%`, "--star-delay": `${-index * 1.6}s`, "--star-duration": `${7 + index % 5}s` } as CSSProperties} />)}</div>
           <div className="horizon-glow" />
         </div>
         <div className="hero-content shell">
@@ -62,7 +62,7 @@ export default function Home() {
         </header>
         <div className="island-grid">
           {islands.map((island, index) => (
-            <article key={island.id} className="island-entry" data-reveal="card" style={{ "--reveal-delay": `${(index % 3) * 100}ms` } as CSSProperties}>
+            <article key={island.id} className="island-entry" data-reveal="card" style={{ "--reveal-delay": `${(index % 3) * 130}ms` } as CSSProperties}>
               <a className="island-card" href={island.url} target="_blank" rel="noopener noreferrer" aria-label={`${island.name} · 在新标签页打开`}>
                 <div className="island-topline"><span>{catalogueNumber(index)}</span><span lang="en">{island.category}</span><Arrow diagonal /></div>
                 <div className="island-image"><img src={`${basePath}${island.cover}`} alt={island.coverAlt} width="1536" height="1024" loading="lazy" decoding="async" /></div>
