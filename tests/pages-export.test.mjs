@@ -31,7 +31,6 @@ test("Pages 导出完整门户并保留三个子站入口", async () => {
 
 test("Pages 的图片、脚本和样式均能在发布子目录中找到", async () => {
   const html = await readFile(resolve(output, "index.html"), "utf8");
-  // 检查实际导出的资源引用，防止仓库子路径丢失导致上线后空白或图片 404。
   const resources = [...html.matchAll(/<(?:script|link|img)\b[^>]*\b(?:src|href)="([^"]+)"/g)]
     .filter((match) => !/rel="(?:preconnect|dns-prefetch)"/.test(match[0]))
     .map((match) => match[1].replaceAll("&amp;", "&"))
@@ -44,7 +43,7 @@ test("Pages 的图片、脚本和样式均能在发布子目录中找到", async
     assert.ok(file.startsWith(output + "/") || file.startsWith(output + "\\"), "资源不能越出发布目录");
     await access(file);
   }
-  for (const filename of ["photos-island.png", "faerie-britain.png", "gridwake.png", "moonlit-ocean-4k.svg"]) {
+  for (const filename of ["photos-island.png", "faerie-britain.png", "gridwake.png", "moonlit-ocean-pramod-tiwari.jpg"]) {
     assert.ok(html.includes(`src="${basePath}/${filename}"`), `缺少封面或背景引用：${filename}`);
     await access(resolve(output, filename));
   }
