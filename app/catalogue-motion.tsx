@@ -27,97 +27,100 @@ function subscribeToMotion(notify: () => void) {
   };
 }
 
-const clamp = (value: number) => Math.min(1, Math.max(0, value));
-
 export default function CatalogueMotion() {
   const enabled = useSyncExternalStore(subscribeToMotion, motionEnabled, () => true);
 
   useEffect(() => {
     const root = document.documentElement;
     const entries = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    const track = document.querySelector<HTMLElement>(".journey-line");
-    const route = document.querySelector<SVGPathElement>(".journey-path");
-    const marker = document.querySelector<SVGCircleElement>(".journey-marker");
+    const chapters = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
     const hero = document.querySelector<HTMLElement>(".hero");
     root.dataset.motion = enabled ? "on" : "off";
+
     if (!enabled) {
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
-      root.style.setProperty("--journey-progress", "1");
-      return () => { delete root.dataset.motion; root.style.removeProperty("--journey-progress"); };
+      chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
+      return () => { delete root.dataset.motion; };
     }
 
-    let observer: IntersectionObserver | undefined;
+    let revealObserver: IntersectionObserver | undefined;
+    let chapterObserver: IntersectionObserver | undefined;
     let heroObserver: IntersectionObserver | undefined;
+
     if ("IntersectionObserver" in window) {
-      observer = new IntersectionObserver((changes) => {
+      revealObserver = new IntersectionObserver((changes) => {
         for (const change of changes) {
           if (change.isIntersecting) {
             change.target.setAttribute("data-reveal-state", "visible");
-            observer?.unobserve(change.target);
+            revealObserver?.unobserve(change.target);
           }
         }
-      }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+      }, { threshold: 0.12, rootMargin: "0px 0px -48px 0px" });
+
       for (const entry of entries) {
-        if (entry.getBoundingClientRect().top >= window.innerHeight) {
+        if (entry.getBoundingClientRect().top >= window.innerHeight * .82) {
           entry.setAttribute("data-reveal-state", "pending");
-          observer.observe(entry);
+          revealObserver.observe(entry);
         }
       }
+
+      chapterObserver = new IntersectionObserver((changes) => {
+        for (const change of changes) {
+          if (change.isIntersecting) {
+            change.target.setAttribute("data-chapter-state", "visible");
+            chapterObserver?.unobserve(change.target);
+          }
+        }
+      }, { threshold: 0.05, rootMargin: "0px 0px -12% 0px" });
+
+      for (const chapter of chapters) {
+        if (chapter.getBoundingClientRect().top >= window.innerHeight * .88) {
+          chapter.setAttribute("data-chapter-state", "pending");
+          chapterObserver.observe(chapter);
+        } else {
+          chapter.setAttribute("data-chapter-state", "visible");
+        }
+      }
+
       heroObserver = new IntersectionObserver(([entry]) => {
         root.dataset.heroVisible = String(entry.isIntersecting);
       });
       if (hero) heroObserver.observe(hero);
     }
 
-    let frame = 0;
-    const length = route?.getTotalLength() ?? 0;
-    const update = () => {
-      // Draw to the reading position inside the viewport, not to document scroll %.
-      // This keeps the moving tip visible instead of extending below the screen.
-      if (track) {
-        const bounds = track.getBoundingClientRect();
-        const progress = clamp((window.innerHeight * .74 - bounds.top) / bounds.height);
-        root.style.setProperty("--journey-progress", progress.toFixed(4));
-        if (route && marker) {
-          const point = route.getPointAtLength(length * progress);
-          marker.setAttribute("cx", point.x.toFixed(2));
-          marker.setAttribute("cy", point.y.toFixed(2));
-        }
-      }
-      frame = 0;
-    };
-    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
     const revealFocus = (event: FocusEvent) => {
-      if (event.target instanceof Element) event.target.closest("[data-reveal]")?.setAttribute("data-reveal-state", "visible");
+      if (!(event.target instanceof Element)) return;
+      event.target.closest("[data-reveal]")?.setAttribute("data-reveal-state", "visible");
+      event.target.closest("[data-chapter]")?.setAttribute("data-chapter-state", "visible");
     };
+
     const revealFragment = () => {
       let id = window.location.hash.slice(1);
       try { id = decodeURIComponent(id); } catch { /* Ignore malformed external fragments. */ }
       const section = document.getElementById(id);
+      section?.setAttribute("data-chapter-state", "visible");
       section?.querySelectorAll("[data-reveal]").forEach((entry) => entry.setAttribute("data-reveal-state", "visible"));
-      schedule();
     };
+
     const visibility = () => { root.dataset.pageVisible = String(!document.hidden); };
-    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : undefined;
-    resizeObserver?.observe(document.body);
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
     window.addEventListener("hashchange", revealFragment);
     document.addEventListener("focusin", revealFocus);
     document.addEventListener("visibilitychange", visibility);
-    visibility(); update(); revealFragment();
+    visibility();
+    revealFragment();
 
     return () => {
-      observer?.disconnect(); heroObserver?.disconnect(); resizeObserver?.disconnect();
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      revealObserver?.disconnect();
+      chapterObserver?.disconnect();
+      heroObserver?.disconnect();
       window.removeEventListener("hashchange", revealFragment);
       document.removeEventListener("focusin", revealFocus);
       document.removeEventListener("visibilitychange", visibility);
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
-      root.style.removeProperty("--journey-progress");
-      delete root.dataset.motion; delete root.dataset.heroVisible; delete root.dataset.pageVisible;
+      chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
+      delete root.dataset.motion;
+      delete root.dataset.heroVisible;
+      delete root.dataset.pageVisible;
     };
   }, [enabled]);
 
