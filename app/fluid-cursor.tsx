@@ -11,11 +11,6 @@ void main() {
 }
 `;
 
-/*
- * 使用双缓冲高度场求解离散波动方程。
- * 鼠标只向水面注入局部扰动，后续扩散由高度场自身完成，
- * 因此不会把历史鼠标点连成一条“尾巴”。
- */
 const simulationFragmentSource = `#version 300 es
 precision highp float;
 
@@ -46,19 +41,17 @@ void main() {
   float down = decodeHeight(texture(u_state, v_uv - vec2(0.0, u_texel.y)).r);
   float up = decodeHeight(texture(u_state, v_uv + vec2(0.0, u_texel.y)).r);
 
-  // 二阶波动方程：邻域传播 - 上一帧高度，再施加轻微阻尼。
   float nextHeight = (left + right + down + up) * 0.5 - previous;
-  nextHeight *= 0.986;
+  nextHeight *= 0.976;
 
   if (u_splatStrength > 0.0) {
     vec2 delta = v_uv - u_splat;
     delta.x *= u_resolution.x / max(u_resolution.y, 1.0);
     float impulse = exp(-dot(delta, delta) / max(u_splatRadius * u_splatRadius, 0.000001));
-    // 正负相间的短脉冲比单向鼓包更像水面被轻触后产生的波峰/波谷。
     nextHeight += impulse * u_splatStrength;
   }
 
-  nextHeight = clamp(nextHeight, -0.92, 0.92);
+  nextHeight = clamp(nextHeight, -0.88, 0.88);
   outColor = vec4(encodeHeight(nextHeight), encodeHeight(current), 0.0, 1.0);
 }
 `;
@@ -77,17 +70,17 @@ float heightAt(vec2 uv) {
   return texture(u_state, uv).r * 2.0 - 1.0;
 }
 
-vec3 spectralColour(vec2 uv, float heightValue, float gradientValue) {
-  vec3 blue = vec3(0.15, 0.42, 0.92);
-  vec3 violet = vec3(0.52, 0.24, 0.76);
-  vec3 cyan = vec3(0.08, 0.66, 0.63);
-  vec3 rose = vec3(0.55, 0.20, 0.38);
+vec3 spectralColour(vec2 uv, float gradientValue) {
+  vec3 silverBlue = vec3(0.44, 0.66, 0.88);
+  vec3 deepBlue = vec3(0.12, 0.34, 0.68);
+  vec3 cyan = vec3(0.08, 0.58, 0.60);
+  vec3 violet = vec3(0.34, 0.28, 0.52);
 
-  float drift = 0.5 + 0.5 * sin(u_time * 0.28 + uv.x * 5.2 - uv.y * 3.4);
-  vec3 cold = mix(blue, violet, drift);
-  vec3 warm = mix(cyan, rose, 0.35 + 0.25 * sin(u_time * 0.19 + uv.y * 5.0));
-  float mixValue = clamp(gradientValue * 8.0 + abs(heightValue) * 1.8, 0.0, 1.0);
-  return mix(cold, warm, mixValue * 0.62);
+  float coolDrift = 0.5 + 0.5 * sin(u_time * 0.18 + uv.x * 4.2 - uv.y * 2.8);
+  vec3 cold = mix(deepBlue, silverBlue, 0.42 + coolDrift * 0.26);
+  vec3 cleanWater = mix(cold, cyan, clamp(gradientValue * 5.5, 0.0, 0.52));
+  float violetHint = 0.08 + 0.04 * sin(u_time * 0.12 + uv.x * 3.0);
+  return mix(cleanWater, violet, violetHint);
 }
 
 void main() {
@@ -101,14 +94,13 @@ void main() {
   float gradientStrength = length(gradient);
   float waveStrength = abs(center);
 
-  // 主要显示波前的法线高光，中心扰动保持透明，避免重新变成“大光圈”。
-  float ridge = smoothstep(0.008, 0.095, gradientStrength) * (1.0 - smoothstep(0.19, 0.42, gradientStrength));
-  float body = smoothstep(0.018, 0.18, waveStrength) * 0.18;
-  float shimmer = pow(max(dot(normalize(vec3(-gradient * 7.0, 1.0)), normalize(vec3(-0.35, 0.55, 0.78))), 0.0), 10.0);
+  float ridge = smoothstep(0.007, 0.075, gradientStrength) * (1.0 - smoothstep(0.18, 0.34, gradientStrength));
+  float body = smoothstep(0.022, 0.15, waveStrength) * 0.10;
+  float shimmer = pow(max(dot(normalize(vec3(-gradient * 6.0, 1.0)), normalize(vec3(-0.32, 0.52, 0.79))), 0.0), 12.0);
 
-  float alpha = clamp(ridge * 0.34 + body * 0.16 + shimmer * ridge * 0.16, 0.0, 0.34);
-  vec3 colour = spectralColour(v_uv, center, gradientStrength);
-  colour *= 0.55 + ridge * 0.75 + shimmer * 0.55;
+  float alpha = clamp(ridge * 0.34 + body * 0.11 + shimmer * ridge * 0.15, 0.0, 0.30);
+  vec3 colour = spectralColour(v_uv, gradientStrength);
+  colour *= 0.58 + ridge * 0.68 + shimmer * 0.44;
 
   outColor = vec4(colour, alpha);
 }
@@ -119,6 +111,12 @@ type RippleImpulse = {
   y: number;
   strength: number;
   radius: number;
+};
+
+type PointerSample = {
+  x: number;
+  y: number;
+  time: number;
 };
 
 function compileShader(gl: WebGL2RenderingContext, type: number, source: string) {
@@ -170,8 +168,8 @@ function createStateTarget(gl: WebGL2RenderingContext, width: number, height: nu
   }
 
   gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, neutral);
@@ -209,7 +207,7 @@ export default function FluidCursor() {
     });
 
     if (!gl) {
-      console.warn("当前浏览器不支持 WebGL2，已保留静态流光背景。");
+      console.warn("当前浏览器不支持 WebGL2，已保留纯色背景。");
       return;
     }
 
@@ -264,8 +262,9 @@ export default function FluidCursor() {
     let back: ReturnType<typeof createStateTarget> = null;
     let frame = 0;
     let activeUntil = 0;
-    let previousPointer: { x: number; y: number; time: number } | null = null;
-    const impulses: RippleImpulse[] = [];
+    let latestPointer: PointerSample | null = null;
+    let lastInjectedPointer: PointerSample | null = null;
+    let queuedImpulse: RippleImpulse | null = null;
     const startedAt = performance.now();
 
     const motionEnabled = () => {
@@ -296,18 +295,17 @@ export default function FluidCursor() {
     };
 
     const resize = () => {
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.35);
-      const width = Math.max(1, Math.round(window.innerWidth * pixelRatio));
-      const height = Math.max(1, Math.round(window.innerHeight * pixelRatio));
+      const width = Math.max(1, Math.round(window.innerWidth));
+      const height = Math.max(1, Math.round(window.innerHeight));
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
       }
 
-      const longest = Math.min(760, Math.max(420, Math.round(Math.max(window.innerWidth, window.innerHeight) * 0.5)));
+      const longest = Math.min(520, Math.max(340, Math.round(Math.max(window.innerWidth, window.innerHeight) * 0.34)));
       const aspect = Math.max(window.innerWidth / Math.max(window.innerHeight, 1), 0.35);
-      const nextWidth = aspect >= 1 ? longest : Math.max(260, Math.round(longest * aspect));
-      const nextHeight = aspect >= 1 ? Math.max(260, Math.round(longest / aspect)) : longest;
+      const nextWidth = aspect >= 1 ? longest : Math.max(220, Math.round(longest * aspect));
+      const nextHeight = aspect >= 1 ? Math.max(220, Math.round(longest / aspect)) : longest;
 
       if (nextWidth !== simulationWidth || nextHeight !== simulationHeight || !front || !back) {
         destroyTargets();
@@ -315,7 +313,9 @@ export default function FluidCursor() {
         simulationHeight = nextHeight;
         front = createStateTarget(gl, simulationWidth, simulationHeight);
         back = createStateTarget(gl, simulationWidth, simulationHeight);
-        impulses.length = 0;
+        queuedImpulse = null;
+        latestPointer = null;
+        lastInjectedPointer = null;
       }
     };
 
@@ -356,6 +356,33 @@ export default function FluidCursor() {
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     };
 
+    const toImpulse = (sample: PointerSample): RippleImpulse | null => {
+      if (!lastInjectedPointer) {
+        lastInjectedPointer = sample;
+        return {
+          x: clamp(sample.x / Math.max(window.innerWidth, 1), 0, 1),
+          y: clamp(1 - sample.y / Math.max(window.innerHeight, 1), 0, 1),
+          strength: 0.16,
+          radius: 0.014,
+        };
+      }
+
+      const dx = sample.x - lastInjectedPointer.x;
+      const dy = sample.y - lastInjectedPointer.y;
+      const distance = Math.hypot(dx, dy);
+      const elapsed = Math.max(sample.time - lastInjectedPointer.time, 1);
+      if (distance < 24 && elapsed < 52) return null;
+
+      const speed = distance / elapsed * 1000;
+      lastInjectedPointer = sample;
+      return {
+        x: clamp(sample.x / Math.max(window.innerWidth, 1), 0, 1),
+        y: clamp(1 - sample.y / Math.max(window.innerHeight, 1), 0, 1),
+        strength: clamp(0.13 + speed / 10500, 0.13, 0.25),
+        radius: clamp(0.011 + speed / 180000, 0.011, 0.019),
+      };
+    };
+
     const render = (now: number) => {
       if (!motionEnabled() || document.hidden || !front || !back) {
         clearCanvas();
@@ -363,16 +390,24 @@ export default function FluidCursor() {
         return;
       }
 
-      // 每帧至少推进两次波动方程，让波前扩散足够顺滑；注入只发生在第一步。
-      const impulse = impulses.shift();
+      if (latestPointer) {
+        const sampled = latestPointer;
+        latestPointer = null;
+        const pointerImpulse = toImpulse(sampled);
+        if (pointerImpulse && (!queuedImpulse || pointerImpulse.strength > queuedImpulse.strength)) {
+          queuedImpulse = pointerImpulse;
+        }
+      }
+
+      const impulse = queuedImpulse ?? undefined;
+      queuedImpulse = null;
       simulationStep(impulse);
-      simulationStep();
-      if (impulses.length > 0) simulationStep(impulses.shift());
       display(now);
 
-      if (now < activeUntil || impulses.length > 0) {
+      if (now < activeUntil || latestPointer || queuedImpulse) {
         frame = window.requestAnimationFrame(render);
       } else {
+        clearCanvas();
         frame = 0;
       }
     };
@@ -381,64 +416,38 @@ export default function FluidCursor() {
       if (!frame) frame = window.requestAnimationFrame(render);
     };
 
-    const enqueueRipple = (x: number, y: number, strength: number, radius: number) => {
-      impulses.push({
-        x: clamp(x / Math.max(window.innerWidth, 1), 0, 1),
-        y: clamp(1 - y / Math.max(window.innerHeight, 1), 0, 1),
-        strength,
-        radius,
-      });
-      if (impulses.length > 4) impulses.splice(0, impulses.length - 4);
-      activeUntil = performance.now() + 3600;
+    const wake = (milliseconds = 2600) => {
+      activeUntil = performance.now() + milliseconds;
       ensureFrame();
     };
 
     const onPointerMove = (event: PointerEvent) => {
       if (!motionEnabled()) return;
-
-      const now = performance.now();
-      const current = { x: event.clientX, y: event.clientY, time: now };
-      const root = document.documentElement;
-      const shiftX = (event.clientX / Math.max(window.innerWidth, 1) - 0.5) * 10;
-      const shiftY = (event.clientY / Math.max(window.innerHeight, 1) - 0.5) * 8;
-      root.style.setProperty("--ambient-dx", `${shiftX.toFixed(2)}px`);
-      root.style.setProperty("--ambient-dy", `${shiftY.toFixed(2)}px`);
-
-      if (!previousPointer) {
-        previousPointer = current;
-        enqueueRipple(current.x, current.y, 0.18, 0.014);
-        return;
-      }
-
-      const dx = current.x - previousPointer.x;
-      const dy = current.y - previousPointer.y;
-      const distance = Math.hypot(dx, dy);
-      const elapsed = Math.max(now - previousPointer.time, 1);
-
-      // 不沿路径连续画线：只有移动达到一定距离/时间才注入新的独立水面扰动。
-      if (distance >= 34 || elapsed >= 58) {
-        const speed = distance / elapsed * 1000;
-        const strength = clamp(0.14 + speed / 9000, 0.14, 0.28);
-        const radius = clamp(0.011 + speed / 150000, 0.011, 0.021);
-        enqueueRipple(current.x, current.y, strength, radius);
-        previousPointer = current;
-      }
+      latestPointer = { x: event.clientX, y: event.clientY, time: performance.now() };
+      wake();
     };
 
     const onPointerDown = (event: PointerEvent) => {
       if (!motionEnabled()) return;
-      enqueueRipple(event.clientX, event.clientY, 0.32, 0.019);
+      queuedImpulse = {
+        x: clamp(event.clientX / Math.max(window.innerWidth, 1), 0, 1),
+        y: clamp(1 - event.clientY / Math.max(window.innerHeight, 1), 0, 1),
+        strength: 0.29,
+        radius: 0.019,
+      };
+      lastInjectedPointer = { x: event.clientX, y: event.clientY, time: performance.now() };
+      wake(2900);
     };
 
     const onPointerLeave = () => {
-      previousPointer = null;
-      document.documentElement.style.setProperty("--ambient-dx", "0px");
-      document.documentElement.style.setProperty("--ambient-dy", "0px");
+      latestPointer = null;
+      lastInjectedPointer = null;
     };
 
     const onMotionPreferenceChange = () => {
       if (!motionEnabled()) {
-        impulses.length = 0;
+        latestPointer = null;
+        queuedImpulse = null;
         activeUntil = 0;
         clearCanvas();
       }
@@ -460,8 +469,6 @@ export default function FluidCursor() {
       document.documentElement.removeEventListener("mouseleave", onPointerLeave);
       window.removeEventListener("digital-islands-motion-change", onMotionPreferenceChange);
       reducedMotion.removeEventListener("change", onMotionPreferenceChange);
-      document.documentElement.style.removeProperty("--ambient-dx");
-      document.documentElement.style.removeProperty("--ambient-dy");
       destroyTargets();
       gl.deleteBuffer(buffer);
       gl.deleteProgram(simulationProgram);
