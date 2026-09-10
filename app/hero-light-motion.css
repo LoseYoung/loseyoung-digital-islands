@@ -1,0 +1,120 @@
+/* Hero 月光动效：滚动负责整体偏转，内部光带负责持续呼吸。 */
+.light-rays {
+  opacity: .42;
+  transform:
+    translate3d(var(--light-scroll-x, 0px), var(--light-scroll-y, 0px), 0)
+    rotate(var(--light-scroll-angle, 0deg))
+    scale(calc(1 + var(--light-scroll-scale, 0)));
+  animation: moonlight-luminance 9.6s ease-in-out -3.2s infinite alternate;
+  will-change: transform, opacity;
+}
+
+/* 主光带与柔光层使用不同节奏，避免整束光一起明暗而显得静止。 */
+.light-rays::before {
+  animation: moonlight-band-drift 8.4s ease-in-out -2.1s infinite alternate;
+  will-change: transform, opacity;
+}
+
+.light-rays::after {
+  animation: moonlight-field-drift 12.6s ease-in-out -6.4s infinite alternate;
+  will-change: transform, opacity;
+}
+
+/* 月光越向海面偏转，海面的细碎反射越明显。 */
+.water-silk {
+  opacity: calc(.50 + var(--light-sea-response, 0));
+  transition: opacity .12s linear;
+}
+
+.sea-glimmer {
+  opacity: calc(.54 + var(--light-sea-response, 0));
+  transition: opacity .12s linear;
+}
+
+.horizon-glow {
+  opacity: calc(.54 + var(--light-sea-response, 0));
+  transition: opacity .12s linear;
+}
+
+.moon-haze {
+  opacity: calc(.18 + var(--light-sea-response, 0));
+  transition: opacity .12s linear;
+}
+
+@keyframes moonlight-luminance {
+  0% { opacity: .32; }
+  38% { opacity: .48; }
+  72% { opacity: .39; }
+  100% { opacity: .56; }
+}
+
+@keyframes moonlight-band-drift {
+  0% {
+    transform: rotate(-2.4deg) scaleX(.965) scaleY(1.01);
+    opacity: .68;
+  }
+  46% {
+    transform: rotate(.35deg) scaleX(1.025) scaleY(.985);
+    opacity: .92;
+  }
+  100% {
+    transform: rotate(2.6deg) scaleX(1.055) scaleY(1.025);
+    opacity: .74;
+  }
+}
+
+@keyframes moonlight-field-drift {
+  0% {
+    transform: translate3d(-3.5%, -1%, 0) scale(.96) rotate(-1deg);
+    opacity: .42;
+  }
+  52% {
+    transform: translate3d(1.5%, 1.8%, 0) scale(1.045) rotate(.8deg);
+    opacity: .88;
+  }
+  100% {
+    transform: translate3d(4.5%, 2.8%, 0) scale(1.08) rotate(1.8deg);
+    opacity: .58;
+  }
+}
+
+html[data-page-visible="false"] .light-rays,
+html[data-page-visible="false"] .light-rays::before,
+html[data-page-visible="false"] .light-rays::after {
+  animation-play-state: paused !important;
+}
+
+html[data-motion="off"] .light-rays,
+html[data-motion="off"] .light-rays::before,
+html[data-motion="off"] .light-rays::after {
+  animation: none !important;
+  transform: none;
+}
+
+html[data-motion="off"] .light-rays { opacity: .22; }
+html[data-motion="off"] .water-silk { opacity: .22; }
+html[data-motion="off"] .sea-glimmer,
+html[data-motion="off"] .horizon-glow { opacity: .42; }
+html[data-motion="off"] .moon-haze { opacity: .16; }
+
+@media (max-width: 640px) {
+  .light-rays {
+    opacity: .34;
+    transform:
+      translate3d(
+        calc(var(--light-scroll-x, 0px) * .55),
+        calc(var(--light-scroll-y, 0px) * .55),
+        0
+      )
+      rotate(var(--light-scroll-angle, 0deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="on"]) .light-rays,
+  html:not([data-motion="on"]) .light-rays::before,
+  html:not([data-motion="on"]) .light-rays::after {
+    animation: none !important;
+    transform: none;
+  }
+}
