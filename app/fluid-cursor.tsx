@@ -35,14 +35,13 @@ float encodeHeight(float value) {
 void main() {
   float current = decodeHeight(texture(u_state, v_uv).r);
   float previous = decodeHeight(texture(u_state, v_uv).g);
-
   float left = decodeHeight(texture(u_state, v_uv - vec2(u_texel.x, 0.0)).r);
   float right = decodeHeight(texture(u_state, v_uv + vec2(u_texel.x, 0.0)).r);
   float down = decodeHeight(texture(u_state, v_uv - vec2(0.0, u_texel.y)).r);
   float up = decodeHeight(texture(u_state, v_uv + vec2(0.0, u_texel.y)).r);
 
   float nextHeight = (left + right + down + up) * 0.5 - previous;
-  nextHeight *= 0.976;
+  nextHeight *= 0.974;
 
   if (u_splatStrength > 0.0) {
     vec2 delta = v_uv - u_splat;
@@ -51,7 +50,7 @@ void main() {
     nextHeight += impulse * u_splatStrength;
   }
 
-  nextHeight = clamp(nextHeight, -0.88, 0.88);
+  nextHeight = clamp(nextHeight, -0.86, 0.86);
   outColor = vec4(encodeHeight(nextHeight), encodeHeight(current), 0.0, 1.0);
 }
 `;
@@ -70,17 +69,16 @@ float heightAt(vec2 uv) {
   return texture(u_state, uv).r * 2.0 - 1.0;
 }
 
-vec3 spectralColour(vec2 uv, float gradientValue) {
-  vec3 silverBlue = vec3(0.44, 0.66, 0.88);
-  vec3 deepBlue = vec3(0.12, 0.34, 0.68);
-  vec3 cyan = vec3(0.08, 0.58, 0.60);
-  vec3 violet = vec3(0.34, 0.28, 0.52);
+vec3 glassTint(vec2 uv, float gradientStrength) {
+  vec3 moonSilver = vec3(0.72, 0.82, 0.91);
+  vec3 nightBlue = vec3(0.28, 0.48, 0.67);
+  vec3 iceCyan = vec3(0.24, 0.62, 0.64);
+  vec3 violet = vec3(0.43, 0.40, 0.56);
 
-  float coolDrift = 0.5 + 0.5 * sin(u_time * 0.18 + uv.x * 4.2 - uv.y * 2.8);
-  vec3 cold = mix(deepBlue, silverBlue, 0.42 + coolDrift * 0.26);
-  vec3 cleanWater = mix(cold, cyan, clamp(gradientValue * 5.5, 0.0, 0.52));
-  float violetHint = 0.08 + 0.04 * sin(u_time * 0.12 + uv.x * 3.0);
-  return mix(cleanWater, violet, violetHint);
+  float drift = 0.5 + 0.5 * sin(u_time * 0.12 + uv.x * 3.4 - uv.y * 2.1);
+  vec3 tint = mix(moonSilver, nightBlue, 0.28 + drift * 0.08);
+  tint = mix(tint, iceCyan, clamp(gradientStrength * 2.2, 0.0, 0.15));
+  return mix(tint, violet, 0.025);
 }
 
 void main() {
@@ -94,13 +92,27 @@ void main() {
   float gradientStrength = length(gradient);
   float waveStrength = abs(center);
 
-  float ridge = smoothstep(0.007, 0.075, gradientStrength) * (1.0 - smoothstep(0.18, 0.34, gradientStrength));
-  float body = smoothstep(0.022, 0.15, waveStrength) * 0.10;
-  float shimmer = pow(max(dot(normalize(vec3(-gradient * 6.0, 1.0)), normalize(vec3(-0.32, 0.52, 0.79))), 0.0), 12.0);
+  vec3 normal = normalize(vec3(-gradient * 7.5, 1.0));
+  vec3 lightDirection = normalize(vec3(-0.30, 0.50, 0.81));
+  float specular = pow(max(dot(normal, lightDirection), 0.0), 22.0);
+  float fresnel = pow(1.0 - clamp(normal.z, 0.0, 1.0), 2.2);
 
-  float alpha = clamp(ridge * 0.34 + body * 0.11 + shimmer * ridge * 0.15, 0.0, 0.30);
-  vec3 colour = spectralColour(v_uv, gradientStrength);
-  colour *= 0.58 + ridge * 0.68 + shimmer * 0.44;
+  float ridge = smoothstep(0.006, 0.058, gradientStrength)
+    * (1.0 - smoothstep(0.14, 0.27, gradientStrength));
+  float innerRefraction = smoothstep(0.028, 0.13, waveStrength) * 0.028;
+
+  // 透明水体：主体几乎不可见，只保留波峰、法线高光与极轻折射。
+  float alpha = clamp(
+    ridge * 0.17
+    + specular * ridge * 0.105
+    + fresnel * 0.045
+    + innerRefraction,
+    0.0,
+    0.20
+  );
+
+  vec3 colour = glassTint(v_uv, gradientStrength);
+  colour *= 0.70 + specular * 0.52 + fresnel * 0.18;
 
   outColor = vec4(colour, alpha);
 }
@@ -183,7 +195,7 @@ function createStateTarget(gl: WebGL2RenderingContext, width: number, height: nu
     return null;
   }
 
-  return { texture, framebuffer };
+  return { texture, framebuffer, neutral };
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -226,7 +238,6 @@ export default function FluidCursor() {
 
     const simulationPosition = gl.getAttribLocation(simulationProgram, "a_position");
     const displayPosition = gl.getAttribLocation(displayProgram, "a_position");
-
     const simulationUniforms = {
       state: gl.getUniformLocation(simulationProgram, "u_state"),
       texel: gl.getUniformLocation(simulationProgram, "u_texel"),
@@ -265,6 +276,7 @@ export default function FluidCursor() {
     let latestPointer: PointerSample | null = null;
     let lastInjectedPointer: PointerSample | null = null;
     let queuedImpulse: RippleImpulse | null = null;
+    let idleResetPending = false;
     const startedAt = performance.now();
 
     const motionEnabled = () => {
@@ -294,6 +306,27 @@ export default function FluidCursor() {
       back = null;
     };
 
+    const resetTarget = (target: NonNullable<typeof front>) => {
+      gl.bindTexture(gl.TEXTURE_2D, target.texture);
+      gl.texSubImage2D(
+        gl.TEXTURE_2D,
+        0,
+        0,
+        0,
+        simulationWidth,
+        simulationHeight,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        target.neutral,
+      );
+    };
+
+    const resetSimulation = () => {
+      if (front) resetTarget(front);
+      if (back) resetTarget(back);
+      idleResetPending = false;
+    };
+
     const resize = () => {
       const width = Math.max(1, Math.round(window.innerWidth));
       const height = Math.max(1, Math.round(window.innerHeight));
@@ -302,10 +335,10 @@ export default function FluidCursor() {
         canvas.height = height;
       }
 
-      const longest = Math.min(520, Math.max(340, Math.round(Math.max(window.innerWidth, window.innerHeight) * 0.34)));
+      const longest = Math.min(500, Math.max(330, Math.round(Math.max(window.innerWidth, window.innerHeight) * 0.32)));
       const aspect = Math.max(window.innerWidth / Math.max(window.innerHeight, 1), 0.35);
-      const nextWidth = aspect >= 1 ? longest : Math.max(220, Math.round(longest * aspect));
-      const nextHeight = aspect >= 1 ? Math.max(220, Math.round(longest / aspect)) : longest;
+      const nextWidth = aspect >= 1 ? longest : Math.max(210, Math.round(longest * aspect));
+      const nextHeight = aspect >= 1 ? Math.max(210, Math.round(longest / aspect)) : longest;
 
       if (nextWidth !== simulationWidth || nextHeight !== simulationHeight || !front || !back) {
         destroyTargets();
@@ -313,9 +346,10 @@ export default function FluidCursor() {
         simulationHeight = nextHeight;
         front = createStateTarget(gl, simulationWidth, simulationHeight);
         back = createStateTarget(gl, simulationWidth, simulationHeight);
-        queuedImpulse = null;
         latestPointer = null;
         lastInjectedPointer = null;
+        queuedImpulse = null;
+        idleResetPending = false;
       }
     };
 
@@ -362,7 +396,7 @@ export default function FluidCursor() {
         return {
           x: clamp(sample.x / Math.max(window.innerWidth, 1), 0, 1),
           y: clamp(1 - sample.y / Math.max(window.innerHeight, 1), 0, 1),
-          strength: 0.16,
+          strength: 0.145,
           radius: 0.014,
         };
       }
@@ -371,15 +405,15 @@ export default function FluidCursor() {
       const dy = sample.y - lastInjectedPointer.y;
       const distance = Math.hypot(dx, dy);
       const elapsed = Math.max(sample.time - lastInjectedPointer.time, 1);
-      if (distance < 24 && elapsed < 52) return null;
+      if (distance < 26 && elapsed < 56) return null;
 
       const speed = distance / elapsed * 1000;
       lastInjectedPointer = sample;
       return {
         x: clamp(sample.x / Math.max(window.innerWidth, 1), 0, 1),
         y: clamp(1 - sample.y / Math.max(window.innerHeight, 1), 0, 1),
-        strength: clamp(0.13 + speed / 10500, 0.13, 0.25),
-        radius: clamp(0.011 + speed / 180000, 0.011, 0.019),
+        strength: clamp(0.12 + speed / 12000, 0.12, 0.22),
+        radius: clamp(0.011 + speed / 200000, 0.011, 0.018),
       };
     };
 
@@ -394,9 +428,7 @@ export default function FluidCursor() {
         const sampled = latestPointer;
         latestPointer = null;
         const pointerImpulse = toImpulse(sampled);
-        if (pointerImpulse && (!queuedImpulse || pointerImpulse.strength > queuedImpulse.strength)) {
-          queuedImpulse = pointerImpulse;
-        }
+        if (pointerImpulse) queuedImpulse = pointerImpulse;
       }
 
       const impulse = queuedImpulse ?? undefined;
@@ -409,6 +441,7 @@ export default function FluidCursor() {
       } else {
         clearCanvas();
         frame = 0;
+        if (idleResetPending) resetSimulation();
       }
     };
 
@@ -416,8 +449,9 @@ export default function FluidCursor() {
       if (!frame) frame = window.requestAnimationFrame(render);
     };
 
-    const wake = (milliseconds = 2600) => {
+    const wake = (milliseconds = 2350) => {
       activeUntil = performance.now() + milliseconds;
+      idleResetPending = true;
       ensureFrame();
     };
 
@@ -432,11 +466,11 @@ export default function FluidCursor() {
       queuedImpulse = {
         x: clamp(event.clientX / Math.max(window.innerWidth, 1), 0, 1),
         y: clamp(1 - event.clientY / Math.max(window.innerHeight, 1), 0, 1),
-        strength: 0.29,
-        radius: 0.019,
+        strength: 0.25,
+        radius: 0.018,
       };
       lastInjectedPointer = { x: event.clientX, y: event.clientY, time: performance.now() };
-      wake(2900);
+      wake(2550);
     };
 
     const onPointerLeave = () => {
@@ -450,6 +484,7 @@ export default function FluidCursor() {
         queuedImpulse = null;
         activeUntil = 0;
         clearCanvas();
+        resetSimulation();
       }
     };
 
