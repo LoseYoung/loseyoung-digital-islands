@@ -29,6 +29,15 @@ function subscribeToMotion(notify: () => void) {
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
+const heroMotionProperties = [
+  "--hero-progress",
+  "--light-scroll-angle",
+  "--light-scroll-x",
+  "--light-scroll-y",
+  "--light-scroll-scale",
+  "--light-sea-response",
+] as const;
+
 export default function CatalogueMotion() {
   const enabled = useSyncExternalStore(subscribeToMotion, motionEnabled, () => true);
 
@@ -39,12 +48,16 @@ export default function CatalogueMotion() {
     const hero = document.querySelector<HTMLElement>(".hero");
     root.dataset.motion = enabled ? "on" : "off";
 
+    const clearHeroMotion = () => {
+      heroMotionProperties.forEach((property) => root.style.removeProperty(property));
+      root.style.removeProperty("--ambient-dx");
+      root.style.removeProperty("--ambient-dy");
+    };
+
     if (!enabled) {
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
       chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
-      root.style.removeProperty("--hero-progress");
-      root.style.removeProperty("--ambient-dx");
-      root.style.removeProperty("--ambient-dy");
+      clearHeroMotion();
       return () => { delete root.dataset.motion; };
     }
 
@@ -105,7 +118,21 @@ export default function CatalogueMotion() {
       if (hero) {
         const bounds = hero.getBoundingClientRect();
         const progress = clamp(-bounds.top / Math.max(bounds.height * .82, 1));
+
+        // 月光随首屏离开视口时产生更明显的偏转、位移和收束。
+        // 角度最大约 4.8°，同时向左下方移动，并轻微放大以保持覆盖。
+        const lightAngle = progress * 4.8;
+        const lightX = progress * -54;
+        const lightY = progress * 36;
+        const lightScale = progress * 0.055;
+        const seaResponse = progress * 0.18;
+
         root.style.setProperty("--hero-progress", progress.toFixed(4));
+        root.style.setProperty("--light-scroll-angle", `${lightAngle.toFixed(3)}deg`);
+        root.style.setProperty("--light-scroll-x", `${lightX.toFixed(2)}px`);
+        root.style.setProperty("--light-scroll-y", `${lightY.toFixed(2)}px`);
+        root.style.setProperty("--light-scroll-scale", lightScale.toFixed(4));
+        root.style.setProperty("--light-sea-response", seaResponse.toFixed(4));
       }
       scrollFrame = 0;
     };
@@ -150,9 +177,7 @@ export default function CatalogueMotion() {
       document.removeEventListener("visibilitychange", visibility);
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
       chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
-      root.style.removeProperty("--hero-progress");
-      root.style.removeProperty("--ambient-dx");
-      root.style.removeProperty("--ambient-dy");
+      clearHeroMotion();
       delete root.dataset.motion;
       delete root.dataset.heroVisible;
       delete root.dataset.pageVisible;
