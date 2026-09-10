@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./exhibition-motion.css";
 import "./ambient-background.css";
+import "./island-index.css";
 
 const title = "Digital Islands · LoseYoung";
 const description = "那些被看见的、被保存的、被想象过的，都在这里，保持各自的距离。A growing collection of personal worlds.";
