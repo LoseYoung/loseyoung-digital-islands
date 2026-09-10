@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import CatalogueMotion from "./catalogue-motion";
+import FluidCursor from "./fluid-cursor";
 import { catalogueNumber, forthcoming, islands } from "./islands";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -16,9 +17,9 @@ export default function Home() {
         <span className="ambient-orb ambient-orb-a" />
         <span className="ambient-orb ambient-orb-b" />
         <span className="ambient-orb ambient-orb-c" />
-        <span className="ambient-pointer" />
         <span className="ambient-sheen" />
       </div>
+      <FluidCursor />
       <a className="skip-link" href="#islands">跳至岛屿目录</a>
       <header className="site-header shell">
         <a className="brand" href="#top" lang="en" aria-label="Digital Islands 首页">Digital Islands<span className="brand-period">.</span></a>
