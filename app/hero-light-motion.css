@@ -100,13 +100,6 @@ html[data-motion="off"] .moon-haze { opacity: .16; }
 @media (max-width: 640px) {
   .light-rays {
     opacity: .34;
-    transform:
-      translate3d(
-        calc(var(--light-scroll-x, 0px) * .55),
-        calc(var(--light-scroll-y, 0px) * .55),
-        0
-      )
-      rotate(var(--light-scroll-angle, 0deg));
   }
 }
 
