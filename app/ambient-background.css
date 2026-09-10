@@ -1,6 +1,4 @@
 :root {
-  --ambient-x: 50vw;
-  --ambient-y: 50vh;
   --ambient-dx: 0px;
   --ambient-dy: 0px;
 }
@@ -79,24 +77,6 @@ main {
   animation: ambient-orb-c 23s ease-in-out -7s infinite alternate;
 }
 
-.ambient-pointer {
-  left: var(--ambient-x);
-  top: var(--ambient-y);
-  width: min(58vw, 940px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  opacity: .72;
-  filter: blur(34px) saturate(126%);
-  mix-blend-mode: screen;
-  background:
-    radial-gradient(circle at 43% 44%, rgba(91, 150, 255, .2) 0%, rgba(91, 150, 255, .075) 23%, transparent 48%),
-    radial-gradient(circle at 58% 42%, rgba(178, 92, 230, .155) 0%, rgba(128, 67, 173, .065) 26%, transparent 52%),
-    radial-gradient(circle at 51% 60%, rgba(43, 194, 168, .14) 0%, rgba(34, 127, 118, .05) 27%, transparent 55%),
-    radial-gradient(circle at 38% 59%, rgba(202, 124, 81, .07) 0%, transparent 38%);
-  transform: translate3d(calc(-50% + var(--ambient-dx)), calc(-50% + var(--ambient-dy)), 0);
-  will-change: left, top, transform;
-}
-
 .ambient-sheen {
   inset: -35%;
   opacity: .26;
@@ -114,6 +94,25 @@ main {
       rgba(116, 83, 55, .055) 328deg,
       transparent 360deg);
   animation: ambient-sheen-turn 38s linear infinite;
+}
+
+/* GPU 流体轨迹位于静态光场之上、正文与 Hero 文案之下。 */
+.fluid-cursor-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: .88;
+  mix-blend-mode: screen;
+  filter: saturate(128%);
+  transition: opacity .25s ease;
+}
+
+/* Hero 已有真实月夜摄影，鼠标流体在首屏只作为极轻的环境反光。 */
+html[data-hero-visible="true"] .fluid-cursor-canvas {
+  opacity: .24;
 }
 
 @keyframes ambient-mesh-drift {
@@ -156,15 +155,12 @@ html[data-motion="off"] .site-ambient * {
   animation: none !important;
 }
 
-html[data-motion="off"] .ambient-pointer {
-  opacity: .22;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+html[data-motion="off"] .fluid-cursor-canvas {
+  opacity: 0 !important;
 }
 
 @media (pointer: coarse) {
-  .ambient-pointer { display: none; }
+  .fluid-cursor-canvas { display: none; }
   .ambient-mesh { opacity: .82; }
 }
 
@@ -181,10 +177,7 @@ html[data-motion="off"] .ambient-pointer {
   html:not([data-motion="on"]) .site-ambient * {
     animation: none !important;
   }
-  html:not([data-motion="on"]) .ambient-pointer {
-    opacity: .18;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+  html:not([data-motion="on"]) .fluid-cursor-canvas {
+    display: none;
   }
 }
