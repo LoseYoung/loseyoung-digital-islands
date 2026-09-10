@@ -1,102 +1,16 @@
-:root {
-  --ambient-dx: 0px;
-  --ambient-dy: 0px;
-}
-
 body {
-  background: #03070d;
+  background: #050b12;
 }
 
 main {
   background: transparent;
 }
 
+/* 正文退回干净的深蓝黑，让水波成为唯一明显的动态背景语言。 */
 .site-ambient {
-  position: fixed;
-  inset: 0;
-  z-index: -3;
-  overflow: hidden;
-  pointer-events: none;
-  background:
-    radial-gradient(120% 90% at 50% -8%, rgba(24, 38, 58, .48), transparent 62%),
-    linear-gradient(180deg, #040911 0%, #03070d 48%, #05080d 100%);
+  display: none;
 }
 
-.site-ambient > span {
-  position: absolute;
-  display: block;
-  pointer-events: none;
-}
-
-.ambient-mesh {
-  inset: -24%;
-  opacity: .94;
-  filter: blur(72px) saturate(132%);
-  background:
-    radial-gradient(ellipse at 14% 28%, rgba(35, 92, 156, .25) 0%, rgba(27, 68, 121, .12) 24%, transparent 54%),
-    radial-gradient(ellipse at 84% 23%, rgba(102, 49, 137, .22) 0%, rgba(73, 42, 110, .1) 25%, transparent 55%),
-    radial-gradient(ellipse at 68% 78%, rgba(19, 116, 108, .2) 0%, rgba(16, 79, 79, .08) 28%, transparent 57%),
-    radial-gradient(ellipse at 24% 82%, rgba(115, 62, 82, .13) 0%, rgba(86, 47, 63, .055) 27%, transparent 56%);
-  transform: translate3d(var(--ambient-dx), var(--ambient-dy), 0) scale(1.05);
-  will-change: transform;
-  animation: ambient-mesh-drift 28s ease-in-out -9s infinite alternate;
-}
-
-.ambient-orb {
-  border-radius: 50%;
-  filter: blur(92px);
-  mix-blend-mode: screen;
-  opacity: .3;
-  will-change: transform;
-}
-
-.ambient-orb-a {
-  left: -8vw;
-  top: 16vh;
-  width: min(54vw, 980px);
-  aspect-ratio: 1;
-  background: radial-gradient(circle, rgba(56, 120, 218, .31) 0%, rgba(47, 91, 177, .12) 35%, transparent 70%);
-  animation: ambient-orb-a 20s ease-in-out -4s infinite alternate;
-}
-
-.ambient-orb-b {
-  right: -7vw;
-  top: 29vh;
-  width: min(48vw, 880px);
-  aspect-ratio: 1;
-  background: radial-gradient(circle, rgba(139, 73, 197, .27) 0%, rgba(91, 46, 137, .1) 38%, transparent 72%);
-  animation: ambient-orb-b 25s ease-in-out -12s infinite alternate;
-}
-
-.ambient-orb-c {
-  left: 34vw;
-  bottom: -20vh;
-  width: min(52vw, 940px);
-  aspect-ratio: 1;
-  background: radial-gradient(circle, rgba(33, 167, 153, .23) 0%, rgba(24, 105, 102, .09) 37%, transparent 72%);
-  animation: ambient-orb-c 23s ease-in-out -7s infinite alternate;
-}
-
-.ambient-sheen {
-  inset: -35%;
-  opacity: .26;
-  mix-blend-mode: screen;
-  filter: blur(68px);
-  background:
-    conic-gradient(from 218deg at 52% 50%,
-      transparent 0deg,
-      rgba(43, 110, 173, .13) 32deg,
-      transparent 76deg,
-      rgba(116, 57, 146, .1) 132deg,
-      transparent 184deg,
-      rgba(31, 127, 118, .1) 232deg,
-      transparent 288deg,
-      rgba(116, 83, 55, .055) 328deg,
-      transparent 360deg);
-  animation: ambient-sheen-turn 38s linear infinite;
-}
-
-/* GPU 流体轨迹位于静态光场之上、正文与 Hero 文案之下。 */
 .fluid-cursor-canvas {
   position: fixed;
   inset: 0;
@@ -104,55 +18,15 @@ main {
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  opacity: .88;
+  opacity: .86;
   mix-blend-mode: screen;
-  filter: saturate(128%);
-  transition: opacity .25s ease;
+  filter: saturate(108%);
+  transition: opacity .22s ease;
 }
 
-/* Hero 已有真实月夜摄影，鼠标流体在首屏只作为极轻的环境反光。 */
+/* Hero 已有真实月夜摄影，水波在首屏只保留极轻的月光反射感。 */
 html[data-hero-visible="true"] .fluid-cursor-canvas {
-  opacity: .24;
-}
-
-@keyframes ambient-mesh-drift {
-  0% {
-    transform: translate3d(calc(var(--ambient-dx) - 1.5%), calc(var(--ambient-dy) - 1%), 0) scale(1.04) rotate(-1deg);
-  }
-  50% {
-    transform: translate3d(calc(var(--ambient-dx) + 1%), calc(var(--ambient-dy) + 1.5%), 0) scale(1.08) rotate(.6deg);
-  }
-  100% {
-    transform: translate3d(calc(var(--ambient-dx) + 2%), calc(var(--ambient-dy) - .5%), 0) scale(1.05) rotate(1.2deg);
-  }
-}
-
-@keyframes ambient-orb-a {
-  from { transform: translate3d(-2vw, -2vh, 0) scale(.96); }
-  to { transform: translate3d(10vw, 9vh, 0) scale(1.12); }
-}
-
-@keyframes ambient-orb-b {
-  from { transform: translate3d(4vw, -5vh, 0) scale(1.08); }
-  to { transform: translate3d(-10vw, 10vh, 0) scale(.94); }
-}
-
-@keyframes ambient-orb-c {
-  from { transform: translate3d(-8vw, 4vh, 0) scale(.98); }
-  to { transform: translate3d(9vw, -12vh, 0) scale(1.1); }
-}
-
-@keyframes ambient-sheen-turn {
-  from { transform: rotate(0deg) scale(1.08); }
-  to { transform: rotate(360deg) scale(1.08); }
-}
-
-html[data-page-visible="false"] .site-ambient * {
-  animation-play-state: paused !important;
-}
-
-html[data-motion="off"] .site-ambient * {
-  animation: none !important;
+  opacity: .18;
 }
 
 html[data-motion="off"] .fluid-cursor-canvas {
@@ -161,22 +35,9 @@ html[data-motion="off"] .fluid-cursor-canvas {
 
 @media (pointer: coarse) {
   .fluid-cursor-canvas { display: none; }
-  .ambient-mesh { opacity: .82; }
-}
-
-@media (max-width: 640px) {
-  .ambient-mesh {
-    inset: -38%;
-    filter: blur(58px) saturate(122%);
-  }
-  .ambient-orb { opacity: .23; filter: blur(72px); }
-  .ambient-sheen { opacity: .18; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html:not([data-motion="on"]) .site-ambient * {
-    animation: none !important;
-  }
   html:not([data-motion="on"]) .fluid-cursor-canvas {
     display: none;
   }
