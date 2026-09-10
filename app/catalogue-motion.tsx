@@ -43,6 +43,10 @@ export default function CatalogueMotion() {
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
       chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
       root.style.removeProperty("--hero-progress");
+      root.style.removeProperty("--ambient-x");
+      root.style.removeProperty("--ambient-y");
+      root.style.removeProperty("--ambient-dx");
+      root.style.removeProperty("--ambient-dy");
       return () => { delete root.dataset.motion; };
     }
 
@@ -98,18 +102,67 @@ export default function CatalogueMotion() {
       chapters.forEach((chapter) => chapter.setAttribute("data-chapter-state", "visible"));
     }
 
-    let frame = 0;
+    let scrollFrame = 0;
     const updateScrollMotion = () => {
       if (hero) {
         const bounds = hero.getBoundingClientRect();
         const progress = clamp(-bounds.top / Math.max(bounds.height * .82, 1));
         root.style.setProperty("--hero-progress", progress.toFixed(4));
       }
-      frame = 0;
+      scrollFrame = 0;
     };
     const scheduleScrollMotion = () => {
-      if (!frame) frame = window.requestAnimationFrame(updateScrollMotion);
+      if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScrollMotion);
     };
+
+    let pointerFrame = 0;
+    let currentX = window.innerWidth / 2;
+    let currentY = window.innerHeight / 2;
+    let targetX = currentX;
+    let targetY = currentY;
+
+    const updatePointerMotion = () => {
+      currentX += (targetX - currentX) * .085;
+      currentY += (targetY - currentY) * .085;
+
+      const width = Math.max(window.innerWidth, 1);
+      const height = Math.max(window.innerHeight, 1);
+      const shiftX = (currentX / width - .5) * 34;
+      const shiftY = (currentY / height - .5) * 26;
+
+      root.style.setProperty("--ambient-x", `${currentX.toFixed(2)}px`);
+      root.style.setProperty("--ambient-y", `${currentY.toFixed(2)}px`);
+      root.style.setProperty("--ambient-dx", `${shiftX.toFixed(2)}px`);
+      root.style.setProperty("--ambient-dy", `${shiftY.toFixed(2)}px`);
+
+      if (Math.abs(targetX - currentX) > .25 || Math.abs(targetY - currentY) > .25) {
+        pointerFrame = window.requestAnimationFrame(updatePointerMotion);
+      } else {
+        pointerFrame = 0;
+      }
+    };
+
+    const schedulePointerMotion = () => {
+      if (!pointerFrame) pointerFrame = window.requestAnimationFrame(updatePointerMotion);
+    };
+
+    const updatePointerTarget = (event: PointerEvent) => {
+      targetX = event.clientX;
+      targetY = event.clientY;
+      schedulePointerMotion();
+    };
+
+    const resetPointerTarget = () => {
+      targetX = window.innerWidth / 2;
+      targetY = window.innerHeight / 2;
+      schedulePointerMotion();
+    };
+
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    if (finePointer) {
+      window.addEventListener("pointermove", updatePointerTarget, { passive: true });
+      document.documentElement.addEventListener("mouseleave", resetPointerTarget);
+    }
 
     const revealFocus = (event: FocusEvent) => {
       if (!(event.target instanceof Element)) return;
@@ -134,21 +187,31 @@ export default function CatalogueMotion() {
     document.addEventListener("visibilitychange", visibility);
     visibility();
     updateScrollMotion();
+    resetPointerTarget();
     revealFragment();
 
     return () => {
       revealObserver?.disconnect();
       chapterObserver?.disconnect();
       heroObserver?.disconnect();
-      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(scrollFrame);
+      window.cancelAnimationFrame(pointerFrame);
       window.removeEventListener("scroll", scheduleScrollMotion);
       window.removeEventListener("resize", scheduleScrollMotion);
       window.removeEventListener("hashchange", revealFragment);
+      if (finePointer) {
+        window.removeEventListener("pointermove", updatePointerTarget);
+        document.documentElement.removeEventListener("mouseleave", resetPointerTarget);
+      }
       document.removeEventListener("focusin", revealFocus);
       document.removeEventListener("visibilitychange", visibility);
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
       chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
       root.style.removeProperty("--hero-progress");
+      root.style.removeProperty("--ambient-x");
+      root.style.removeProperty("--ambient-y");
+      root.style.removeProperty("--ambient-dx");
+      root.style.removeProperty("--ambient-dy");
       delete root.dataset.motion;
       delete root.dataset.heroVisible;
       delete root.dataset.pageVisible;
