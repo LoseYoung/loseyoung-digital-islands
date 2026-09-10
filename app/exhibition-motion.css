@@ -1,19 +1,49 @@
 /* A + C direction: clear moonlit atmosphere + cinematic catalogue motion. */
 
-/* Wider exhibition canvas: keep breathing room without shrinking the work. */
+/* Hero/header keep the original editorial measure. Inner catalogue sections open wider. */
 .shell { width: min(calc(100% - 96px), 1580px); }
-.section-space { padding-block: clamp(88px, 6vw, 112px); }
-.collection { padding-top: 78px; }
-.section-heading { margin-bottom: 48px; }
-.island-grid, .forthcoming-grid { gap: 28px; }
-.island-topline { margin-bottom: 16px; }
-.island-copy { padding-top: 22px; }
-.island-copy > p { margin-bottom: 24px; }
-.island-image { aspect-ratio: 3 / 2; }
-.island-image img { object-fit: cover; }
-.forthcoming { padding-bottom: 104px; }
+.curatorial.shell,
+.collection.shell,
+.forthcoming.shell,
+.site-footer.shell {
+  width: min(calc(100% - clamp(48px, 4vw, 80px)), 2240px);
+}
+.section-space { padding-block: clamp(82px, 5.5vw, 106px); }
+.collection { padding-top: 72px; }
+.section-heading { margin-bottom: 44px; }
+.island-grid, .forthcoming-grid { gap: clamp(24px, 2vw, 34px); }
+.island-topline { margin-bottom: 14px; }
+.island-copy { padding-top: 20px; }
+.island-copy > p { margin-bottom: 22px; }
+.forthcoming { padding-bottom: 98px; }
 
-/* Crisp 4K hero. Motion is layered over the artwork instead of blurring it. */
+/* “Iridescent black”: nearly black, with very broad low-contrast colour fields. */
+body { background: #050a10; }
+main {
+  background:
+    radial-gradient(1200px 900px at 7% 30%, rgba(42, 78, 113, .12), transparent 72%),
+    radial-gradient(1180px 900px at 92% 46%, rgba(76, 48, 94, .09), transparent 72%),
+    radial-gradient(980px 820px at 46% 74%, rgba(24, 91, 82, .075), transparent 72%),
+    radial-gradient(760px 640px at 82% 90%, rgba(102, 68, 42, .035), transparent 74%),
+    linear-gradient(180deg, #07111a 0%, #050a11 35%, #070c14 69%, #05090f 100%);
+}
+
+/* Preserve every cover edge. Reveal the frame, never crop/zoom the artwork itself. */
+.island-image {
+  aspect-ratio: auto;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(16, 29, 43, .72), rgba(7, 14, 23, .92));
+}
+.island-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  transform: none;
+}
+
+/* Crisp photographic hero. Motion is layered over the artwork instead of blurring it. */
 .hero { min-height: max(720px, calc(100svh - 106px)); }
 .hero-atmosphere {
   overflow: hidden;
@@ -180,16 +210,16 @@ h1 { max-width: 1260px; }
   transition: clip-path 1.15s var(--ease);
 }
 [data-reveal="card"] .island-image img {
-  transform: translate3d(0, var(--card-shift, 0px), 0) scale(1.035);
-  transition: transform 1.2s var(--ease), filter .75s var(--ease);
-  will-change: transform;
+  transform: none;
+  transition: filter .75s var(--ease);
+  will-change: auto;
 }
 [data-reveal="card"][data-reveal-state="pending"] .island-image { clip-path: inset(0 0 100% 0); }
-[data-reveal="card"][data-reveal-state="visible"] .island-image img { transform: translate3d(0, var(--card-shift, 0px), 0) scale(1.02); }
+[data-reveal="card"][data-reveal-state="visible"] .island-image img { transform: none; }
 
 @media (hover: hover) and (pointer: fine) {
   .island-card:hover { transform: translateY(-2px); }
-  .island-card:hover img { filter: saturate(.92) brightness(.98); }
+  .island-card:hover img { transform: none; filter: saturate(.92) brightness(.98); }
 }
 
 .journey-line { display: none !important; }
@@ -227,10 +257,18 @@ h1 { max-width: 1260px; }
 
 @media (max-width: 1180px) {
   .shell { width: calc(100% - 64px); }
+  .curatorial.shell,
+  .collection.shell,
+  .forthcoming.shell,
+  .site-footer.shell { width: calc(100% - 48px); }
   .island-grid, .forthcoming-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px 28px; }
 }
 @media (max-width: 640px) {
-  .shell { width: calc(100% - 36px); }
+  .shell,
+  .curatorial.shell,
+  .collection.shell,
+  .forthcoming.shell,
+  .site-footer.shell { width: calc(100% - 36px); }
   .section-space { padding-block: 72px; }
   .hero { min-height: calc(100svh - 88px); }
   .hero-landscape { object-position: 64% center; filter: saturate(.98) contrast(1.06) brightness(.84); }
