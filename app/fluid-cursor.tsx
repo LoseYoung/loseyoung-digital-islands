@@ -40,8 +40,9 @@ void main() {
   float down = decodeHeight(texture(u_state, v_uv - vec2(0.0, u_texel.y)).r);
   float up = decodeHeight(texture(u_state, v_uv + vec2(0.0, u_texel.y)).r);
 
+  // 稍慢的阻尼让波纹传播得更远，同时仍保持单步模拟控制开销。
   float nextHeight = (left + right + down + up) * 0.5 - previous;
-  nextHeight *= 0.974;
+  nextHeight *= 0.982;
 
   if (u_splatStrength > 0.0) {
     vec2 delta = v_uv - u_splat;
@@ -75,10 +76,10 @@ vec3 glassTint(vec2 uv, float gradientStrength) {
   vec3 iceCyan = vec3(0.24, 0.62, 0.64);
   vec3 violet = vec3(0.43, 0.40, 0.56);
 
-  float drift = 0.5 + 0.5 * sin(u_time * 0.12 + uv.x * 3.4 - uv.y * 2.1);
-  vec3 tint = mix(moonSilver, nightBlue, 0.28 + drift * 0.08);
-  tint = mix(tint, iceCyan, clamp(gradientStrength * 2.2, 0.0, 0.15));
-  return mix(tint, violet, 0.025);
+  float drift = 0.5 + 0.5 * sin(u_time * 0.10 + uv.x * 3.0 - uv.y * 1.9);
+  vec3 tint = mix(moonSilver, nightBlue, 0.26 + drift * 0.07);
+  tint = mix(tint, iceCyan, clamp(gradientStrength * 2.0, 0.0, 0.13));
+  return mix(tint, violet, 0.022);
 }
 
 void main() {
@@ -92,27 +93,26 @@ void main() {
   float gradientStrength = length(gradient);
   float waveStrength = abs(center);
 
-  vec3 normal = normalize(vec3(-gradient * 7.5, 1.0));
+  vec3 normal = normalize(vec3(-gradient * 7.2, 1.0));
   vec3 lightDirection = normalize(vec3(-0.30, 0.50, 0.81));
   float specular = pow(max(dot(normal, lightDirection), 0.0), 22.0);
   float fresnel = pow(1.0 - clamp(normal.z, 0.0, 1.0), 2.2);
 
-  float ridge = smoothstep(0.006, 0.058, gradientStrength)
-    * (1.0 - smoothstep(0.14, 0.27, gradientStrength));
-  float innerRefraction = smoothstep(0.028, 0.13, waveStrength) * 0.028;
+  float ridge = smoothstep(0.0055, 0.054, gradientStrength)
+    * (1.0 - smoothstep(0.145, 0.275, gradientStrength));
+  float innerRefraction = smoothstep(0.026, 0.13, waveStrength) * 0.025;
 
-  // 透明水体：主体几乎不可见，只保留波峰、法线高光与极轻折射。
   float alpha = clamp(
     ridge * 0.17
-    + specular * ridge * 0.105
-    + fresnel * 0.045
+    + specular * ridge * 0.10
+    + fresnel * 0.04
     + innerRefraction,
     0.0,
-    0.20
+    0.19
   );
 
   vec3 colour = glassTint(v_uv, gradientStrength);
-  colour *= 0.70 + specular * 0.52 + fresnel * 0.18;
+  colour *= 0.70 + specular * 0.50 + fresnel * 0.16;
 
   outColor = vec4(colour, alpha);
 }
@@ -129,6 +129,12 @@ type PointerSample = {
   x: number;
   y: number;
   time: number;
+};
+
+type StateTarget = {
+  texture: WebGLTexture;
+  framebuffer: WebGLFramebuffer;
+  neutral: Uint8Array;
 };
 
 function compileShader(gl: WebGL2RenderingContext, type: number, source: string) {
@@ -165,7 +171,7 @@ function createProgram(gl: WebGL2RenderingContext, fragmentSource: string) {
   return program;
 }
 
-function createStateTarget(gl: WebGL2RenderingContext, width: number, height: number) {
+function createStateTarget(gl: WebGL2RenderingContext, width: number, height: number): StateTarget | null {
   const texture = gl.createTexture();
   const framebuffer = gl.createFramebuffer();
   if (!texture || !framebuffer) return null;
@@ -269,14 +275,13 @@ export default function FluidCursor() {
 
     let simulationWidth = 1;
     let simulationHeight = 1;
-    let front: ReturnType<typeof createStateTarget> = null;
-    let back: ReturnType<typeof createStateTarget> = null;
+    let front: StateTarget | null = null;
+    let back: StateTarget | null = null;
     let frame = 0;
     let activeUntil = 0;
     let latestPointer: PointerSample | null = null;
     let lastInjectedPointer: PointerSample | null = null;
     let queuedImpulse: RippleImpulse | null = null;
-    let idleResetPending = false;
     const startedAt = performance.now();
 
     const motionEnabled = () => {
@@ -306,7 +311,7 @@ export default function FluidCursor() {
       back = null;
     };
 
-    const resetTarget = (target: NonNullable<typeof front>) => {
+    const resetTarget = (target: StateTarget) => {
       gl.bindTexture(gl.TEXTURE_2D, target.texture);
       gl.texSubImage2D(
         gl.TEXTURE_2D,
@@ -324,21 +329,24 @@ export default function FluidCursor() {
     const resetSimulation = () => {
       if (front) resetTarget(front);
       if (back) resetTarget(back);
-      idleResetPending = false;
     };
 
     const resize = () => {
-      const width = Math.max(1, Math.round(window.innerWidth));
-      const height = Math.max(1, Math.round(window.innerHeight));
+      // 全屏显示层最长边限制在 1920，避免 4K 屏上无意义地跑满像素。
+      const viewportLongest = Math.max(window.innerWidth, window.innerHeight, 1);
+      const renderScale = Math.min(1, 1920 / viewportLongest);
+      const width = Math.max(1, Math.round(window.innerWidth * renderScale));
+      const height = Math.max(1, Math.round(window.innerHeight * renderScale));
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
       }
 
-      const longest = Math.min(500, Math.max(330, Math.round(Math.max(window.innerWidth, window.innerHeight) * 0.32)));
+      // 更低的高度场既减轻 GPU 压力，也让单个模拟 texel 对应更大的屏幕距离，波纹扩散更开阔。
+      const longest = Math.min(460, Math.max(300, Math.round(viewportLongest * 0.28)));
       const aspect = Math.max(window.innerWidth / Math.max(window.innerHeight, 1), 0.35);
-      const nextWidth = aspect >= 1 ? longest : Math.max(210, Math.round(longest * aspect));
-      const nextHeight = aspect >= 1 ? Math.max(210, Math.round(longest / aspect)) : longest;
+      const nextWidth = aspect >= 1 ? longest : Math.max(190, Math.round(longest * aspect));
+      const nextHeight = aspect >= 1 ? Math.max(190, Math.round(longest / aspect)) : longest;
 
       if (nextWidth !== simulationWidth || nextHeight !== simulationHeight || !front || !back) {
         destroyTargets();
@@ -349,7 +357,6 @@ export default function FluidCursor() {
         latestPointer = null;
         lastInjectedPointer = null;
         queuedImpulse = null;
-        idleResetPending = false;
       }
     };
 
@@ -371,7 +378,7 @@ export default function FluidCursor() {
       gl.uniform2f(simulationUniforms.resolution, simulationWidth, simulationHeight);
       gl.uniform2f(simulationUniforms.splat, impulse?.x ?? 0.5, impulse?.y ?? 0.5);
       gl.uniform1f(simulationUniforms.strength, impulse?.strength ?? 0);
-      gl.uniform1f(simulationUniforms.radius, impulse?.radius ?? 0.02);
+      gl.uniform1f(simulationUniforms.radius, impulse?.radius ?? 0.022);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       [front, back] = [back, front];
     };
@@ -396,8 +403,8 @@ export default function FluidCursor() {
         return {
           x: clamp(sample.x / Math.max(window.innerWidth, 1), 0, 1),
           y: clamp(1 - sample.y / Math.max(window.innerHeight, 1), 0, 1),
-          strength: 0.145,
-          radius: 0.014,
+          strength: 0.16,
+          radius: 0.019,
         };
       }
 
@@ -405,15 +412,15 @@ export default function FluidCursor() {
       const dy = sample.y - lastInjectedPointer.y;
       const distance = Math.hypot(dx, dy);
       const elapsed = Math.max(sample.time - lastInjectedPointer.time, 1);
-      if (distance < 26 && elapsed < 56) return null;
+      if (distance < 26 && elapsed < 50) return null;
 
       const speed = distance / elapsed * 1000;
       lastInjectedPointer = sample;
       return {
         x: clamp(sample.x / Math.max(window.innerWidth, 1), 0, 1),
         y: clamp(1 - sample.y / Math.max(window.innerHeight, 1), 0, 1),
-        strength: clamp(0.12 + speed / 12000, 0.12, 0.22),
-        radius: clamp(0.011 + speed / 200000, 0.011, 0.018),
+        strength: clamp(0.13 + speed / 11000, 0.13, 0.23),
+        radius: clamp(0.016 + speed / 150000, 0.016, 0.026),
       };
     };
 
@@ -428,7 +435,9 @@ export default function FluidCursor() {
         const sampled = latestPointer;
         latestPointer = null;
         const pointerImpulse = toImpulse(sampled);
-        if (pointerImpulse) queuedImpulse = pointerImpulse;
+        if (pointerImpulse && (!queuedImpulse || pointerImpulse.strength > queuedImpulse.strength)) {
+          queuedImpulse = pointerImpulse;
+        }
       }
 
       const impulse = queuedImpulse ?? undefined;
@@ -440,8 +449,8 @@ export default function FluidCursor() {
         frame = window.requestAnimationFrame(render);
       } else {
         clearCanvas();
+        resetSimulation();
         frame = 0;
-        if (idleResetPending) resetSimulation();
       }
     };
 
@@ -449,9 +458,8 @@ export default function FluidCursor() {
       if (!frame) frame = window.requestAnimationFrame(render);
     };
 
-    const wake = (milliseconds = 2350) => {
+    const wake = (milliseconds = 3400) => {
       activeUntil = performance.now() + milliseconds;
-      idleResetPending = true;
       ensureFrame();
     };
 
@@ -466,11 +474,11 @@ export default function FluidCursor() {
       queuedImpulse = {
         x: clamp(event.clientX / Math.max(window.innerWidth, 1), 0, 1),
         y: clamp(1 - event.clientY / Math.max(window.innerHeight, 1), 0, 1),
-        strength: 0.25,
-        radius: 0.018,
+        strength: 0.29,
+        radius: 0.028,
       };
       lastInjectedPointer = { x: event.clientX, y: event.clientY, time: performance.now() };
-      wake(2550);
+      wake(3700);
     };
 
     const onPointerLeave = () => {
