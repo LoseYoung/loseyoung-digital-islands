@@ -18,15 +18,10 @@ main {
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  opacity: .72;
+  /* 从首屏的轻微月光折射，随 Hero 滚动进度连续增强到正文强度。 */
+  opacity: calc(.12 + var(--hero-progress, 0) * .46);
   mix-blend-mode: screen;
   filter: saturate(88%) brightness(.98);
-  transition: opacity .22s ease;
-}
-
-/* Hero 已有真实月夜摄影，只留下极轻的透明月光折射。 */
-html[data-hero-visible="true"] .fluid-cursor-canvas {
-  opacity: .12;
 }
 
 html[data-motion="off"] .fluid-cursor-canvas {
