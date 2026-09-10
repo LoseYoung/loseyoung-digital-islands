@@ -6,7 +6,7 @@ main {
   background: transparent;
 }
 
-/* 正文退回干净的深蓝黑，让水波成为唯一明显的动态背景语言。 */
+/* 正文保持纯净深蓝黑，让透明水波成为唯一明显的动态背景语言。 */
 .site-ambient {
   display: none;
 }
@@ -18,15 +18,15 @@ main {
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  opacity: .86;
+  opacity: .72;
   mix-blend-mode: screen;
-  filter: saturate(108%);
+  filter: saturate(88%) brightness(.98);
   transition: opacity .22s ease;
 }
 
-/* Hero 已有真实月夜摄影，水波在首屏只保留极轻的月光反射感。 */
+/* Hero 已有真实月夜摄影，只留下极轻的透明月光折射。 */
 html[data-hero-visible="true"] .fluid-cursor-canvas {
-  opacity: .18;
+  opacity: .12;
 }
 
 html[data-motion="off"] .fluid-cursor-canvas {
