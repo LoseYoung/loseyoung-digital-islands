@@ -1,0 +1,174 @@
+/* 单行项目索引：采用成熟的 Media Object / editorial project index 结构。
+ * 桌面端固定左图右文，移动端自然堆叠；新增岛屿只需继续追加一行。
+ */
+
+.collection .island-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.collection .island-entry {
+  min-width: 0;
+  padding-block: clamp(42px, 4.5vw, 76px);
+  border-top: 1px solid var(--line);
+}
+
+.collection .island-entry:first-child {
+  padding-top: 8px;
+}
+
+.collection .island-entry:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.collection .island-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "image meta"
+    "image copy";
+  column-gap: clamp(40px, 5vw, 96px);
+  align-items: stretch;
+  height: auto;
+  transform: none;
+}
+
+.collection .island-topline {
+  grid-area: meta;
+  align-self: start;
+  margin: 0;
+  padding: 0 0 18px;
+}
+
+.collection .island-image {
+  grid-area: image;
+  align-self: start;
+  width: 100%;
+  margin: 0;
+  border: 1px solid rgba(214, 226, 240, .10);
+  background: rgba(9, 18, 28, .72);
+  transition: border-color .5s var(--ease), box-shadow .5s var(--ease);
+}
+
+.collection .island-image img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.collection .island-copy {
+  grid-area: copy;
+  align-self: stretch;
+  width: min(100%, 600px);
+  padding: clamp(34px, 4.8vw, 88px) 0 clamp(8px, 1vw, 18px);
+  display: flex;
+  flex-direction: column;
+}
+
+.collection .island-copy h3 {
+  margin-bottom: 18px;
+  font-size: clamp(42px, 4.1vw, 64px);
+  line-height: 1.02;
+  letter-spacing: -.022em;
+}
+
+.collection .island-copy > p {
+  max-width: 44ch;
+  margin-bottom: 34px;
+  font-size: 15px;
+  line-height: 2;
+}
+
+.collection .island-caption {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+/* 每一行独立进入视口，不需要沿用三列卡片时代的 0/130/260ms 错峰。 */
+.collection [data-reveal="card"] {
+  --reveal-delay: 0ms !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .collection .island-card:hover {
+    transform: none;
+  }
+
+  .collection .island-card:hover .island-image {
+    border-color: rgba(190, 211, 236, .24);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .16);
+  }
+}
+
+/* 中等宽度仍保持左右结构，只适度收紧图文比例和间距。 */
+@media (max-width: 1180px) {
+  .collection .island-card {
+    grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
+    column-gap: clamp(30px, 4vw, 54px);
+  }
+
+  .collection .island-copy {
+    padding-top: clamp(28px, 4vw, 56px);
+  }
+
+  .collection .island-copy h3 {
+    font-size: clamp(38px, 4.8vw, 54px);
+  }
+}
+
+/* 窄屏切换为标准 Media Object 的堆叠形态，保证封面和文字都完整。 */
+@media (max-width: 900px) {
+  .collection .island-entry {
+    padding-block: 46px;
+  }
+
+  .collection .island-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "meta"
+      "image"
+      "copy";
+    row-gap: 0;
+  }
+
+  .collection .island-topline {
+    margin-bottom: 18px;
+  }
+
+  .collection .island-copy {
+    width: 100%;
+    max-width: 680px;
+    padding-top: 28px;
+  }
+
+  .collection .island-copy > p {
+    max-width: 52ch;
+  }
+}
+
+@media (max-width: 640px) {
+  .collection .island-entry {
+    padding-block: 38px;
+  }
+
+  .collection .island-entry:first-child {
+    padding-top: 0;
+  }
+
+  .collection .island-copy {
+    padding-top: 24px;
+  }
+
+  .collection .island-copy h3 {
+    margin-bottom: 14px;
+    font-size: 38px;
+  }
+
+  .collection .island-copy > p {
+    margin-bottom: 24px;
+    font-size: 14px;
+  }
+}
