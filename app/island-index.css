@@ -2,9 +2,9 @@
  * 桌面端固定左图右文，移动端自然堆叠；新增岛屿只需继续追加一行。
  */
 
-/* 单行结构不再需要超宽展览画布，适当收回版心，让封面与说明更像作品目录。 */
+/* 与首页共用同一套版心尺度，避免进入岛屿目录后左右留白发生变化。 */
 .collection.shell {
-  width: min(calc(100% - clamp(72px, 7vw, 140px)), 1760px);
+  width: min(calc(100% - 96px), 1580px);
 }
 
 .collection .island-grid {
@@ -110,10 +110,10 @@
   }
 }
 
-/* 中等宽度下封面继续等比缩小，而不是挤压说明区域。 */
+/* 中等宽度下继续沿用首页 32px 单侧留白。 */
 @media (max-width: 1180px) {
   .collection.shell {
-    width: calc(100% - 72px);
+    width: calc(100% - 64px);
   }
 
   .collection .island-card {
@@ -134,12 +134,8 @@
   }
 }
 
-/* 窄屏切换为标准 Media Object 的堆叠形态，保证封面和文字都完整。 */
+/* 窄屏只改变图文排列，不单独改变版心。 */
 @media (max-width: 900px) {
-  .collection.shell {
-    width: calc(100% - 48px);
-  }
-
   .collection .island-entry {
     padding-block: 44px;
   }
