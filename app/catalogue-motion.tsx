@@ -36,7 +36,6 @@ export default function CatalogueMotion() {
     const root = document.documentElement;
     const entries = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
     const chapters = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
-    const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal='card']"));
     const hero = document.querySelector<HTMLElement>(".hero");
     root.dataset.motion = enabled ? "on" : "off";
 
@@ -44,7 +43,6 @@ export default function CatalogueMotion() {
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
       chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
       root.style.removeProperty("--hero-progress");
-      cards.forEach((card) => card.style.removeProperty("--card-shift"));
       return () => { delete root.dataset.motion; };
     }
 
@@ -102,19 +100,10 @@ export default function CatalogueMotion() {
 
     let frame = 0;
     const updateScrollMotion = () => {
-      const viewportHeight = Math.max(window.innerHeight, 1);
       if (hero) {
         const bounds = hero.getBoundingClientRect();
         const progress = clamp(-bounds.top / Math.max(bounds.height * .82, 1));
         root.style.setProperty("--hero-progress", progress.toFixed(4));
-      }
-
-      for (const card of cards) {
-        const bounds = card.getBoundingClientRect();
-        if (bounds.bottom < -120 || bounds.top > viewportHeight + 120) continue;
-        const center = bounds.top + bounds.height / 2;
-        const relative = clamp((viewportHeight / 2 - center) / (viewportHeight * .72), -1, 1);
-        card.style.setProperty("--card-shift", `${(relative * 7).toFixed(2)}px`);
       }
       frame = 0;
     };
@@ -138,8 +127,6 @@ export default function CatalogueMotion() {
     };
 
     const visibility = () => { root.dataset.pageVisible = String(!document.hidden); };
-    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(scheduleScrollMotion) : undefined;
-    resizeObserver?.observe(document.body);
     window.addEventListener("scroll", scheduleScrollMotion, { passive: true });
     window.addEventListener("resize", scheduleScrollMotion, { passive: true });
     window.addEventListener("hashchange", revealFragment);
@@ -153,7 +140,6 @@ export default function CatalogueMotion() {
       revealObserver?.disconnect();
       chapterObserver?.disconnect();
       heroObserver?.disconnect();
-      resizeObserver?.disconnect();
       window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", scheduleScrollMotion);
       window.removeEventListener("resize", scheduleScrollMotion);
@@ -162,7 +148,6 @@ export default function CatalogueMotion() {
       document.removeEventListener("visibilitychange", visibility);
       entries.forEach((entry) => entry.removeAttribute("data-reveal-state"));
       chapters.forEach((chapter) => chapter.removeAttribute("data-chapter-state"));
-      cards.forEach((card) => card.style.removeProperty("--card-shift"));
       root.style.removeProperty("--hero-progress");
       delete root.dataset.motion;
       delete root.dataset.heroVisible;
