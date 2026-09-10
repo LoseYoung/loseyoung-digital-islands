@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./exhibition-motion.css";
 import "./ambient-background.css";
+import "./hero-light-motion.css";
 import "./island-index.css";
 
 const title = "Digital Islands · LoseYoung";
