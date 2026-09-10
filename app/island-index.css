@@ -1,6 +1,11 @@
-/* 单行项目索引：采用成熟的 Media Object / editorial project index 结构。
+/* 单行项目索引：采用 Media Object / editorial project index 结构。
  * 桌面端固定左图右文，移动端自然堆叠；新增岛屿只需继续追加一行。
  */
+
+/* 单行结构不再需要超宽展览画布，适当收回版心，让封面与说明更像作品目录。 */
+.collection.shell {
+  width: min(calc(100% - clamp(72px, 7vw, 140px)), 1760px);
+}
 
 .collection .island-grid {
   display: grid;
@@ -10,7 +15,7 @@
 
 .collection .island-entry {
   min-width: 0;
-  padding-block: clamp(42px, 4.5vw, 76px);
+  padding-block: clamp(38px, 4vw, 66px);
   border-top: 1px solid var(--line);
 }
 
@@ -24,12 +29,12 @@
 
 .collection .island-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr);
+  grid-template-columns: minmax(420px, 720px) minmax(360px, 1fr);
   grid-template-rows: auto 1fr;
   grid-template-areas:
     "image meta"
     "image copy";
-  column-gap: clamp(40px, 5vw, 96px);
+  column-gap: clamp(44px, 5vw, 88px);
   align-items: stretch;
   height: auto;
   transform: none;
@@ -46,6 +51,7 @@
   grid-area: image;
   align-self: start;
   width: 100%;
+  max-width: 720px;
   margin: 0;
   border: 1px solid rgba(214, 226, 240, .10);
   background: rgba(9, 18, 28, .72);
@@ -53,6 +59,7 @@
 }
 
 .collection .island-image img {
+  display: block;
   width: 100%;
   height: auto;
   object-fit: contain;
@@ -61,24 +68,25 @@
 .collection .island-copy {
   grid-area: copy;
   align-self: stretch;
-  width: min(100%, 600px);
-  padding: clamp(34px, 4.8vw, 88px) 0 clamp(8px, 1vw, 18px);
+  width: min(100%, 660px);
+  padding: clamp(28px, 3.8vw, 68px) 0 clamp(8px, 1vw, 18px);
   display: flex;
   flex-direction: column;
 }
 
 .collection .island-copy h3 {
-  margin-bottom: 18px;
-  font-size: clamp(42px, 4.1vw, 64px);
-  line-height: 1.02;
+  margin-bottom: 20px;
+  font-size: clamp(40px, 3.6vw, 58px);
+  line-height: 1.03;
   letter-spacing: -.022em;
 }
 
 .collection .island-copy > p {
-  max-width: 44ch;
-  margin-bottom: 34px;
+  max-width: 56ch;
+  margin-bottom: 36px;
   font-size: 15px;
-  line-height: 2;
+  line-height: 2.05;
+  color: #b9c3ce;
 }
 
 .collection .island-caption {
@@ -86,7 +94,7 @@
   padding-top: 20px;
 }
 
-/* 每一行独立进入视口，不需要沿用三列卡片时代的 0/130/260ms 错峰。 */
+/* 每一行独立进入视口，不需要沿用三列卡片时代的错峰。 */
 .collection [data-reveal="card"] {
   --reveal-delay: 0ms !important;
 }
@@ -102,26 +110,38 @@
   }
 }
 
-/* 中等宽度仍保持左右结构，只适度收紧图文比例和间距。 */
+/* 中等宽度下封面继续等比缩小，而不是挤压说明区域。 */
 @media (max-width: 1180px) {
+  .collection.shell {
+    width: calc(100% - 72px);
+  }
+
   .collection .island-card {
-    grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
-    column-gap: clamp(30px, 4vw, 54px);
+    grid-template-columns: minmax(360px, 46%) minmax(320px, 1fr);
+    column-gap: clamp(30px, 4vw, 52px);
+  }
+
+  .collection .island-image {
+    max-width: 620px;
   }
 
   .collection .island-copy {
-    padding-top: clamp(28px, 4vw, 56px);
+    padding-top: clamp(24px, 3.5vw, 48px);
   }
 
   .collection .island-copy h3 {
-    font-size: clamp(38px, 4.8vw, 54px);
+    font-size: clamp(38px, 4.5vw, 52px);
   }
 }
 
 /* 窄屏切换为标准 Media Object 的堆叠形态，保证封面和文字都完整。 */
 @media (max-width: 900px) {
+  .collection.shell {
+    width: calc(100% - 48px);
+  }
+
   .collection .island-entry {
-    padding-block: 46px;
+    padding-block: 44px;
   }
 
   .collection .island-card {
@@ -138,6 +158,11 @@
     margin-bottom: 18px;
   }
 
+  .collection .island-image {
+    width: min(100%, 680px);
+    max-width: 680px;
+  }
+
   .collection .island-copy {
     width: 100%;
     max-width: 680px;
@@ -145,13 +170,17 @@
   }
 
   .collection .island-copy > p {
-    max-width: 52ch;
+    max-width: 58ch;
   }
 }
 
 @media (max-width: 640px) {
+  .collection.shell {
+    width: calc(100% - 36px);
+  }
+
   .collection .island-entry {
-    padding-block: 38px;
+    padding-block: 36px;
   }
 
   .collection .island-entry:first-child {
@@ -168,7 +197,8 @@
   }
 
   .collection .island-copy > p {
-    margin-bottom: 24px;
+    margin-bottom: 26px;
     font-size: 14px;
+    line-height: 2;
   }
 }
