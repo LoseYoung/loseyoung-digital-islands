@@ -11,6 +11,14 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 export default function Home() {
   return (
     <main id="top">
+      <div className="site-ambient" aria-hidden="true">
+        <span className="ambient-mesh" />
+        <span className="ambient-orb ambient-orb-a" />
+        <span className="ambient-orb ambient-orb-b" />
+        <span className="ambient-orb ambient-orb-c" />
+        <span className="ambient-pointer" />
+        <span className="ambient-sheen" />
+      </div>
       <a className="skip-link" href="#islands">跳至岛屿目录</a>
       <header className="site-header shell">
         <a className="brand" href="#top" lang="en" aria-label="Digital Islands 首页">Digital Islands<span className="brand-period">.</span></a>
