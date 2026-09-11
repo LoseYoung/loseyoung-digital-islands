@@ -2,109 +2,144 @@
 
 > Somewhere Between Real and Imagined
 
-“数字岛屿”是 LoseYoung 的个人网页总门户，用统一的入口展示正在创造与维护的作品。每座“岛屿”对应一个独立站点，承载影像、游戏或持续生长的创意。
+“数字岛屿”是 LoseYoung 的个人网页总门户，也是一个持续生长的作品索引。每座“岛屿”对应一个独立站点，承载影像、游戏、幻想世界或之后还会出现的新项目；门户本身不追求把它们做成统一产品，而是像一份展览目录一样，把彼此不同的世界放在同一个入口中。
 
-本仓库维护门户首页、项目入口、视觉样式与部署配置。照片画廊和游戏的具体实现位于各自项目中。
+本仓库维护门户首页、岛屿索引、视觉动效、响应式布局、分享信息与部署配置。各个岛屿的业务逻辑与具体内容仍由各自项目维护。
 
-**访问门户：[LoseYoung · 数字岛屿](https://loseyoung-digital-islands.lzy793222567.chatgpt.site)**
+**在线访问**
 
-## 核心功能
+- [OpenAI Sites · LoseYoung 数字岛屿](https://loseyoung-digital-islands.lzy793222567.chatgpt.site)
+- [GitHub Pages · LoseYoung 数字岛屿](https://loseyoung.github.io/loseyoung-digital-islands/)
 
-- **项目导航**：通过项目卡片查看作品简介、封面和入口，在新标签页打开对应站点。
-- **策展目录**：以 A Softer Gaze、Another Reality、Further Out 三个章节展示当前作品，目录可持续扩展。
-- **More to Arrive**：为未来岛屿预留目录位置，序号随已开放作品数量自动延续，尚未开放的条目不可点击。
-- **克制的视觉与动效**：本地海面背景、星光明暗、海面反光与光雾呼吸；衬线标题、缓慢入场、滚动显现和随阅读推进的光点轨迹。Motion 开关支持暂停与记忆，默认遵循系统偏好；禁用 JavaScript 时仍可完整阅读和导航。
-- **响应式布局与基础无障碍支持**：适配桌面和移动端，提供导航标签、图片替代文本及键盘焦点样式。
-- **分享元数据**：配置中文标题、描述、Open Graph 和 Twitter 大图卡片，使用本地分享图。
+## 当前页面体验
 
-### 当前展示的岛屿
+### 月夜 Hero
 
-| 项目 | 首页介绍 | 入口 |
-| --- | --- | --- |
-| 照片岛 · Photos Island | 收藏光影与记忆的公开照片画廊 | [进入照片岛](https://photos-island.lzy793222567.chatgpt.site/) |
-| 妖精国余响 · Faerie Britain: Echoes | 以阿尔托莉雅·Caster 为角色的横版动作 RPG | [开始巡礼](https://faerie-britain-echoes.lzy793222567.chatgpt.site/) |
-| 栅域余烬 · Gridwake | 原创像素风第一人称生存游戏，单机大逃杀 Demo | [进入战场](https://digital-island-gridwake.lzy793222567.chatgpt.site/) |
+首页首屏使用真实月夜海面摄影作为背景，并在其上叠加克制的展览式动效：
 
-以上名称、介绍和入口以门户代码为准；子站点的功能和运行状态由各自项目维护。目录不是实时可用性监测，子站的开放情况由各自项目维护。
+- 右上方月光由多层光带组成，静止时会缓慢呼吸、漂移，而不是保持完全静止。
+- 月光会随 Hero 的滚动进度产生明显偏转、位移与收束，同时带动海面反光、月晕和地平线亮度变化。
+- 标题与前言采用缓慢入场和轻微视差，滚动时逐渐离开首屏。
+- 背景摄影使用 `public/moonlit-ocean-pramod-tiwari.jpg`；旧版生成背景仍保留在 `public/` 作为历史素材，但不再作为当前 Hero 主背景。
+
+### 透明水波交互
+
+Hero 以下使用纯净深蓝黑作为主背景，并保留一层全屏 WebGL2 水波交互：
+
+- 水波使用双缓冲高度场模拟扩散，不是 DOM 圆环或沿鼠标连线的“拖尾”。
+- 鼠标移动时只向水面注入局部扰动，波纹会自行扩散、叠加和衰减。
+- 当前视觉以透明玻璃 / 月光水纹为目标，主体接近透明，只保留银蓝、冷青和极弱紫色折射。
+- 水波强度会随页面从 Hero 向正文滚动逐渐增强，不再使用上下两档透明度切换。
+- 模拟分辨率、鼠标采样和空闲停止都做了性能限制；触屏设备和减少动态效果模式会自动降级。
+
+### 单行岛屿索引
+
+Selected Islands 已从三列卡片墙改为更适合长期扩展的 **Media Object / Editorial Project Index**：
+
+- 每个岛屿独占一整行，桌面端左侧封面、右侧编号 / 分类 / 标题 / 概述 / 入口。
+- 新增第 4、5、6 个岛屿时只需要继续向下追加，不再受 3 的倍数影响。
+- 封面始终完整展示，使用 `object-fit: contain`，不会通过裁切或放大制造统一比例。
+- 桌面端封面最大宽度约 720px；中等屏继续等比缩小，窄屏自动切换为上下布局。
+- 岛屿区和首页共用同一套左右版心，滚动过程中页面边界保持连续。
+- 每个岛屿概述都保留更完整的作品定位和情绪说明，而不是只有一句短标语。
+
+### 动效与可访问性
+
+- 内容先服务端输出，动效只作为增强；无 JavaScript 时核心内容和导航仍可阅读。
+- `Motion on / off` 开关可手动暂停或开启页面动效，并记忆用户选择。
+- 默认遵循系统 `prefers-reduced-motion`。
+- 页面切到后台时会暂停部分持续动画，减少无意义的 GPU 消耗。
+- 图片包含替代文本，页内导航、焦点和锚点跳转都保留基础无障碍处理。
+
+## 当前展示的岛屿
+
+| 岛屿 | 类型 | 概述 | 入口 |
+| --- | --- | --- | --- |
+| Photos Island · A Softer Gaze | Photography | 一册持续生长的私人影像档案，收集旅行、城市、自然与偶然相遇的瞬间，让记忆以照片的方式慢慢沉淀。 | [进入照片岛](https://photos-island.lzy793222567.chatgpt.site/) |
+| Faerie Britain Echoes · Another Reality | Fantasy / RPG | 保存关于妖精国、角色与旅途的余响，把幻想作品结束后仍未消失的氛围与记忆重新编排成一个可以再次进入的空间。 | [进入妖精国余响](https://faerie-britain-echoes.lzy793222567.chatgpt.site/) |
+| Gridwake · Further Out | Sci-Fi / FPS | 从科幻与 FPS 的节奏出发，把战斗、空间、残存秩序与陌生环境收束成一片更冷、更锋利的数字区域。 | [进入 Gridwake](https://digital-island-gridwake.lzy793222567.chatgpt.site/) |
+
+岛屿名称、介绍、封面和入口统一维护在 `app/islands.ts`。门户只负责展示和导航，不承担外部子站的实时可用性监测。
 
 ## 技术栈
 
 | 类别 | 当前使用 |
 | --- | --- |
-| 界面 | React 19.2.6、TypeScript 5.9.3 |
-| 路由与渲染 | Next.js App Router API；Sites 使用 vinext 0.0.50；Pages 使用 Next.js 16.2.6 静态导出 |
+| UI | React 19.2.6、TypeScript 5.9.3 |
+| 路由与渲染 | Next.js 16.2.6 App Router；Sites 侧使用 vinext 0.0.50 |
 | 构建 | Vite 8.0.13、Cloudflare Vite 插件 |
-| 样式 | 自定义全局 CSS、Tailwind CSS 4.2.1 / PostCSS |
+| 样式 | 自定义 CSS、Tailwind CSS 4.2.1 / PostCSS |
+| 动效 | CSS Transform / Opacity、IntersectionObserver、requestAnimationFrame、WebGL2 高度场水波 |
 | 运行与托管 | OpenAI Sites / Cloudflare Workers、GitHub Pages |
 | 检查 | ESLint 9、Node.js 内置测试运行器 |
-| 可选扩展 | Drizzle ORM / Kit、Cloudflare D1 / R2 配置、ChatGPT 登录辅助函数 |
+| 可选扩展 | Drizzle ORM / Kit、Cloudflare D1 / R2、ChatGPT 登录辅助函数 |
 
-默认开发与 Sites 构建脚本调用 `vinext`；`build:pages` 使用已有的 Next.js 依赖生成纯静态页面。D1、R2 和登录辅助函数当前没有接入门户首页。
+默认开发与 Sites 构建脚本调用 `vinext`；`build:pages` 使用 Next.js 静态导出生成 GitHub Pages 版本。D1、R2 和登录辅助函数目前没有接入门户首页。
 
 ## 目录结构
 
 ```text
 .
 ├── app/
-│   ├── page.tsx                 # 策展首页与可扩展作品陈列
-│   ├── islands.ts               # 岛屿数据与自动编号
-│   ├── catalogue-motion.tsx       # 渐进式动效、减少动态效果和键盘导航处理
-│   ├── fonts/                   # 本地字体与 SIL Open Font License
-│   ├── layout.tsx               # 中文页面布局与分享元数据
-│   ├── globals.css              # 艺术展目录视觉、动效与响应式样式
-│   └── chatgpt-auth.ts          # 预留的 ChatGPT 登录辅助函数
+│   ├── page.tsx                  # 首页结构：Hero、策展说明、岛屿索引、未来目录、Footer
+│   ├── islands.ts                # 岛屿数据、概述、封面、入口和自动编号
+│   ├── catalogue-motion.tsx      # 滚动进度、章节显现、Motion 开关、月光滚动变量
+│   ├── fluid-cursor.tsx          # WebGL2 双缓冲高度场水波
+│   ├── globals.css               # 基础视觉系统和通用响应式样式
+│   ├── exhibition-motion.css     # Hero、章节、海面与展览式动效
+│   ├── ambient-background.css    # 纯深色正文背景与水波画布层级
+│   ├── hero-light-motion.css     # 右上月光呼吸、滚动偏转与海面联动
+│   ├── island-index.css          # 单行左图右文岛屿索引布局
+│   ├── layout.tsx                # 页面元数据与样式入口
+│   ├── fonts/                    # 本地字体与许可
+│   └── chatgpt-auth.ts           # 预留的 ChatGPT 登录辅助函数
 ├── public/
-│   ├── quiet-horizon.webp        # 无文字首屏背景（约 51 KB）
-│   ├── photos-island.png        # 照片岛封面
+│   ├── moonlit-ocean-pramod-tiwari.jpg # 当前 Hero 月夜海面摄影
+│   ├── photos-island.png         # 照片岛封面
 │   ├── faerie-britain.png        # 妖精国余响封面
-│   ├── gridwake.png             # 栅域余烬封面
-│   └── og.png                   # 门户分享图
+│   ├── gridwake.png              # Gridwake 封面
+│   ├── og.png                    # Open Graph 分享图
+│   ├── quiet-horizon.webp        # 旧版 Hero 素材，当前未使用
+│   └── moonlit-ocean-4k.svg      # 旧版生成背景，当前未使用
 ├── worker/
-│   └── index.ts                # Worker 请求处理与图片优化入口
+│   └── index.ts                  # Worker 请求处理与图片优化入口
 ├── build/
-│   └── sites-vite-plugin.ts     # 将 Sites 配置和迁移目录复制到构建产物
+│   └── sites-vite-plugin.ts      # Sites 构建辅助
 ├── .openai/
-│   └── hosting.json             # Sites 项目关联与可选 D1 / R2 绑定
+│   └── hosting.json              # OpenAI Sites 项目关联与可选资源绑定
 ├── db/
-│   ├── index.ts                # 可选 D1 / Drizzle 数据库访问工具
-│   └── schema.ts               # 当前为空，尚无业务数据表
-├── drizzle/                    # 数据库迁移元数据，目前无业务迁移
-├── examples/d1/                 # 保留的 D1 示例，不是门户实际 API
-├── .github/workflows/pages.yml # GitHub 自动构建、检查与 Pages 发布
-├── scripts/build-pages.mjs     # 静态导出与发布地址配置
+│   ├── index.ts                  # 可选 D1 / Drizzle 数据访问工具
+│   └── schema.ts                 # 当前没有业务数据表
+├── drizzle/                      # 数据库迁移元数据
+├── .github/workflows/pages.yml  # GitHub Pages 自动构建和发布
+├── scripts/build-pages.mjs       # Pages 静态导出和发布地址配置
 ├── tests/
-│   ├── rendered-html.test.mjs   # 门户服务端渲染与本地资源检查
-│   └── pages-export.test.mjs    # 静态页面内容与子路径资源检查
-├── vite.config.ts              # vinext、Sites 与 Cloudflare 构建配置
-├── next.config.ts              # Pages 静态导出与基础路径配置
-├── drizzle.config.ts           # 可选的数据库迁移生成配置
-├── eslint.config.mjs           # ESLint 配置
-├── postcss.config.mjs          # Tailwind CSS / PostCSS 配置
-├── tsconfig.json               # TypeScript 配置
-├── tsconfig.pages.json         # Pages 前端类型检查范围
-├── package.json                # 项目依赖及运行脚本
-└── package-lock.json           # npm 依赖锁文件
+│   ├── rendered-html.test.mjs    # Sites / 服务端渲染检查
+│   └── pages-export.test.mjs     # Pages 静态导出检查
+├── vite.config.ts
+├── next.config.ts
+├── eslint.config.mjs
+├── postcss.config.mjs
+├── tsconfig.json
+├── tsconfig.pages.json
+├── package.json
+└── package-lock.json
 ```
 
-## 本地运行与开发
+## 本地运行
 
 ### 环境要求
 
 - Node.js **>= 22.13.0**
 - npm
-- Git，以及本仓库的读取权限
+- Git
 
 ### 启动开发环境
 
 ```bash
-# 获取仓库并进入项目目录
 git clone https://github.com/LoseYoung/loseyoung-digital-islands.git
 cd loseyoung-digital-islands
-
-# 按锁文件安装依赖
 npm ci
-
-# 启动开发服务器，访问终端输出的本地地址
 npm run dev
 ```
 
@@ -115,60 +150,65 @@ npm run dev
 | 命令 | 用途 |
 | --- | --- |
 | `npm run dev` | 启动 vinext 开发服务器 |
-| `npm run build` | 生成 Sites 生产构建 |
+| `npm run build` | 生成 OpenAI Sites 生产构建 |
 | `npm run build:pages` | 生成 GitHub Pages 静态文件到 `out/` |
-| `npm run test:pages` | 检查已导出的 Pages 页面、分享地址及资源 |
-| `npm start` | 调用 `vinext start` 启动生产预览，需先构建 |
-| `npm run lint` | 执行 ESLint 检查 |
+| `npm run test:pages` | 检查 Pages 导出页面与资源路径 |
+| `npm start` | 启动生产预览，需先构建 |
+| `npm run lint` | 执行 ESLint |
 | `npm test` | 先构建，再执行门户 HTML 渲染和资源检查 |
-| `npm run db:generate` | 使用 Drizzle 生成迁移，仅在接入数据库并修改 schema 后需要 |
+| `npm run db:generate` | 仅在接入数据库并修改 schema 后生成 Drizzle 迁移 |
+
+推荐提交前执行：
 
 ```bash
-# 检查代码与门户渲染
 npm run lint
 npm test
-
-# 单独构建并启动生产预览
-npm run build
-npm start
+npm run build:pages
+npm run test:pages
 ```
 
-现有测试覆盖双平台完整渲染、子站安全新标签导航、页内锚点、无 JavaScript 内容可见性、可信分享地址，以及 Pages 子目录下的图片、脚本、样式和字体路径；不验证外部子站点的完整功能。
+## 内容维护
 
-### 内容维护
+新增或调整岛屿时，主要修改 `app/islands.ts`：
 
-- 修改项目名称、介绍、链接和封面：编辑 `app/islands.ts`；首页区块和文案位于 `app/page.tsx`。
-- 新增岛屿：在 `app/islands.ts` 的 `islands` 数组追加一项并添加 `public/` 封面；编号和未来条目序号自动延续，网格在桌面 / 平板 / 手机按 3 / 2 / 1 列排列。
-- 修改主题、动画和移动端布局：编辑 `app/globals.css`。
-- 修改页面标题、描述和分享信息：编辑 `app/layout.tsx`，需要时更新 `public/og.png`。
+```ts
+{
+  id: "new-island",
+  title: "Project Title",
+  description: "这里写较完整的岛屿概述，而不是一句短标语。",
+  name: "New Island",
+  category: "Category",
+  url: "https://example.com/",
+  cover: "/new-island.png",
+  coverAlt: "封面的文字替代说明",
+}
+```
 
-## 部署方式
+然后把封面放到 `public/`。编号会自动延续，单行目录会自然继续向下增加，不需要手动补齐一整行。
 
-当前门户通过 **OpenAI Sites** 托管。`.openai/hosting.json` 已关联现有“LoseYoung · 数字岛屿”项目，`d1` 和 `r2` 均为 `null`。
+其他常用入口：
 
-### 更新现有 Sites 站点
+- 首页结构与静态文案：`app/page.tsx`
+- 岛屿单行布局：`app/island-index.css`
+- Hero 和章节动效：`app/exhibition-motion.css`
+- 月光动态：`app/hero-light-motion.css`
+- WebGL 水波：`app/fluid-cursor.tsx`
+- 水波层级和正文背景：`app/ambient-background.css`
+- 元数据与分享信息：`app/layout.tsx`
 
-1. 完成代码修改，运行 `npm run lint` 和 `npm test`。
-2. 使用构建产物发布：服务端入口为 `dist/server/index.js`，客户端资源位于 `dist/client/`，Sites 元数据位于 `dist/.openai/`。
-3. 在具备现有项目发布权限的 Sites 工作流中，同步对应源码提交、打包构建产物并保存新版本。
-4. 将保存的版本部署到现有 Sites 项目，确认部署成功后访问门户检查结果。
+## 部署
 
-维护现有站点时应保留 `.openai/hosting.json` 中的项目关联。真实的 Cloudflare 资源和部署绑定由 Sites 管理，本仓库没有手写的 `wrangler.jsonc`。
+### OpenAI Sites
 
-**GitHub 提交与 Sites 发布是两个步骤。** 下方工作流只发布 GitHub Pages，不会更新已有 Sites 站点。
+`.openai/hosting.json` 关联现有“LoseYoung · 数字岛屿”项目。当前门户不依赖 D1 / R2；真实部署资源与项目绑定由 Sites 管理。
 
-### GitHub Pages 自动构建与发布
+GitHub 提交与 Sites 发布是两个独立步骤：仓库更新不会自动替换已有 Sites 版本，需要在对应的 Sites 工作流中重新构建并部署。
 
-GitHub Free 需要将仓库设为公开，才能使用此 Pages 发布方式。
+### GitHub Pages
 
-1. 在仓库 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**。
-2. 推送到 `main` 后，`.github/workflows/pages.yml` 自动安装依赖，验证 Sites 构建，再执行 Pages 静态导出与资源检查。
-3. 所有检查通过后上传 `out/` 并发布。可在仓库 **Actions** 查看构建日志和部署结果。
-4. 发布地址：[LoseYoung · 数字岛屿（GitHub Pages）](https://loseyoung.github.io/loseyoung-digital-islands/)。
+仓库已经配置 `.github/workflows/pages.yml`。推送到 `main` 后会自动执行依赖安装、构建、静态导出、资源检查和 Pages 发布。
 
-PR 只运行构建检查；公开仓库的 `main` 才会触发部署。也可以在 Actions 页面手动运行此工作流。
-
-本地生成同样的静态文件：
+本地可以生成同样的静态版本：
 
 ```bash
 npm ci
@@ -176,18 +216,19 @@ npm run build:pages
 npm run test:pages
 ```
 
-脚本默认使用当前仓库的发布子路径 `/loseyoung-digital-islands` 和完整 Pages 地址，确保封面、脚本、样式及分享图片路径正确。复制仓库后，GitHub Actions 会根据 `GITHUB_REPOSITORY` 自动确定地址；使用自定义域名时，可显式设置 `NEXT_PUBLIC_BASE_PATH`（根目录为空字符串）和 `NEXT_PUBLIC_SITE_URL`。
-
-Pages 发布的是本仓库的门户静态页面。三个岛屿仍链接到各自站点，照片上传、登录或数据库等服务端功能不会由 Pages 提供。
+默认 Pages 子路径为 `/loseyoung-digital-islands`。脚本和测试会处理封面、字体、脚本、样式以及分享地址在子路径下的资源引用。
 
 ## 当前状态
 
-- 包版本为 **0.1.0**，项目持续构建中。
-- 门户已有三个独立项目入口，以及 More to Arrive 预留目录（移动端仅显示两个预留条目）。
-- 页面内容直接维护在源码中，目前没有内容管理后台、照片上传、用户账户或业务数据库功能。
-- `db/`、`examples/d1/` 和 `app/chatgpt-auth.ts` 是保留的扩展基础，不代表这些能力已经上线。
-- 后续作品准备好后，可通过更新首页卡片和封面接入门户。
+- 项目版本：**0.1.0**。
+- 当前开放 3 座岛屿，并保留 More to Arrive 未来目录。
+- 首页已经完成月夜摄影 Hero、动态月光、透明 WebGL 水波、滚动渐进强度和单行岛屿索引。
+- 门户内容仍直接维护在源码中，没有 CMS、用户账户、照片上传或业务数据库。
+- `db/`、Drizzle、D1 / R2 和 `app/chatgpt-auth.ts` 目前只是扩展基础，不代表相关能力已经上线。
+- 后续新增岛屿时，优先通过 `app/islands.ts` 和 `public/` 扩展，不需要重做目录网格。
 
-## 本轮设计与素材
+## 设计说明
 
-设计、动效规则和生成背景来源见 [策展首页开发说明](docs/curated-homepage.md)。
+当前视觉方向是“夜海 × 星空”的个人展览目录：真实摄影负责首屏情绪，正文退回纯深蓝黑，动态只保留月光、海面与透明水波等少量层次。相比早期三列卡片和大面积彩色背景，当前版本更强调留白、连续阅读与长期扩展。
+
+`docs/curated-homepage.md` 记录了早期策展首页和动效的设计演进，其中部分布局与素材说明已经被后续版本替代；以当前 `app/` 实现和本 README 为准。
