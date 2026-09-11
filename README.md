@@ -1,9 +1,9 @@
 <p align="center">
   <strong><kbd>English</kbd></strong>
   ·
-  <a href="./README.zh-CN.md"><kbd>简体中文</kbd></a>
+  <a href="https://github.com/LoseYoung/loseyoung-digital-islands/tree/doc-zh"><kbd>简体中文</kbd></a>
   ·
-  <a href="./README.ja.md"><kbd>日本語</kbd></a>
+  <a href="https://github.com/LoseYoung/loseyoung-digital-islands/tree/doc-ja"><kbd>日本語</kbd></a>
 </p>
 
 # LoseYoung · Digital Islands
@@ -124,9 +124,7 @@ The default development and Sites build commands use `vinext`. `build:pages` use
 ├── tests/
 │   ├── rendered-html.test.mjs    # Sites / server-rendered output checks
 │   └── pages-export.test.mjs     # Pages export checks
-├── README.md                     # English (default)
-├── README.zh-CN.md               # Simplified Chinese
-├── README.ja.md                  # Japanese
+├── README.md                     # English README on main
 ├── vite.config.ts
 ├── next.config.ts
 ├── eslint.config.mjs
