@@ -1,151 +1,133 @@
 <p align="center">
-  <strong><kbd>English</kbd></strong>
+  <a href="https://github.com/LoseYoung/loseyoung-digital-islands/tree/main"><kbd>English</kbd></a>
   ·
-  <a href="./README.zh-CN.md"><kbd>简体中文</kbd></a>
+  <a href="https://github.com/LoseYoung/loseyoung-digital-islands/tree/doc-zh"><kbd>简体中文</kbd></a>
   ·
-  <a href="./README.ja.md"><kbd>日本語</kbd></a>
+  <strong><kbd>日本語</kbd></strong>
 </p>
 
-# LoseYoung · Digital Islands
+# LoseYoung · デジタル・アイランズ
 
 > Somewhere Between Real and Imagined
 
-Digital Islands is LoseYoung's personal web portal and a continuously growing index of creative work. Each “island” is an independent site for photography, games, imagined worlds, or future experiments. The portal is not designed to flatten them into one product. Instead, it behaves more like an exhibition catalogue: different worlds, gathered under one entrance while keeping their own identities.
+「Digital Islands」は LoseYoung の個人ポータルであり、少しずつ増えていく作品インデックスです。それぞれの“島”は独立したサイトとして、写真、ゲーム、幻想世界、そして今後生まれる新しいプロジェクトを収容します。すべてを同じ製品に統一するのではなく、異なる世界をひとつの展覧会カタログのように並べることを目指しています。
 
-This repository contains the portal homepage, island index, visual motion system, responsive layout, sharing metadata, and deployment configuration. The business logic and actual content of each island remain in their own projects.
+このリポジトリでは、ポータルのトップページ、島のインデックス、ビジュアル演出、レスポンシブレイアウト、共有メタデータ、デプロイ設定を管理します。各島の個別ロジックやコンテンツは、それぞれのプロジェクト側で管理されます。
 
-**Live**
+**公開サイト**
 
 - [OpenAI Sites · Digital Islands](https://loseyoung-digital-islands.lzy793222567.chatgpt.site)
 - [GitHub Pages · Digital Islands](https://loseyoung.github.io/loseyoung-digital-islands/)
 
-## Current Experience
+## 現在の体験
 
-### Moonlit Hero
+### 月夜の Hero
 
-The first screen uses a real moonlit-ocean photograph as the visual anchor, with restrained exhibition-style motion layered on top.
+ファーストビューには実写の月夜の海を使用し、その上に控えめな展覧会風モーションを重ねています。
 
-- The moonlight entering from the upper-right is built from several light bands and continues to breathe and drift while the page is idle.
-- As the Hero scrolls away, the light direction, position, and spread change more noticeably, while the sea reflection, moon haze, and horizon glow respond with it.
-- The title and introduction enter slowly with a subtle parallax treatment, then recede as the page scrolls.
-- The active background image is `public/moonlit-ocean-pramod-tiwari.jpg`. Earlier generated backgrounds are still kept in `public/` as historical assets, but they are no longer used as the main Hero artwork.
+- 右上の月光は複数の光帯で構成され、静止中もゆっくり呼吸するように明滅・漂移します。
+- Hero のスクロール量に応じて光の向き、位置、広がりが変化し、海面の反射、月の霞、水平線の明るさも連動します。
+- タイトルと導入文はゆっくり現れ、スクロール時にはわずかなパララックスを伴って退場します。
+- 背景写真は `public/moonlit-ocean-pramod-tiwari.jpg` を使用しています。旧素材は履歴用として `public/` に残していますが、現在の Hero では使用していません。
 
-### Transparent Ripple Interaction
+### 透明な水紋インタラクション
 
-Below the Hero, the interface returns to a clean deep blue-black background with a full-screen WebGL2 ripple layer.
+Hero の下は深い青黒の単色背景とし、その上にフルスクリーンの WebGL2 水紋を重ねています。
 
-- Ripples are simulated with a double-buffer height field rather than DOM circles or a mouse trail.
-- Pointer movement only injects local disturbances; the wave field itself handles propagation, interference, and decay.
-- The current visual target is transparent glass / moonlit water: the body of the effect is nearly invisible, leaving mostly silver-blue, cold cyan, and a very subtle violet refraction.
-- Ripple intensity grows gradually as the page moves from the Hero into the body instead of switching between two abrupt opacity levels.
-- Simulation resolution, pointer sampling, and idle shutdown are intentionally limited for performance. Touch devices and reduced-motion environments receive a simplified fallback.
+- 水紋は DOM の円やマウス軌跡ではなく、ダブルバッファの高さ場で波の拡散をシミュレートします。
+- マウス移動時は局所的な摂動だけを加え、その後の拡散・干渉・減衰は水面シミュレーション側で進みます。
+- 見た目は透明なガラス / 月光に照らされた水面を目標にし、銀青・冷たいシアン・ごく弱い紫の屈折だけを残しています。
+- 水紋の強さは Hero から本文へスクロールするにつれて滑らかに強くなります。
+- シミュレーション解像度、マウスサンプリング、アイドル停止を制限し、タッチ端末や reduced motion では自動的に簡略化します。
 
-### Single-Row Island Index
+### 1 行型の Island Index
 
-Selected Islands has moved away from a three-column card wall to a more scalable **Media Object / Editorial Project Index**.
+Selected Islands は 3 列カードから、長期的に増やしやすい **Media Object / Editorial Project Index** へ変更しました。
 
-- Each island occupies one complete row. On desktop, the cover sits on the left and the number, category, title, description, and link sit on the right.
-- Islands 4, 5, 6, and beyond can simply be appended vertically, without any dependency on multiples of three.
-- Covers are always shown in full with `object-fit: contain`; the layout does not crop or artificially zoom artwork into a shared aspect ratio.
-- Cover width is capped at roughly 720px on desktop, scales down proportionally at intermediate widths, and stacks above the copy on narrow screens.
-- The island section uses the same page margins as the Hero, keeping the visual baseline continuous while scrolling.
-- Island descriptions are intentionally richer than one-line taglines so each entry carries more narrative and context.
+- 各島が 1 行を占有し、デスクトップでは左にカバー、右に番号 / カテゴリ / タイトル / 概要 / リンクを配置します。
+- 4、5、6 個目の島もそのまま下へ追加でき、3 の倍数を意識する必要がありません。
+- カバーは `object-fit: contain` で常に全体を表示し、トリミングや無理な拡大は行いません。
+- デスクトップではカバー最大幅を約 720px に制限し、中間幅では比例縮小、狭い画面では縦積みに切り替わります。
+- Island セクションは Hero と同じ左右余白を共有し、ページ全体の基準線を揃えています。
+- 各島の概要は短いタグラインだけでなく、作品の位置づけや雰囲気まで説明します。
 
-### Motion and Accessibility
+### モーションとアクセシビリティ
 
-- Core content is rendered first; motion is progressive enhancement. Main content and navigation remain readable without JavaScript.
-- A `Motion on / off` control lets visitors pause or enable motion and remembers the choice.
-- The default behavior follows the system `prefers-reduced-motion` setting.
-- Some continuous animation pauses when the page is in the background to avoid unnecessary GPU work.
-- Images include alternative text, and in-page navigation, focus, and anchor jumps retain basic accessibility handling.
+- コンテンツはサーバー側で先に出力し、モーションはあくまで拡張として扱います。JavaScript が無効でも主要コンテンツとナビゲーションは利用できます。
+- `Motion on / off` でアニメーションを手動切り替えでき、選択は保存されます。
+- 既定では `prefers-reduced-motion` に従います。
+- ページがバックグラウンドに移ると、一部の連続アニメーションを停止します。
+- 画像には代替テキストがあり、ページ内ナビゲーション、フォーカス、アンカー遷移にも基本的なアクセシビリティ対応があります。
 
-## Open Islands
+## 公開中の島
 
 | Island | Type | Summary | Link |
 | --- | --- | --- | --- |
-| Photos Island · A Softer Gaze | Photography | A growing personal image archive collecting travel, cities, nature, and accidental encounters, allowing memory to settle slowly through photographs. | [Enter Photos Island](https://photos-island.lzy793222567.chatgpt.site/) |
-| Faerie Britain Echoes · Another Reality | Fantasy / RPG | A space for preserving the echoes of Faerie Britain, its characters, and its journeys, reassembling the atmosphere that remains after the story ends. | [Enter Faerie Britain Echoes](https://faerie-britain-echoes.lzy793222567.chatgpt.site/) |
-| Gridwake · Further Out | Sci-Fi / FPS | A colder, sharper digital territory shaped by the rhythm of sci-fi and FPS design, bringing together combat, space, residual order, and unfamiliar environments. | [Enter Gridwake](https://digital-island-gridwake.lzy793222567.chatgpt.site/) |
+| Photos Island · A Softer Gaze | Photography | 旅、都市、自然、偶然出会った瞬間を集める、少しずつ成長していく個人的な写真アーカイブです。 | [Photos Island](https://photos-island.lzy793222567.chatgpt.site/) |
+| Faerie Britain Echoes · Another Reality | Fantasy / RPG | 妖精国、登場人物、旅の余韻を保存し、物語が終わった後にも残る空気や記憶を、もう一度入れる空間として組み直します。 | [Faerie Britain Echoes](https://faerie-britain-echoes.lzy793222567.chatgpt.site/) |
+| Gridwake · Further Out | Sci-Fi / FPS | SF と FPS のテンポを軸に、戦闘、空間、残された秩序、未知の環境を、より冷たく鋭いデジタル領域へまとめています。 | [Gridwake](https://digital-island-gridwake.lzy793222567.chatgpt.site/) |
 
-Island names, descriptions, covers, and destinations are maintained centrally in `app/islands.ts`. The portal is responsible for presentation and navigation only; it does not perform live availability monitoring of the external island sites.
+島の名称、説明、カバー、リンクは `app/islands.ts` で一元管理しています。ポータルは表示とナビゲーションのみを担当し、外部サブサイトの稼働状況をリアルタイム監視するものではありません。
 
-## Tech Stack
+## 技術スタック
 
 | Category | Current stack |
 | --- | --- |
-| UI | React 19.2.6, TypeScript 5.9.3 |
-| Routing / Rendering | Next.js 16.2.6 App Router; vinext 0.0.50 on the Sites build path |
-| Build | Vite 8.0.13, Cloudflare Vite plugin |
-| Styling | Custom CSS, Tailwind CSS 4.2.1 / PostCSS |
-| Motion | CSS Transform / Opacity, IntersectionObserver, requestAnimationFrame, WebGL2 height-field ripples |
-| Hosting | OpenAI Sites / Cloudflare Workers, GitHub Pages |
-| Checks | ESLint 9, Node.js built-in test runner |
-| Optional foundation | Drizzle ORM / Kit, Cloudflare D1 / R2, ChatGPT auth helper |
+| UI | React 19.2.6、TypeScript 5.9.3 |
+| Routing / Rendering | Next.js 16.2.6 App Router、Sites 側は vinext 0.0.50 |
+| Build | Vite 8.0.13、Cloudflare Vite plugin |
+| Styling | Custom CSS、Tailwind CSS 4.2.1 / PostCSS |
+| Motion | CSS Transform / Opacity、IntersectionObserver、requestAnimationFrame、WebGL2 height-field ripple |
+| Hosting | OpenAI Sites / Cloudflare Workers、GitHub Pages |
+| Checks | ESLint 9、Node.js built-in test runner |
+| Optional foundation | Drizzle ORM / Kit、Cloudflare D1 / R2、ChatGPT auth helper |
 
-The default development and Sites build commands use `vinext`. `build:pages` uses a Next.js static export to produce the GitHub Pages version. D1, R2, and the login helper are not currently connected to the homepage experience.
+通常の開発と Sites ビルドは `vinext` を使用します。`build:pages` は Next.js の静的エクスポートで GitHub Pages 用の成果物を生成します。D1、R2、ログイン補助機能は現在のトップページには接続していません。
 
-## Project Structure
+## ディレクトリ構成
 
 ```text
 .
 ├── app/
-│   ├── page.tsx                  # Hero, curatorial note, island index, future index, footer
-│   ├── islands.ts                # Island data, descriptions, covers, URLs, automatic numbering
-│   ├── catalogue-motion.tsx      # Scroll progress, reveals, Motion toggle, moonlight variables
-│   ├── fluid-cursor.tsx          # WebGL2 double-buffer ripple simulation
-│   ├── globals.css               # Base visual system and shared responsive styles
-│   ├── exhibition-motion.css     # Hero, section, sea, and exhibition-style motion
-│   ├── ambient-background.css    # Dark body background and ripple canvas layering
-│   ├── hero-light-motion.css     # Moonlight breathing, scroll deflection, sea response
-│   ├── island-index.css          # Single-row cover + description layout
-│   ├── layout.tsx                # Metadata and style entry point
-│   ├── fonts/                    # Local fonts and licenses
-│   └── chatgpt-auth.ts           # Reserved ChatGPT auth helper
+│   ├── page.tsx                  # Hero、キュレーション、Island Index、Future、Footer
+│   ├── islands.ts                # 島データ、説明、カバー、URL、自動番号
+│   ├── catalogue-motion.tsx      # スクロール進行、reveal、Motion 切替、月光変数
+│   ├── fluid-cursor.tsx          # WebGL2 ダブルバッファ水紋
+│   ├── globals.css               # 基本ビジュアルと共通レスポンシブ
+│   ├── exhibition-motion.css     # Hero、セクション、海面、展示風モーション
+│   ├── ambient-background.css    # 本文背景と水紋キャンバスのレイヤー
+│   ├── hero-light-motion.css     # 月光の呼吸、スクロール偏向、海面連動
+│   ├── island-index.css          # 1 行型の左画像・右説明レイアウト
+│   ├── layout.tsx                # Metadata とスタイルエントリ
+│   ├── fonts/                    # ローカルフォントとライセンス
+│   └── chatgpt-auth.ts           # 将来用 ChatGPT auth helper
 ├── public/
-│   ├── moonlit-ocean-pramod-tiwari.jpg # Current Hero photograph
-│   ├── photos-island.png         # Photos Island cover
-│   ├── faerie-britain.png        # Faerie Britain Echoes cover
-│   ├── gridwake.png              # Gridwake cover
-│   ├── og.png                    # Open Graph image
-│   ├── quiet-horizon.webp        # Legacy Hero asset, currently unused
-│   └── moonlit-ocean-4k.svg      # Legacy generated background, currently unused
-├── worker/
-│   └── index.ts                  # Worker request handling and image optimization entry
-├── build/
-│   └── sites-vite-plugin.ts      # Sites build helper
-├── .openai/
-│   └── hosting.json              # OpenAI Sites project binding and optional resources
-├── db/
-│   ├── index.ts                  # Optional D1 / Drizzle access helpers
-│   └── schema.ts                 # No business tables at present
-├── drizzle/                      # Database migration metadata
-├── .github/workflows/pages.yml  # GitHub Pages build and deployment
-├── scripts/build-pages.mjs       # Pages static export and publish URL handling
+│   ├── moonlit-ocean-pramod-tiwari.jpg # 現在の Hero 背景
+│   ├── photos-island.png
+│   ├── faerie-britain.png
+│   ├── gridwake.png
+│   ├── og.png
+│   ├── quiet-horizon.webp        # 旧 Hero 素材
+│   └── moonlit-ocean-4k.svg      # 旧生成背景
+├── .github/workflows/pages.yml   # GitHub Pages build / deploy
+├── scripts/build-pages.mjs       # Pages static export
 ├── tests/
-│   ├── rendered-html.test.mjs    # Sites / server-rendered output checks
-│   └── pages-export.test.mjs     # Pages export checks
-├── README.md                     # English (default)
-├── README.zh-CN.md               # Simplified Chinese
-├── README.ja.md                  # Japanese
-├── vite.config.ts
-├── next.config.ts
-├── eslint.config.mjs
-├── postcss.config.mjs
-├── tsconfig.json
-├── tsconfig.pages.json
+│   ├── rendered-html.test.mjs
+│   └── pages-export.test.mjs
+├── README.md                     # 現在のブランチ言語 README
 ├── package.json
 └── package-lock.json
 ```
 
-## Local Development
+## ローカル開発
 
-### Requirements
+### 必要環境
 
 - Node.js **>= 22.13.0**
 - npm
 - Git
 
-### Start the development server
+### 起動
 
 ```bash
 git clone https://github.com/LoseYoung/loseyoung-digital-islands.git
@@ -154,22 +136,22 @@ npm ci
 npm run dev
 ```
 
-The current homepage does not require a database, object storage, login configuration, or any mandatory business environment variables.
+現在のトップページには、データベース、オブジェクトストレージ、ログイン設定などの必須環境変数はありません。
 
-### Common commands
+### よく使うコマンド
 
 | Command | Purpose |
 | --- | --- |
-| `npm run dev` | Start the vinext development server |
-| `npm run build` | Build the OpenAI Sites production output |
-| `npm run build:pages` | Generate the GitHub Pages static export in `out/` |
-| `npm run test:pages` | Validate the Pages export and asset paths |
-| `npm start` | Start the production preview after building |
-| `npm run lint` | Run ESLint |
-| `npm test` | Build first, then run portal HTML and resource checks |
-| `npm run db:generate` | Generate Drizzle migrations only after introducing DB schema changes |
+| `npm run dev` | vinext 開発サーバーを起動 |
+| `npm run build` | OpenAI Sites 用 production build |
+| `npm run build:pages` | GitHub Pages 用 static export を `out/` に生成 |
+| `npm run test:pages` | Pages の出力と asset path を検証 |
+| `npm start` | production preview を起動（事前 build が必要） |
+| `npm run lint` | ESLint を実行 |
+| `npm test` | build 後に HTML / resource tests を実行 |
+| `npm run db:generate` | DB schema を導入した場合のみ Drizzle migration を生成 |
 
-Recommended before committing:
+コミット前の推奨チェック：
 
 ```bash
 npm run lint
@@ -178,48 +160,48 @@ npm run build:pages
 npm run test:pages
 ```
 
-## Content Maintenance
+## コンテンツ管理
 
-To add or update an island, edit `app/islands.ts`:
+新しい島を追加または編集する場合は、主に `app/islands.ts` を更新します。
 
 ```ts
 {
   id: "new-island",
   title: "Project Title",
-  description: "Write a fuller island summary here instead of a one-line tagline.",
+  description: "短いキャッチコピーではなく、島の概要を少し詳しく書きます。",
   name: "New Island",
   category: "Category",
   url: "https://example.com/",
   cover: "/new-island.png",
-  coverAlt: "Alternative text for the cover image",
+  coverAlt: "カバー画像の代替テキスト",
 }
 ```
 
-Then add the cover to `public/`. Catalogue numbering continues automatically, and the single-row index simply grows downward without requiring a complete grid row.
+カバー画像を `public/` に追加すれば、番号は自動的に続き、1 行型インデックスもそのまま下に増えます。
 
-Other common entry points:
+主な編集箇所：
 
-- Page structure and static copy: `app/page.tsx`
-- Island index layout: `app/island-index.css`
-- Hero and section motion: `app/exhibition-motion.css`
-- Moonlight motion: `app/hero-light-motion.css`
-- WebGL ripples: `app/fluid-cursor.tsx`
-- Ripple layering and body background: `app/ambient-background.css`
-- Metadata and sharing information: `app/layout.tsx`
+- ページ構造と静的コピー：`app/page.tsx`
+- Island Index レイアウト：`app/island-index.css`
+- Hero / section motion：`app/exhibition-motion.css`
+- 月光モーション：`app/hero-light-motion.css`
+- WebGL 水紋：`app/fluid-cursor.tsx`
+- 水紋レイヤーと本文背景：`app/ambient-background.css`
+- Metadata / share info：`app/layout.tsx`
 
-## Deployment
+## デプロイ
 
 ### OpenAI Sites
 
-`.openai/hosting.json` is linked to the existing “LoseYoung · Digital Islands” project. The current portal does not require D1 or R2; actual deployment resources and project bindings are managed by Sites.
+`.openai/hosting.json` は既存の「LoseYoung · Digital Islands」プロジェクトに紐づいています。現在のポータルは D1 / R2 を必須としていません。
 
-A GitHub commit and a Sites deployment are separate steps. Updating the repository does not automatically replace the existing Sites version; the corresponding Sites workflow must rebuild and redeploy it.
+GitHub への push と Sites への公開は別工程です。リポジトリの更新だけでは既存 Sites 版は置き換わらず、対応する Sites ワークフローで再ビルド・再デプロイする必要があります。
 
 ### GitHub Pages
 
-The repository includes `.github/workflows/pages.yml`. A push to `main` automatically installs dependencies, builds the project, performs the static export, checks assets, and deploys GitHub Pages.
+`.github/workflows/pages.yml` が設定済みです。`main` への push で依存関係のインストール、build、static export、asset check、Pages deploy が自動で実行されます。
 
-To generate the same static version locally:
+ローカルで同じ静的版を生成する場合：
 
 ```bash
 npm ci
@@ -227,19 +209,19 @@ npm run build:pages
 npm run test:pages
 ```
 
-The default Pages base path is `/loseyoung-digital-islands`. The export scripts and tests handle covers, fonts, scripts, styles, and sharing assets under that subpath.
+既定の Pages base path は `/loseyoung-digital-islands` です。
 
-## Current Status
+## 現在の状態
 
 - Version: **0.1.0**
-- Three islands are currently open, with a More to Arrive section reserved for future work.
-- The homepage now includes a moonlit photographic Hero, dynamic moonlight, transparent WebGL ripples, scroll-progressive ripple intensity, and a single-row island index.
-- Portal content is still maintained directly in source code; there is no CMS, user account system, photo upload flow, or business database.
-- `db/`, Drizzle, D1 / R2, and `app/chatgpt-auth.ts` are foundations for future extension, not currently active product features.
-- New islands can be added primarily through `app/islands.ts` and `public/` without redesigning the catalogue layout.
+- 現在 3 つの島を公開し、More to Arrive の将来枠を残しています。
+- 月夜の実写 Hero、動的な月光、透明 WebGL 水紋、スクロール連動の水紋強度、1 行型 Island Index を実装済みです。
+- コンテンツは現在もソースコードで直接管理しており、CMS、ユーザーアカウント、写真アップロード、業務 DB はありません。
+- `db/`、Drizzle、D1 / R2、`app/chatgpt-auth.ts` は将来拡張のための基盤です。
+- 新しい島は `app/islands.ts` と `public/` を拡張するだけで追加できます。
 
-## Design Notes
+## デザインノート
 
-The current visual direction is a personal exhibition catalogue built around **night ocean × starlight**. Real photography carries the emotion of the Hero, the body returns to a restrained deep blue-black, and motion is limited to a few layers such as moonlight, sea response, and transparent ripples. Compared with the earlier three-column card wall and colorful ambient background, the current design emphasizes negative space, continuous reading, and long-term extensibility.
+現在の方向性は「夜の海 × 星空」を軸にした個人展覧会カタログです。実写写真が Hero の感情を担い、本文は深い青黒へ戻し、動きは月光、海面、透明な水紋に絞っています。初期の 3 列カードと広いカラフル背景に比べ、現在は余白、連続した読書体験、長期的な拡張性を重視しています。
 
-`docs/curated-homepage.md` records the earlier evolution of the curated homepage and motion system. Some layout and asset notes there have been superseded by later iterations; the current `app/` implementation and this README are the source of truth.
+`docs/curated-homepage.md` には初期の設計とモーションの変遷を記録していますが、一部は後続の実装で更新されています。現在の `app/` と本 README を正としてください。
