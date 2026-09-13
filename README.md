@@ -10,7 +10,7 @@
 
 > Somewhere Between Real and Imagined
 
-“数字岛屿”是 LoseYoung 的个人网页总门户，也是一个持续生长的作品索引。每座“岛屿”对应一个独立站点，承载影像、游戏、幻想世界或之后还会出现的新项目；门户本身不追求把它们做成统一产品，而是像一份展览目录一样，把彼此不同的世界放在同一个入口中。
+“数字岛屿”是 LoseYoung 的个人网页总门户，也是一个持续生长的作品索引。每座“岛屿”对应一个独立站点，承载影像、游戏、幻想世界、AI 体验或之后还会出现的新项目；门户本身不追求把它们做成统一产品，而是像一份展览目录一样，把彼此不同的世界放在同一个入口中。
 
 本仓库维护门户首页、岛屿索引、视觉动效、响应式布局、分享信息与部署配置。各个岛屿的业务逻辑与具体内容仍由各自项目维护。
 
@@ -45,7 +45,7 @@ Hero 以下使用纯净深蓝黑作为主背景，并保留一层全屏 WebGL2 �
 Selected Islands 已从三列卡片墙改为更适合长期扩展的 **Media Object / Editorial Project Index**：
 
 - 每个岛屿独占一整行，桌面端左侧封面、右侧编号 / 分类 / 标题 / 概述 / 入口。
-- 新增第 4、5、6 个岛屿时只需要继续向下追加，不再受 3 的倍数影响。
+- 新增第 5、6、7 个岛屿时只需要继续向下追加，不再受 3 的倍数影响。
 - 封面始终完整展示，使用 `object-fit: contain`，不会通过裁切或放大制造统一比例。
 - 桌面端封面最大宽度约 720px；中等屏继续等比缩小，窄屏自动切换为上下布局。
 - 岛屿区和首页共用同一套左右版心，滚动过程中页面边界保持连续。
@@ -66,6 +66,7 @@ Selected Islands 已从三列卡片墙改为更适合长期扩展的 **Media Obj
 | Photos Island · A Softer Gaze | Photography | 一册持续生长的私人影像档案，收集旅行、城市、自然与偶然相遇的瞬间，让记忆以照片的方式慢慢沉淀。 | [进入照片岛](https://photos-island.lzy793222567.chatgpt.site/) |
 | Faerie Britain Echoes · Another Reality | Fantasy / RPG | 保存关于妖精国、角色与旅途的余响，把幻想作品结束后仍未消失的氛围与记忆重新编排成一个可以再次进入的空间。 | [进入妖精国余响](https://faerie-britain-echoes.lzy793222567.chatgpt.site/) |
 | Gridwake · Further Out | Sci-Fi / FPS | 从科幻与 FPS 的节奏出发，把战斗、空间、残存秩序与陌生环境收束成一片更冷、更锋利的数字区域。 | [进入 Gridwake](https://digital-island-gridwake.lzy793222567.chatgpt.site/) |
+| RoamIsle · A Journey, in Conversation | AI Travel / Agent | 围绕 AI 旅行规划，把目的地灵感、路线整理和途中想法逐渐收束成一段可以讨论、调整并真正出发的旅程。 | [进入 RoamIsle](https://roamisle.lzy793222567.chatgpt.site/) |
 
 岛屿名称、介绍、封面和入口统一维护在 `app/islands.ts`。门户只负责展示和导航，不承担外部子站的实时可用性监测。
 
@@ -103,34 +104,19 @@ Selected Islands 已从三列卡片墙改为更适合长期扩展的 **Media Obj
 │   └── chatgpt-auth.ts           # 预留的 ChatGPT 登录辅助函数
 ├── public/
 │   ├── moonlit-ocean-pramod-tiwari.jpg # 当前 Hero 月夜海面摄影
-│   ├── photos-island.png         # 照片岛封面
-│   ├── faerie-britain.png        # 妖精国余响封面
-│   ├── gridwake.png              # Gridwake 封面
-│   ├── og.png                    # Open Graph 分享图
-│   ├── quiet-horizon.webp        # 旧版 Hero 素材，当前未使用
-│   └── moonlit-ocean-4k.svg      # 旧版生成背景，当前未使用
-├── worker/
-│   └── index.ts                  # Worker 请求处理与图片优化入口
-├── build/
-│   └── sites-vite-plugin.ts      # Sites 构建辅助
-├── .openai/
-│   └── hosting.json              # OpenAI Sites 项目关联与可选资源绑定
-├── db/
-│   ├── index.ts                  # 可选 D1 / Drizzle 数据访问工具
-│   └── schema.ts                 # 当前没有业务数据表
-├── drizzle/                      # 数据库迁移元数据
-├── .github/workflows/pages.yml  # GitHub Pages 自动构建和发布
-├── scripts/build-pages.mjs       # Pages 静态导出和发布地址配置
+│   ├── photos-island.png
+│   ├── faerie-britain.png
+│   ├── gridwake.png
+│   ├── roamisle.svg
+│   ├── og.png
+│   ├── quiet-horizon.webp
+│   └── moonlit-ocean-4k.svg
+├── .github/workflows/pages.yml
+├── scripts/build-pages.mjs
 ├── tests/
-│   ├── rendered-html.test.mjs    # Sites / 服务端渲染检查
-│   └── pages-export.test.mjs     # Pages 静态导出检查
-├── README.md                     # 当前分支语言 README
-├── vite.config.ts
-├── next.config.ts
-├── eslint.config.mjs
-├── postcss.config.mjs
-├── tsconfig.json
-├── tsconfig.pages.json
+│   ├── rendered-html.test.mjs
+│   └── pages-export.test.mjs
+├── README.md
 ├── package.json
 └── package-lock.json
 ```
@@ -142,8 +128,6 @@ Selected Islands 已从三列卡片墙改为更适合长期扩展的 **Media Obj
 - Node.js **>= 22.13.0**
 - npm
 - Git
-
-### 启动开发环境
 
 ```bash
 git clone https://github.com/LoseYoung/loseyoung-digital-islands.git
@@ -167,77 +151,27 @@ npm run dev
 | `npm test` | 先构建，再执行门户 HTML 渲染和资源检查 |
 | `npm run db:generate` | 仅在接入数据库并修改 schema 后生成 Drizzle 迁移 |
 
-推荐提交前执行：
-
-```bash
-npm run lint
-npm test
-npm run build:pages
-npm run test:pages
-```
-
 ## 内容维护
 
-新增或调整岛屿时，主要修改 `app/islands.ts`：
-
-```ts
-{
-  id: "new-island",
-  title: "Project Title",
-  description: "这里写较完整的岛屿概述，而不是一句短标语。",
-  name: "New Island",
-  category: "Category",
-  url: "https://example.com/",
-  cover: "/new-island.png",
-  coverAlt: "封面的文字替代说明",
-}
-```
-
-然后把封面放到 `public/`。编号会自动延续，单行目录会自然继续向下增加，不需要手动补齐一整行。
-
-其他常用入口：
-
-- 首页结构与静态文案：`app/page.tsx`
-- 岛屿单行布局：`app/island-index.css`
-- Hero 和章节动效：`app/exhibition-motion.css`
-- 月光动态：`app/hero-light-motion.css`
-- WebGL 水波：`app/fluid-cursor.tsx`
-- 水波层级和正文背景：`app/ambient-background.css`
-- 元数据与分享信息：`app/layout.tsx`
+新增或调整岛屿时，主要修改 `app/islands.ts`，并把对应封面加入 `public/`。编号会自动延续，单行目录会自然继续向下增加。
 
 ## 部署
 
 ### OpenAI Sites
 
-`.openai/hosting.json` 关联现有“LoseYoung · 数字岛屿”项目。当前门户不依赖 D1 / R2；真实部署资源与项目绑定由 Sites 管理。
-
-GitHub 提交与 Sites 发布是两个独立步骤：仓库更新不会自动替换已有 Sites 版本，需要在对应的 Sites 工作流中重新构建并部署。
+`.openai/hosting.json` 关联现有“LoseYoung · 数字岛屿”项目。GitHub 提交与 Sites 发布是两个独立步骤，需要在对应的 Sites 工作流中重新构建并部署。
 
 ### GitHub Pages
 
-仓库已经配置 `.github/workflows/pages.yml`。推送到 `main` 后会自动执行依赖安装、构建、静态导出、资源检查和 Pages 发布。
-
-本地可以生成同样的静态版本：
-
-```bash
-npm ci
-npm run build:pages
-npm run test:pages
-```
-
-默认 Pages 子路径为 `/loseyoung-digital-islands`。脚本和测试会处理封面、字体、脚本、样式以及分享地址在子路径下的资源引用。
+推送到 `main` 后，`.github/workflows/pages.yml` 会自动执行依赖安装、构建、静态导出、资源检查和 Pages 发布。
 
 ## 当前状态
 
 - 项目版本：**0.1.0**。
-- 当前开放 3 座岛屿，并保留 More to Arrive 未来目录。
+- 当前开放 4 座岛屿，并保留 More to Arrive 未来目录。
 - 首页已经完成月夜摄影 Hero、动态月光、透明 WebGL 水波、滚动渐进强度和单行岛屿索引。
 - 门户内容仍直接维护在源码中，没有 CMS、用户账户、照片上传或业务数据库。
-- `db/`、Drizzle、D1 / R2 和 `app/chatgpt-auth.ts` 目前只是扩展基础，不代表相关能力已经上线。
-- 后续新增岛屿时，优先通过 `app/islands.ts` 和 `public/` 扩展，不需要重做目录网格。
 
 ## 设计说明
 
-当前视觉方向是“夜海 × 星空”的个人展览目录：真实摄影负责首屏情绪，正文退回纯深蓝黑，动态只保留月光、海面与透明水波等少量层次。相比早期三列卡片和大面积彩色背景，当前版本更强调留白、连续阅读与长期扩展。
-
-`docs/curated-homepage.md` 记录了早期策展首页和动效的设计演进，其中部分布局与素材说明已经被后续版本替代；以当前 `app/` 实现和本 README 为准。
+当前视觉方向是“夜海 × 星空”的个人展览目录：真实摄影负责首屏情绪，正文退回纯深蓝黑，动态只保留月光、海面与透明水波等少量层次。
