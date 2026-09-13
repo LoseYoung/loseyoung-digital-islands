@@ -10,7 +10,7 @@
 
 > Somewhere Between Real and Imagined
 
-Digital Islands is LoseYoung's personal web portal and a continuously growing index of creative work. Each “island” is an independent site for photography, games, imagined worlds, or future experiments. The portal is not designed to flatten them into one product. Instead, it behaves more like an exhibition catalogue: different worlds, gathered under one entrance while keeping their own identities.
+Digital Islands is LoseYoung's personal web portal and a continuously growing index of creative work. Each “island” is an independent site for photography, games, imagined worlds, AI experiences, or future experiments. The portal is not designed to flatten them into one product. Instead, it behaves more like an exhibition catalogue: different worlds, gathered under one entrance while keeping their own identities.
 
 This repository contains the portal homepage, island index, visual motion system, responsive layout, sharing metadata, and deployment configuration. The business logic and actual content of each island remain in their own projects.
 
@@ -45,7 +45,7 @@ Below the Hero, the interface returns to a clean deep blue-black background with
 Selected Islands has moved away from a three-column card wall to a more scalable **Media Object / Editorial Project Index**.
 
 - Each island occupies one complete row. On desktop, the cover sits on the left and the number, category, title, description, and link sit on the right.
-- Islands 4, 5, 6, and beyond can simply be appended vertically, without any dependency on multiples of three.
+- Islands 5, 6, 7, and beyond can simply be appended vertically, without any dependency on multiples of three.
 - Covers are always shown in full with `object-fit: contain`; the layout does not crop or artificially zoom artwork into a shared aspect ratio.
 - Cover width is capped at roughly 720px on desktop, scales down proportionally at intermediate widths, and stacks above the copy on narrow screens.
 - The island section uses the same page margins as the Hero, keeping the visual baseline continuous while scrolling.
@@ -66,6 +66,7 @@ Selected Islands has moved away from a three-column card wall to a more scalable
 | Photos Island · A Softer Gaze | Photography | A growing personal image archive collecting travel, cities, nature, and accidental encounters, allowing memory to settle slowly through photographs. | [Enter Photos Island](https://photos-island.lzy793222567.chatgpt.site/) |
 | Faerie Britain Echoes · Another Reality | Fantasy / RPG | A space for preserving the echoes of Faerie Britain, its characters, and its journeys, reassembling the atmosphere that remains after the story ends. | [Enter Faerie Britain Echoes](https://faerie-britain-echoes.lzy793222567.chatgpt.site/) |
 | Gridwake · Further Out | Sci-Fi / FPS | A colder, sharper digital territory shaped by the rhythm of sci-fi and FPS design, bringing together combat, space, residual order, and unfamiliar environments. | [Enter Gridwake](https://digital-island-gridwake.lzy793222567.chatgpt.site/) |
+| RoamIsle · A Journey, in Conversation | AI Travel / Agent | An AI-assisted travel space where destination ideas, route planning, and scattered thoughts can gradually become a journey that is easier to discuss, reshape, and actually take. | [Enter RoamIsle](https://roamisle.lzy793222567.chatgpt.site/) |
 
 Island names, descriptions, covers, and destinations are maintained centrally in `app/islands.ts`. The portal is responsible for presentation and navigation only; it does not perform live availability monitoring of the external island sites.
 
@@ -106,6 +107,7 @@ The default development and Sites build commands use `vinext`. `build:pages` use
 │   ├── photos-island.png         # Photos Island cover
 │   ├── faerie-britain.png        # Faerie Britain Echoes cover
 │   ├── gridwake.png              # Gridwake cover
+│   ├── roamisle.svg              # RoamIsle cover
 │   ├── og.png                    # Open Graph image
 │   ├── quiet-horizon.webp        # Legacy Hero asset, currently unused
 │   └── moonlit-ocean-4k.svg      # Legacy generated background, currently unused
@@ -230,7 +232,7 @@ The default Pages base path is `/loseyoung-digital-islands`. The export scripts 
 ## Current Status
 
 - Version: **0.1.0**
-- Three islands are currently open, with a More to Arrive section reserved for future work.
+- Four islands are currently open, with a More to Arrive section reserved for future work.
 - The homepage now includes a moonlit photographic Hero, dynamic moonlight, transparent WebGL ripples, scroll-progressive ripple intensity, and a single-row island index.
 - Portal content is still maintained directly in source code; there is no CMS, user account system, photo upload flow, or business database.
 - `db/`, Drizzle, D1 / R2, and `app/chatgpt-auth.ts` are foundations for future extension, not currently active product features.
