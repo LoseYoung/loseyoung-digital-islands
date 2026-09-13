@@ -41,6 +41,16 @@ export const islands: Island[] = [
     cover: "/gridwake.png",
     coverAlt: "栅域余烬：像素生存世界",
   },
+  {
+    id: "roamisle",
+    title: "A Journey, in Conversation",
+    description: "有些旅行从真正出发之前就已经开始。RoamIsle 围绕 AI 旅行规划，把目的地灵感、路线整理与途中想法收束在一个更像旅行手账的空间里，让零散的念头逐渐变成可以讨论、调整并真正走出去的旅程。它更关注规划过程本身，让一次出发从工具清单变成一段有脉络的共同创作。",
+    name: "RoamIsle",
+    category: "AI Travel / Agent",
+    url: "https://roamisle.lzy793222567.chatgpt.site/",
+    cover: "/roamisle.svg",
+    coverAlt: "途屿 RoamIsle：旅行手账与路线意象封面",
+  },
 ];
 
 export const forthcoming = [
