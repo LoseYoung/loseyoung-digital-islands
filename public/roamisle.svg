@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024" role="img" aria-labelledby="title desc">
+  <title id="title">RoamIsle</title>
+  <desc id="desc">A quiet travel-journal inspired cover with a route line, island contours, and a distant horizon.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d8e7e3"/>
+      <stop offset="0.52" stop-color="#e9ddd0"/>
+      <stop offset="1" stop-color="#b9c8c4"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#91aaa7" stop-opacity=".78"/>
+      <stop offset="1" stop-color="#546f70" stop-opacity=".94"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.7" cy="0.22" r="0.28">
+      <stop offset="0" stop-color="#fff8ea" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#fff8ea" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+  <rect width="1536" height="1024" fill="#dfe7e3"/>
+  <rect width="1536" height="650" fill="url(#sky)"/>
+  <rect y="650" width="1536" height="374" fill="url(#sea)"/>
+  <circle cx="1110" cy="226" r="250" fill="url(#sun)" filter="url(#soft)"/>
+  <path d="M0 682 C250 648 460 668 678 650 C905 632 1115 654 1536 628 L1536 1024 L0 1024 Z" fill="#6f8b89" opacity=".36"/>
+  <path d="M74 820 C260 770 396 786 540 742 C666 704 736 640 865 627 C1022 611 1112 663 1262 646 C1366 634 1456 597 1536 566" fill="none" stroke="#f4f0e8" stroke-width="3" stroke-linecap="round" stroke-dasharray="10 18" opacity=".72"/>
+  <circle cx="167" cy="798" r="9" fill="#f7f2e8"/>
+  <circle cx="855" cy="630" r="10" fill="#f7f2e8"/>
+  <circle cx="1408" cy="616" r="9" fill="#f7f2e8"/>
+  <path d="M241 590 C300 543 390 527 462 550 C517 567 557 610 593 651 C513 651 436 667 360 695 C313 679 270 643 241 590 Z" fill="#486761" opacity=".62"/>
+  <path d="M972 501 C1018 468 1090 461 1141 478 C1185 493 1222 524 1254 559 C1186 558 1129 569 1065 594 C1026 578 994 547 972 501 Z" fill="#52706a" opacity=".52"/>
+  <g fill="#213438">
+    <text x="106" y="162" font-family="Georgia, 'Times New Roman', serif" font-size="38" letter-spacing="8" opacity=".78">DIGITAL ISLAND 04</text>
+    <text x="104" y="248" font-family="Georgia, 'Times New Roman', serif" font-size="102" font-style="italic">RoamIsle</text>
+    <text x="110" y="302" font-family="Arial, Helvetica, sans-serif" font-size="26" letter-spacing="5" opacity=".68">AI TRAVEL · NOTES · ROUTES</text>
+  </g>
+  <g transform="translate(107,894)" fill="#ecf1ed" opacity=".88">
+    <text font-family="Georgia, 'Times New Roman', serif" font-size="30">Where a journey begins before departure.</text>
+  </g>
+</svg>
