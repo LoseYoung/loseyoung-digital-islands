@@ -45,6 +45,7 @@ jobs:
           export TEST_URL="http://127.0.0.1:8765/${GITHUB_REPOSITORY#*/}/"
           for attempt in $(seq 1 20); do curl --fail --silent "$TEST_URL" >/dev/null && break || sleep 1; done
           python tests/browser-playgrounds.py
+          python tests/browser-aim.py
       - name: 保存交互截图与报告
         if: always()
         uses: actions/upload-artifact@v4

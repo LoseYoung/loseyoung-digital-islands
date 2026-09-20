@@ -27,7 +27,8 @@ export default function PlayableCover({ island, basePath }: { island: Island; ba
     const element = host.current;
     frame.current.querySelector<HTMLButtonElement>(".play-toolbar button:last-child")?.focus({ preventScroll: true });
     const unwatch = watchRest(frame.current, () => setActive(false));
-    import("./play/cover-engine").then(module => {
+    const engine = island.id === "gridwake" ? import("./play/aim-engine") : import("./play/cover-engine");
+    engine.then(module => {
       if (!disposed) cleanup = module.mountCover(element, { kind: island.id, basePath, status: setStatus });
     }).catch(() => { if (!disposed) setStatus("实验暂时无法加载。可以收起后重试，或直接进入岛屿。 "); });
     return () => { disposed = true; cleanup?.(); unwatch(); };

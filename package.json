@@ -12,7 +12,7 @@
     "db:generate": "drizzle-kit generate",
     "build:pages": "node scripts/build-pages.mjs",
     "test:pages": "node --test tests/pages-export.test.mjs",
-    "test:play": "node --experimental-strip-types --test tests/playgrounds.test.mjs"
+    "test:play": "node --experimental-strip-types --test tests/playgrounds.test.mjs tests/aim-model.test.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
