@@ -1,0 +1,117 @@
+/* 只精修三个封面实验；静态封面、六点瞄准、首屏与版心不变。 */
+.playable-cover:is([data-kind="photos"], [data-kind="faerie"], [data-kind="roamisle"]) { container-type: inline-size; }
+.collection .playable-cover[data-kind="photos"][data-playing="true"] { min-height: 480px; }
+.collection .playable-cover[data-kind="faerie"][data-playing="true"] { min-height: 500px; }
+.collection .playable-cover[data-kind="roamisle"][data-playing="true"] { min-height: 510px; }
+.playable-cover:is([data-kind="photos"], [data-kind="faerie"], [data-kind="roamisle"]) .play-toolbar { background: #09141cf5; border-bottom: 1px solid #bed1ce21; }
+.playable-cover:is([data-kind="photos"], [data-kind="faerie"], [data-kind="roamisle"]) .cover-engine { background: #09141bf5; }
+.playable-cover[data-kind="faerie"] .cover-engine { background: linear-gradient(180deg, #0a181be6, #0b1d20bd 50%, #09171df5); }
+.playable-cover[data-kind="roamisle"] .cover-engine { background: #111e20f5; }
+.craft-lab { position: absolute; inset: 62px 20px 72px; display: flex; flex-direction: column; gap: 12px; color: #d4dfd9; font-family: var(--body); }
+.craft-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; flex-shrink: 0; }
+.craft-identity { display: flex; flex-direction: column; gap: 6px; }
+.craft-kicker { color: #8aaba5; font: 9px/1.1 ui-monospace, monospace; letter-spacing: .18em; }
+.craft-title { font-size: 14px; font-weight: 400; letter-spacing: .08em; }
+.craft-counter { font: 16px/1.2 var(--display); color: #deceaa; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: .07em; }
+.craft-small { font-size: 9px; color: #90a5aa; }
+.craft-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
+.craft-toggle, .craft-actions { display: flex; align-items: center; gap: 5px; }
+.craft-button { min-height: 44px; padding: 8px 12px; border: 1px solid #bfd3cc30; border-radius: 4px; color: #d4e1dc; background: #101e23; font-size: 11px; cursor: pointer; touch-action: manipulation; }
+.craft-button:hover { background: #1c3032; border-color: #cbdacc7a; }
+.craft-button[aria-pressed="true"] { border-color: #d8ceaa8a; color: #eedfc0; background: #3a3a292e; }
+.craft-footnote { font-size: 9px; color: #8fa5a0; letter-spacing: .03em; line-height: 1.6; flex-shrink: 0; }
+.craft-lab [hidden] { display: none !important; }
+
+/* 暗房：定影尺、相纸边界、柔边光刷与原片。 */
+.photo-meter { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.photo-percent { color: #deceaa; font: 24px/1 var(--display); font-variant-numeric: tabular-nums; }
+.photo-track { height: 2px; background: #aac7c321; flex-shrink: 0; }
+.photo-track-fill { display: block; height: 100%; width: 0; background: #cbbb95; }
+.photo-stage { position: relative; display: flex; align-items: center; justify-content: center; flex: 1; min-height: 0; background: #050c10; border: 1px solid #c9d3c926; overflow: hidden; }
+.photo-stage::before, .photo-stage::after { position: absolute; content: ""; width: 12px; height: 12px; z-index: 2; pointer-events: none; border-color: #c8d3bd70; }
+.photo-stage::before { left: 7px; top: 7px; border-top: 1px solid; border-left: 1px solid; }
+.photo-stage::after { right: 7px; bottom: 7px; border-bottom: 1px solid; border-right: 1px solid; }
+.photo-sheet { position: relative; flex-shrink: 0; overflow: hidden; }
+.collection .playable-cover .photo-print { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transform: none; filter: none; }
+.collection .photo-lab[data-tone="silver"] .photo-print { filter: grayscale(1) sepia(.12) contrast(1.05); }
+.photo-emulsion { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.photo-gesture-hint { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; pointer-events: none; color: #bacac1; font-size: 11px; letter-spacing: .12em; }
+.photo-hint-mark { font-size: 34px; color: #dccdaf; }
+.photo-edge { position: absolute; bottom: 8px; left: 12px; font: 8px ui-monospace, monospace; letter-spacing: .18em; color: #c0cebd78; pointer-events: none; }
+.photo-caption { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 8px; color: #99aba6; letter-spacing: .08em; }
+.photo-lab[data-complete="true"] .photo-print-state { color: #dfcfa7; }
+
+/* 林间手记：有限时施法与三种可收集的共鸣，不运行背景粒子循环。 */
+.rune-stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-block: 1px solid #b9d1bb24; background: radial-gradient(ellipse at 50% 55%, #61937512, transparent 72%); }
+.rune-sheet { position: relative; flex-shrink: 0; }
+.rune-canvas { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
+.rune-whisper { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 10px; color: #c3d0b5; letter-spacing: .18em; pointer-events: none; }
+.rune-journal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; flex-shrink: 0; }
+.rune-token { min-height: 70px; border: 1px solid #bfd3c428; border-radius: 3px; background: #0b1a1bd4; color: #abbfb3; cursor: pointer; display: grid; grid-template-columns: 30px 1fr; align-content: center; text-align: left; padding: 8px 10px; column-gap: 5px; row-gap: 4px; touch-action: manipulation; }
+.rune-token-symbol { grid-row: span 2; align-self: center; font: 28px/1 var(--display); color: #b9d2bf; }
+.rune-token strong { font-size: 12px; font-weight: 400; letter-spacing: .1em; }
+.rune-token-state { font-size: 8px; color: #829e90; }
+.rune-token:hover, .rune-token[data-current="true"] { border-color: #e0d2a06e; background: #28443847; }
+.rune-token[data-discovered="true"] .rune-token-symbol { color: #ead6a6; }
+.rune-token[data-discovered="true"] .rune-token-state { color: #c6d2b8; }
+
+/* 途屿：地形线、地点签、沿途记录。地图内容明确为示意。 */
+.route-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; border: 1px solid #c6c8a53b; background: radial-gradient(ellipse at 50% 15%, #38534a55, #14282955), #102122; }
+.route-stage::after { position: absolute; content: ""; inset: 7px; border: 1px solid #cad0ae0e; pointer-events: none; }
+.route-lab .route-map { position: absolute; width: 100%; height: 100%; top: 0; }
+.route-terrain { fill: none; stroke: #9cad9626; stroke-width: 1; }
+.route-terrain .route-sketches { stroke: #d1cdb55e; stroke-width: 1.5; }
+.route-lab .route-line { fill: none; stroke: #cec29d6e; stroke-width: 2; stroke-dasharray: 4 7; stroke-linecap: round; stroke-linejoin: round; }
+.route-travelled { fill: none; stroke: #edd9a5; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.route-lab .route-map text { fill: #d1dccb; font-family: var(--body); text-anchor: middle; }
+.route-map .route-place-name { font-size: 30px; }
+.route-map .route-place-sub { font-size: 8px; letter-spacing: 2px; fill: #8fa99e; }
+.route-place-ring { fill: #152b28; stroke: #bcc8a357; stroke-width: 1; }
+.route-lab .route-dot { fill: #a5bba9; }
+.route-place.is-visited .route-place-ring { stroke: #e3cb95; }
+.route-place.is-visited .route-dot { fill: #f0d4a0; }
+.route-lab .route-traveller { fill: none; stroke: none; }
+.route-traveller-halo { fill: #ead5a415; }
+.route-arrow { fill: #f9e4ad; stroke: #31463b; stroke-width: 1; }
+.route-compass { stroke: #b9c5a47a; fill: #c9d2ab4a; stroke-width: 1; }
+.route-map .route-compass text { stroke: none; fill: #c9d2ab85; font-size: 11px; }
+.route-map-note { position: absolute; bottom: 8px; left: 10px; font: 8px ui-monospace, monospace; color: #8da396; letter-spacing: .08em; }
+.route-arrival { position: absolute; right: 12px; bottom: 14px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 16px; border: 1px solid #e4d1a478; background: #102122f5; color: #e4d1a4; transform: rotate(-5deg); }
+.route-arrival > span { font: 10px/1 ui-monospace, monospace; letter-spacing: .17em; }
+.route-arrival > strong { font-size: 10px; font-weight: 400; }
+.route-lab .route-stops { position: relative; inset: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; flex-shrink: 0; }
+.route-stop { display: grid; grid-template-columns: auto 1fr; align-items: center; text-align: center; position: relative; min-height: 56px; gap: 4px; padding: 8px; border: 1px solid #b4c2a947; border-radius: 3px; background: #26382fcc; color: #dde2cb; cursor: grab; touch-action: none; user-select: none; }
+.route-stop-number { color: #acb997; font: 9px ui-monospace, monospace; }
+.route-stop strong { font-size: 12px; font-weight: 400; }
+.route-stop-grip { grid-column: span 2; color: #a6b89a90; font-size: 12px; line-height: .65; }
+.route-stop[data-visited="true"] { border-color: #dece988c; background: #4b4c343f; }
+.route-lab .route-stops .dragging { z-index: 4; cursor: grabbing; box-shadow: 0 9px 20px #0004; background: #35483b; border-color: #eadbb0; }
+.route-stop.drop-here { border-style: dashed; border-color: #efdba6; background: #cebb8330; }
+.route-journal-note { font-size: 10px; line-height: 1.7; color: #b2c1aa; max-width: 65%; }
+.route-lab .craft-button { border-color: #cdbf9661; color: #eadbb9; background: #2b3e33; white-space: nowrap; }
+
+@container (max-width: 450px) {
+  .craft-lab { inset-inline: 12px; gap: 10px; }
+  .craft-title { font-size: 12px; letter-spacing: .02em; }
+  .craft-kicker { font-size: 8px; letter-spacing: .1em; }
+  .craft-button { padding-inline: 9px; font-size: 10px; }
+  .craft-toggle, .craft-actions { gap: 4px; }
+  .rune-token { grid-template-columns: 22px 1fr; padding: 8px 6px; column-gap: 3px; }
+  .rune-token-symbol { font-size: 24px; }
+  .rune-token strong { font-size: 11px; }
+  .rune-token-state { font-size: 8px; letter-spacing: 0; }
+  .rune-journal { gap: 6px; }
+  .route-lab .route-stops { gap: 5px; }
+  .route-stop { padding-inline: 5px; gap: 3px; }
+  .route-stop strong { font-size: 11px; }
+  .route-journal-note { font-size: 10px; }
+  .photo-caption { letter-spacing: .03em; }
+  .route-map .route-place-name { font-size: 39px; }
+  .route-map .route-place-sub { display: none; }
+}
+@media (max-width: 640px) {
+  .craft-lab { top: 67px; bottom: 83px; }
+  .collection .playable-cover[data-kind="photos"][data-playing="true"] { min-height: 490px; }
+  .collection .playable-cover[data-kind="faerie"][data-playing="true"] { min-height: 510px; }
+  .collection .playable-cover[data-kind="roamisle"][data-playing="true"] { min-height: 520px; }
+}
