@@ -1,10 +1,17 @@
-import json, math, os
+import atexit, json, math, os, sys, time, traceback
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 URL = os.environ.get('TEST_URL','http://127.0.0.1:8765/loseyoung-digital-islands/')
 OUT = Path(os.environ.get('TEST_OUTPUT','outputs/playgrounds')); OUT.mkdir(parents=True,exist_ok=True)
 results=[]
+def save_progress():
+    (OUT/'report.json').write_text(json.dumps({'checks':results,'count':len(results)},ensure_ascii=False,indent=2))
+atexit.register(save_progress)
+def save_error(kind,value,tb):
+    (OUT/'failure.txt').write_text(''.join(traceback.format_exception(kind,value,tb)))
+    sys.__excepthook__(kind,value,tb)
+sys.excepthook=save_error
 def ok(s): results.append(s); print('通过：'+s, flush=True)
 def cover(page, kind): return page.locator(f'.playable-cover[data-kind="{kind}"]')
 def open_cover(page, kind):
@@ -38,10 +45,15 @@ with sync_playwright() as p:
     page.mouse.move(x,y); page.mouse.down(); page.mouse.move(x-120,y+220,steps=8); page.wait_for_timeout(250); page.mouse.up(); page.wait_for_timeout(850)
     assert '一圈涟漪' in page.locator('.star-feedback').inner_text()
     ok('拖住后停下轻放只落水一次')
-    # 最后一段快速甩出；避免远程鼠标多次往返把快甩人为变成慢拖。
+    # CDP 的时间戳模拟真实 120ms 手势，避免软件 GPU 下 IPC 往返把快甩变成停顿。
+    # 仍走原生命中测试、pointer capture 与 PointerEvent，不直接调用投掷函数。
     box=star.bounding_box(); x=box['x']+box['width']/2; y=box['y']+box['height']/2
-    page.mouse.move(x,y); page.mouse.down(); page.mouse.move(x-100,y+200,steps=5); page.mouse.move(x-380,y+230,steps=1); page.mouse.up(); page.wait_for_timeout(2900)
+    cdp=ctx.new_cdp_session(page); ts=time.time()
+    for event,dx,dy,dt,buttons in [('mouseMoved',0,0,0,0),('mousePressed',0,0,.01,1),('mouseMoved',-100,200,.07,1),('mouseMoved',-380,230,.11,1),('mouseReleased',-380,230,.13,0)]:
+        cdp.send('Input.dispatchMouseEvent',{'type':event,'x':x+dx,'y':y+dy,'button':'left' if buttons or event=='mouseReleased' else 'none','buttons':buttons,'clickCount':1,'timestamp':ts+dt})
+    page.wait_for_timeout(2900)
     assert '次海面' in page.locator('.star-feedback').inner_text(), page.locator('.star-feedback').inner_text()
+    cdp.detach()
     ok('横向快速甩出不同于轻放')
     star.focus(); page.keyboard.press('Enter'); page.wait_for_timeout(150); page.keyboard.press('Escape')
     assert pixels(page,'.star-canvas')==0
@@ -121,5 +133,4 @@ with sync_playwright() as p:
     assert n.locator('.island-caption[href^="https:"]').count()==4
     ok('无 JavaScript 时没有死按钮，四个作品仍可直接进入')
     browser.close()
-(OUT/'report.json').write_text(json.dumps({'checks':results,'count':len(results)},ensure_ascii=False,indent=2))
 print('全部浏览器回归通过。',flush=True)

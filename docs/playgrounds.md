@@ -4,7 +4,7 @@
 
 ## 怎么玩
 
-- 首屏的「摘一颗星」支持拖拽、甩出后松手。近 110ms 的手势速度和方向决定轨迹与 1–6 次落水；轻放一次，横向快速甩出可多次弹跳。点击 / Enter 提供预设投掷，Esc 中止。后台、离开首屏或打开封面实验会停止动画。
+- 首屏的「摘一颗星」支持拖拽、甩出后松手。最近一段有效手势的速度和方向决定轨迹与 1–6 次落水；轻放一次，横向快速甩出可多次弹跳。点击 / Enter 提供预设投掷，Esc 中止。后台、离开首屏或打开封面实验会停止动画。
 - Photos Island：用笔迹擦去暗层，显出仓库现有的月夜摄影。支持「显影整幅」按钮；这不是 AI 识图，也不是按笔迹搜索照片库。
 - Faerie Britain Echoes：圆环、折线、长弧分别触发月环、星芒与微风。使用简单几何判别，不使用模型；按钮提供不依赖绘画的替代操作。
 - Gridwake：依次点击六个目标。首击之后计时，显示本轮用时和空击次数；支持 Tab / Enter，无排行榜，不收集操作数据。
@@ -20,7 +20,7 @@
 
 ## 文件与验证
 
-- `app/play/physics.ts`：纯计算、符文识别与排序函数。
+- `app/play/physics.ts`：纯计算、符文识别、投掷采样与排序函数。
 - `app/play/runtime.ts`：停止条件、画布与本地控件辅助。
 - `app/play/star-engine.ts`：投掷输入、轨迹及落水反馈。
 - `app/play/cover-engine.ts`：四种封面实验。
@@ -28,10 +28,12 @@
 - `app/playgrounds.css`：局部样式，不改变原版心。
 
 ```bash
-node --experimental-strip-types --test tests/playgrounds.test.mjs
+npm run test:play
 npm test
 npm run build:pages
 npm run test:pages
 ```
 
-浏览器回归应覆盖：四种实验的真实输入和重置、拖拽 / 点击投掷差异、收起后的焦点恢复、移出视口停止、后台停止、Motion 切换、手机无横向溢出、无脚本时正常导航，以及 Pages 子路径下的动态模块和图片加载。
+`.github/workflows/playgrounds.yml` 在涉及交互代码的 PR 中运行真实 Chromium 回归。浏览器依赖仅安装在 CI，不加入页面运行时依赖。也可以在已经安装 Python Playwright 的环境中，启动 `out/` 对应子路径的静态服务器，设置 `TEST_URL` 后运行 `python tests/browser-playgrounds.py`。
+
+浏览器回归覆盖四种实验的真实输入和重置、拖拽 / 点击投掷差异、收起后的焦点恢复、移出视口停止、后台事件、Motion 切换、手机无横向溢出、无脚本时正常导航，以及 Pages 子路径下的动态模块和图片加载。快速手势通过 CDP 的原生输入时间戳保证测试速度不受 CI 软件 GPU 与控制进程往返延迟干扰；不是绕过输入直接调用业务函数。截图和报告保存到 `outputs/playgrounds/`，失败时同样保留诊断。
