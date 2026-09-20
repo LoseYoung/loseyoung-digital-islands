@@ -1,4 +1,4 @@
-import { clamp, makeSkipPlan, pointOnHop, type Point, type Hop } from "./physics";
+import { clamp, makeSkipPlan, pointOnHop, releaseVelocity, type Point, type Hop } from "./physics";
 import { motionAllowed, PLAY_EVENT, watchRest } from "./runtime";
 
 /** 首屏局部的星体轨迹 + 透视水圈。不增加第二套全屏 WebGL。 */
@@ -89,25 +89,25 @@ export function mountStar(host: HTMLElement, report: (message: string) => void) 
   button.addEventListener("pointerdown", event => {
     if (!event.isPrimary || event.button !== 0 || busy) return;
     event.stopPropagation(); announce(); pointer = event.pointerId; dragged = false; suppressClick = false;
-    origin = local(event); samples = [{ point: origin, time: performance.now() }];
+    origin = local(event); samples = [{ point: origin, time: event.timeStamp }];
     button.setPointerCapture(pointer); button.dataset.dragging = "true";
   }, { signal });
   button.addEventListener("pointermove", event => {
     if (pointer !== event.pointerId) return;
-    event.stopPropagation(); const p = local(event); const time = performance.now();
+    event.stopPropagation(); const p = local(event); const time = event.timeStamp;
     dragged ||= Math.hypot((p.x - origin.x) * width, (p.y - origin.y) * height) > 8;
-    samples.push({ point: p, time }); samples = samples.filter(sample => time - sample.time < 110).slice(-12);
+    samples.push({ point: p, time });
+    // 不能把低帧率下超过采样窗口的前一点全部删掉，否则快甩会被误算为零速度。
+    while (samples.length > 2 && (time - samples[1].time > 150 || samples.length > 16)) samples.shift();
     if (dragged) { button.style.left = `${p.x * 100}%`; button.style.top = `${p.y * 100}%`; }
   }, { signal });
   button.addEventListener("pointerup", event => {
     if (pointer !== event.pointerId) return;
-    event.stopPropagation(); const end = local(event); const now = performance.now();
-    const first = samples[0], last = samples.at(-1); pointer = null; button.dataset.dragging = "false";
+    event.stopPropagation(); const end = local(event); const now = event.timeStamp;
+    pointer = null; button.dataset.dragging = "false";
     if (dragged) {
       suppressClick = true;
-      const elapsed = Math.max((now - (first?.time ?? now)) / 1000, .025);
-      const velocity = last && now - last.time < 140 && first ? { x: (end.x - first.point.x) / elapsed, y: (end.y - first.point.y) / elapsed } : { x: 0, y: 0 };
-      launch(end, velocity);
+      launch(end, releaseVelocity(samples, end, now));
     } else restore();
   }, { signal });
   button.addEventListener("click", event => {

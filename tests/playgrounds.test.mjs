@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { makeSkipPlan, pointOnHop, recognizeRune, moveStop } from "../app/play/physics.ts";
+import { makeSkipPlan, pointOnHop, recognizeRune, moveStop, releaseVelocity } from "../app/play/physics.ts";
 
 test("轻放一次落水，横向快速投掷产生更多落点", () => {
   assert.equal(makeSkipPlan({ x: .8, y: .3 }, { x: 0, y: 0 }).length, 1);
@@ -49,4 +49,11 @@ test("路线拖拽和键盘复用排序逻辑，不丢地点、不修改原数�
   assert.deepEqual(moveStop(route, 0, 3), [1, 2, 3, 0]);
   assert.deepEqual(moveStop(route, 3, 0), [3, 0, 1, 2]);
   assert.deepEqual(moveStop(route, -1, 1), route); assert.deepEqual(route, [0, 1, 2, 3]);
+});
+
+test("低帧率稀疏采样仍保留投掷速度，停住后松手按轻放处理", () => {
+  const samples = [{ point: { x: .8, y: .3 }, time: 100 }, { point: { x: .55, y: .32 }, time: 280 }];
+  assert.ok(releaseVelocity(samples, { x: .55, y: .32 }, 290).x < -1);
+  assert.deepEqual(releaseVelocity(samples, { x: .55, y: .32 }, 540), { x: 0, y: 0 });
+  assert.deepEqual(releaseVelocity([], { x: .5, y: .5 }, 500), { x: 0, y: 0 });
 });

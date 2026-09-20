@@ -13,7 +13,7 @@ export function makeSkipPlan(start: Point, velocity: Point): Hop[] {
   const skim = Math.abs(vx) / Math.max(speed, .01);
   const count = 1 + Math.floor(clamp(speed * skim * 2.8, 0, 5));
   const direction = Math.abs(vx) > .04 ? Math.sign(vx) : (x > .5 ? -1 : 1);
-  const room = direction < 0 ? x - .06 : .94 - x;
+  const room = Math.max(0, direction < 0 ? x - .06 : .94 - x);
   const distance = Math.min(room, .12 + speed * .20);
   const first = { x: x + direction * distance * .35, y: .79 };
   const hops: Hop[] = [{ from: { x, y }, to: first, height: .055, duration: clamp(.66 - speed * .07, .38, .66) }];
@@ -57,4 +57,13 @@ export function moveStop(route: number[], from: number, to: number): number[] {
   const result = [...route];
   result.splice(to, 0, result.splice(from, 1)[0]);
   return result;
+}
+
+/** 保留低帧率时的最后一段位移；停住超过 160ms 则按轻放处理。 */
+export type PointerSample = { point: Point; time: number };
+export function releaseVelocity(samples: PointerSample[], end: Point, now: number): Point {
+  const last = samples.at(-1), first = samples[0];
+  if (!first || !last || samples.length < 2 || now - last.time > 160) return { x: 0, y: 0 };
+  const elapsed = Math.max((now - first.time) / 1000, .025);
+  return { x: clamp((end.x - first.point.x) / elapsed, -2, 2), y: clamp((end.y - first.point.y) / elapsed, -2, 2) };
 }

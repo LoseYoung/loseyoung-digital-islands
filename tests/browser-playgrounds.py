@@ -31,17 +31,17 @@ with sync_playwright() as p:
     assert pixels(page,'.star-canvas')>0
     page.screenshot(path=str(OUT/'star-impact.png'))
     page.wait_for_timeout(2000)
-    assert '次海面' in page.locator('.star-feedback').inner_text()
+    assert '次海面' in page.locator('.star-feedback').inner_text(), page.locator('.star-feedback').inner_text()
     ok('点击星光后出现真实轨迹、多个落点和结果')
     # 轻放：停住再松手，不把早期拖动速度误算成投掷速度。
     box=star.bounding_box(); x=box['x']+box['width']/2; y=box['y']+box['height']/2
     page.mouse.move(x,y); page.mouse.down(); page.mouse.move(x-120,y+220,steps=8); page.wait_for_timeout(250); page.mouse.up(); page.wait_for_timeout(850)
     assert '一圈涟漪' in page.locator('.star-feedback').inner_text()
     ok('拖住后停下轻放只落水一次')
-    # 甩出。
+    # 最后一段快速甩出；避免远程鼠标多次往返把快甩人为变成慢拖。
     box=star.bounding_box(); x=box['x']+box['width']/2; y=box['y']+box['height']/2
-    page.mouse.move(x,y); page.mouse.down(); page.mouse.move(x-100,y+200,steps=5); page.mouse.move(x-380,y+230,steps=5); page.mouse.up(); page.wait_for_timeout(2900)
-    assert '次海面' in page.locator('.star-feedback').inner_text()
+    page.mouse.move(x,y); page.mouse.down(); page.mouse.move(x-100,y+200,steps=5); page.mouse.move(x-380,y+230,steps=1); page.mouse.up(); page.wait_for_timeout(2900)
+    assert '次海面' in page.locator('.star-feedback').inner_text(), page.locator('.star-feedback').inner_text()
     ok('横向快速甩出不同于轻放')
     star.focus(); page.keyboard.press('Enter'); page.wait_for_timeout(150); page.keyboard.press('Escape')
     assert pixels(page,'.star-canvas')==0
