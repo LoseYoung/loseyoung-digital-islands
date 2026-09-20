@@ -50,7 +50,7 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
     current = kind; root.dataset.rune = kind;
     if (!records.has(kind) || !assisted) records.set(kind, assisted ? "assisted" : "drawn"); updateJournal();
     whisper.textContent = `${spells[kind].glyph}  ${spells[kind].name} / ${assisted ? "辅助施法" : "手绘共鸣"}`;
-    options.status(`${spells[kind].note}${records.size === 3 ? "三种符文都已留下回应。" : `已记录 ${records.size} / 3 种符文。`}`);
+    options.status(`${spells[kind].name} · ${spells[kind].note}${records.size === 3 ? "三种符文都已留下回应。" : `已记录 ${records.size} / 3 种符文。`}`);
     const center = path.reduce((sum, p) => ({ x: sum.x + p.x / path.length, y: sum.y + p.y / path.length }), { x: 0, y: 0 });
     const start = performance.now();
     const render = (now: number) => {

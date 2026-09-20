@@ -50,6 +50,7 @@ with sync_playwright() as p:
     photo.get_by_role('button', name='显影整幅', exact=True).click()
     assert pixels(canvas) == 0 and photo.locator('.photo-percent').inner_text() == '100%'
     photo.get_by_role('button', name='银盐影调', exact=True).click()
+    page.wait_for_function("getComputedStyle(document.querySelector('.photo-print')).filter.includes('grayscale(1)')")
     assert 'grayscale(1)' in photo.locator('.photo-print').evaluate('(el)=>getComputedStyle(el).filter')
     photo.screenshot(path=str(OUT/'photo-silver.png'))
     photo.get_by_role('button', name='重来', exact=True).click(); page.wait_for_timeout(200)
