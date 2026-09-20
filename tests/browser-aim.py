@@ -95,14 +95,23 @@ with sync_playwright() as p:
         context = browser.new_context(viewport={'width':width,'height':900}, has_touch=True, is_mobile=width<641)
         m = context.new_page(); m.on('pageerror',lambda e:errors.append(str(e)))
         m.goto(URL); mc = open_range(m)
-        toolbar = mc.locator('.play-toolbar').bounding_box(); hud = mc.locator('.aim-hud').bounding_box()
-        assert hud['y'] >= toolbar['y'] + toolbar['height'] - 1, (width, toolbar, hud)
+        # 同一个浏览器任务内读取相对几何；避免章节显现/滚动时两次 IPC 跨帧。
+        geometry = mc.evaluate('''el => {
+          const rect = selector => el.querySelector(selector).getBoundingClientRect().toJSON();
+          return { toolbar: rect('.play-toolbar'), hud: rect('.aim-hud') };
+        }''')
+        toolbar, hud = geometry['toolbar'], geometry['hud']
+        assert hud['y'] >= toolbar['y'] + toolbar['height'] - 1, (width, geometry)
         for n in range(1,7):
             t = hit(mc,n); expect(t).to_be_visible()
-            tb = t.bounding_box(); fb = mc.locator('.aim-field').bounding_box()
-            assert tb['width'] >= 44 and tb['height'] >= 44
-            assert tb['x'] >= fb['x'] and tb['x']+tb['width'] <= fb['x']+fb['width']
-            assert tb['y'] >= fb['y'] and tb['y']+tb['height'] <= fb['y']+fb['height']
+            geometry = t.evaluate('''el => ({
+              target: el.getBoundingClientRect().toJSON(),
+              field: el.closest('.aim-field').getBoundingClientRect().toJSON()
+            })''')
+            tb, fb = geometry['target'], geometry['field']
+            assert tb['width'] >= 44 and tb['height'] >= 44, (width,n,geometry)
+            assert tb['x'] >= fb['x'] and tb['x']+tb['width'] <= fb['x']+fb['width'], (width,n,geometry)
+            assert tb['y'] >= fb['y'] and tb['y']+tb['height'] <= fb['y']+fb['height'], (width,n,geometry)
             t.tap()
         expect(mc.locator('.aim-results')).to_be_visible()
         assert m.evaluate('document.documentElement.scrollWidth<=innerWidth')
