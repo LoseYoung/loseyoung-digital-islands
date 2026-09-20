@@ -1,0 +1,84 @@
+/* 可玩但不喧闹：默认不自动启动，封面完整显示，入口与实验分离。 */
+.playable-cover { isolation: isolate; }
+.collection .playable-cover::after { pointer-events: none; z-index: 0; }
+.cover-still { display: block; }
+.collection .playable-cover .cover-still img { width: 100%; height: auto; object-fit: contain; transform: none; }
+.cover-launch {
+  position: absolute; z-index: 2; left: 18px; bottom: 18px;
+  display: inline-flex; align-items: center; gap: 9px; min-height: 44px;
+  padding: 9px 16px; border: 1px solid #dbe8ec50; border-radius: 999px;
+  color: #e3ecee; background: #09151ee8; font-size: 12px; letter-spacing: .06em;
+  cursor: pointer; transition: background .2s, border-color .2s;
+}
+.cover-launch:hover { background: #1a2c37; border-color: #dce9ee99; }
+.cover-launch > span:first-child { font-size: 20px; }
+.cover-launch-name { color: #a9bdc8; letter-spacing: .02em; }
+.cover-launch[hidden], .cover-playground[hidden], .star-skipping[hidden] { display: none !important; }
+.playable-cover button:focus-visible, .throw-star:focus-visible { outline: 2px solid #dae8e9; outline-offset: -4px; }
+.collection .playable-cover[data-playing="true"] .cover-still img { filter: saturate(.6) brightness(.48); }
+.collection .playable-cover[data-playing="true"]::after { display: none; }
+.cover-playground, .cover-engine { position: absolute; inset: 0; }
+.cover-playground { z-index: 3; background: #07121b30; }
+.cover-engine { overflow: hidden; }
+.play-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.play-toolbar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 4;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  min-height: 48px; padding: 7px 16px;
+  background: linear-gradient(#07111aee, #07111a60); color: #bdcfda; font-size: 11px; letter-spacing: .06em;
+}
+.play-toolbar > div { display: flex; gap: 4px; }
+.play-toolbar button { cursor: pointer; padding: 7px 10px; min-height: 36px; border: 0; border-radius: 3px; background: #0a18219c; color: #dfe9ec; }
+.play-status {
+  position: absolute; z-index: 2; inset: auto 0 0; margin: 0; padding: 24px 18px 14px;
+  min-height: 60px; background: linear-gradient(transparent, #07111af2 40%);
+  color: #c4d4df; font-size: 12px; line-height: 1.7; pointer-events: none;
+}
+.play-controls { position: absolute; z-index: 2; left: 18px; bottom: 76px; display: flex; flex-wrap: wrap; gap: 8px; }
+.play-control { border: 1px solid #bfd8d74d; background: #09171fdd; color: #dcebe7; padding: 9px 13px; min-height: 40px; border-radius: 3px; font-size: 12px; cursor: pointer; }
+.play-control:hover { border-color: #dcebe7; }
+.playable-cover[data-kind="faerie"] .cover-engine { background: radial-gradient(ellipse at 50% 45%, #47605718, transparent 70%); }
+.target-field { position: absolute; inset: 50px 0 65px; background-image: linear-gradient(#a3c7d40c 1px, transparent 1px), linear-gradient(90deg, #a3c7d40c 1px, transparent 1px); background-size: 36px 36px; }
+.grid-target { position: absolute; transform: translate(-50%, -50%); width: 54px; height: 54px; border: 1px solid #c2e1e4; background: #0b2534e8; border-radius: 50%; cursor: crosshair; color: #f2f7ed; font: 12px ui-monospace, monospace; box-shadow: 0 0 0 7px #98c9d51a, 0 0 24px #98c9d51a; }
+.grid-target[hidden] { display: none; }
+.target-complete { position: absolute; left: 0; right: 0; top: 35%; text-align: center; color: #c9e1d7; font: 16px ui-monospace, monospace; letter-spacing: .24em; }
+.playable-cover[data-kind="roamisle"] .cover-engine { background: #111c20ed; }
+.route-map { position: absolute; width: 100%; height: 65%; top: 40px; }
+.route-map text { fill: #c4d6cd; font-size: 21px; text-anchor: middle; font-family: var(--body); }
+.route-line { fill: none; stroke: #cbbd94; stroke-width: 2; stroke-dasharray: 6 7; }
+.route-dot { fill: #9cabaa; }
+.route-traveller { fill: #f6e6bb; stroke: #13232b; stroke-width: 3; }
+.route-note { position: absolute; left: 18px; top: 50px; margin: 0; color: #8fa8a5; font-size: 10px; }
+.route-stops { position: absolute; left: 18px; right: 18px; bottom: 127px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.route-stops .play-control { padding: 10px 4px; font-size: 11px; touch-action: none; user-select: none; cursor: grab; }
+.route-stops .dragging { z-index: 5; cursor: grabbing; background: #354945; border-color: #eadfbc; }
+
+/* 首屏小彩蛋：只有星星按钮接管指针；整张海面仍可滚动、点击原导航。 */
+.star-skipping { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.star-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.throw-star { position: absolute; left: 82%; top: 12%; transform: translate(-50%, -50%); pointer-events: auto; touch-action: none; user-select: none; width: 76px; height: 76px; border: 0; background: transparent; color: #e5ede4; cursor: grab; border-radius: 50%; padding: 0; }
+.star-glyph { display: inline-block; font-size: 30px; line-height: 1; text-shadow: 0 0 18px #c4dced99; transition: transform .22s; }
+.throw-star:hover .star-glyph { transform: scale(1.2); }
+.throw-star[data-dragging="true"] { cursor: grabbing; }
+.throw-star[data-flying="true"] { opacity: .24; cursor: default; }
+.star-label { display: block; font-size: 10px; color: #b0c5cc; margin-top: 8px; letter-spacing: .14em; white-space: nowrap; }
+.star-feedback { position: absolute; right: max(48px, calc((100% - 1580px) / 2)); bottom: 98px; max-width: 300px; margin: 0; padding-left: 15px; border-left: 1px solid #aec8d440; font-size: 11px; line-height: 1.9; color: #bbced7; text-wrap: pretty; }
+@media (max-width: 900px) {
+  .star-feedback { right: 32px; bottom: 92px; max-width: 240px; }
+}
+@media (max-width: 640px) {
+  .collection .playable-cover[data-playing="true"] { min-height: 380px; }
+  .cover-launch { left: 12px; bottom: 12px; padding-inline: 12px; }
+  .play-toolbar { padding-inline: 10px; }
+  .play-toolbar button { min-height: 44px; }
+  .play-controls { bottom: 88px; left: 12px; }
+  .play-control { min-height: 44px; }
+  .play-status { padding: 22px 12px 12px; font-size: 11px; }
+  .route-stops { bottom: 145px; left: 12px; right: 12px; gap: 5px; }
+  .route-map { height: 48%; top: 63px; }
+  .route-note { top: 60px; left: 12px; }
+  .throw-star { left: 86%; top: 5%; width: 64px; height: 64px; }
+  .star-feedback { right: 18px; bottom: 78px; max-width: 210px; font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .star-glyph { transition: none; } }
+html[data-motion="off"] .star-glyph { transition: none; }

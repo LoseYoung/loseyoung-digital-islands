@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import CatalogueMotion from "./catalogue-motion";
 import FluidCursor from "./fluid-cursor";
+import PlayableCover from "./playable-cover";
+import StarSkipping from "./star-skipping";
 import { catalogueNumber, forthcoming, islands } from "./islands";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -41,6 +43,7 @@ export default function Home() {
           <div className="distant-lights">{Array.from({ length: 12 }, (_, index) => <i key={index} style={{ "--star-x": `${9 + (index * 47) % 86}%`, "--star-y": `${8 + (index * 23) % 44}%`, "--star-delay": `${-index * 1.6}s`, "--star-duration": `${7 + index % 5}s` } as CSSProperties} />)}</div>
           <div className="horizon-glow" />
         </div>
+        <StarSkipping />
         <div className="hero-content shell">
           <p className="eyebrow hero-eyebrow" lang="en">A personal collection <span>—</span> always in progress</p>
           <h1 id="hero-title" lang="en"><span className="hero-title-line">Somewhere Between</span><span className="hero-title-line">Real and <em>Imagined</em></span></h1>
@@ -67,16 +70,20 @@ export default function Home() {
       <section id="islands" className="collection shell section-space" aria-labelledby="islands-title" data-chapter>
         <header className="section-heading" data-reveal>
           <div><p className="eyebrow" lang="en">The collection</p><h2 id="islands-title" lang="en">Selected <em>Islands</em></h2></div>
-          <p>正在形成中的目录里，<br />目前可进入的部分。</p>
+          <p>正在形成中的目录里，<br />也藏着几个可以亲手唤醒的小世界。</p>
         </header>
         <div className="island-grid">
           {islands.map((island, index) => (
-            <article key={island.id} className="island-entry" data-reveal="card" style={{ "--reveal-delay": `${(index % 3) * 130}ms` } as CSSProperties}>
-              <a className="island-card" href={island.url} target="_blank" rel="noopener noreferrer" aria-label={`${island.name} · 在新标签页打开`}>
+            <article key={island.id} className="island-entry" data-reveal="card">
+              <div className="island-card">
                 <div className="island-topline"><span>{catalogueNumber(index)}</span><span lang="en">{island.category}</span><Arrow diagonal /></div>
-                <div className="island-image"><img src={`${basePath}${island.cover}`} alt={island.coverAlt} width="1536" height="1024" loading="lazy" decoding="async" /></div>
-                <div className="island-copy"><h3 lang="en">{island.title}</h3><p>{island.description}</p><div className="island-caption"><span lang="en">{island.name}</span><Arrow diagonal /></div></div>
-              </a>
+                <PlayableCover island={island} basePath={basePath} />
+                <div className="island-copy">
+                  <h3 lang="en"><a href={island.url} target="_blank" rel="noopener noreferrer" aria-label={`${island.name} · 在新标签页打开`}>{island.title}</a></h3>
+                  <p>{island.description}</p>
+                  <a className="island-caption" href={island.url} target="_blank" rel="noopener noreferrer" aria-label={`${island.name} · 在新标签页打开`}><span lang="en">{island.name}</span><span>进入岛屿 <Arrow diagonal /></span></a>
+                </div>
+              </div>
             </article>
           ))}
         </div>

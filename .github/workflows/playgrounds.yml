@@ -1,0 +1,55 @@
+name: Verify playable islands
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'tests/**'
+      - 'package*.json'
+      - '.github/workflows/playgrounds.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playgrounds-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run test:play
+      - run: npm run build:pages
+      # 浏览器仅装在 CI 环境，不新增网页运行时依赖。
+      - name: 安装回归浏览器
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: 验证桌面、触屏、键盘和动效降级
+        run: |
+          mkdir -p "$RUNNER_TEMP/playgrounds-web"
+          ln -s "$GITHUB_WORKSPACE/out" "$RUNNER_TEMP/playgrounds-web/${GITHUB_REPOSITORY#*/}"
+          python -m http.server 8765 --bind 127.0.0.1 --directory "$RUNNER_TEMP/playgrounds-web" > "$RUNNER_TEMP/playgrounds-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID"' EXIT
+          export TEST_URL="http://127.0.0.1:8765/${GITHUB_REPOSITORY#*/}/"
+          for attempt in $(seq 1 20); do curl --fail --silent "$TEST_URL" >/dev/null && break || sleep 1; done
+          python tests/browser-playgrounds.py
+      - name: 保存交互截图与报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playground-browser-report
+          path: outputs/playgrounds/
+          if-no-files-found: ignore
+          retention-days: 7
