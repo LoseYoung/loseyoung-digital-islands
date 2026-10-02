@@ -48,6 +48,7 @@ jobs:
           python tests/browser-aim.py
           python tests/browser-crafts.py
           python tests/browser-continuity.py
+          python tests/browser-dialog.py
       - name: 保存交互截图与报告
         if: always()
         uses: actions/upload-artifact@v4
