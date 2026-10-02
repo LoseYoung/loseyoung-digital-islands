@@ -40,3 +40,6 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# 构建时生成的版本标识不进入源码历史
+/public/build-info.json

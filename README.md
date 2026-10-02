@@ -1,8 +1,6 @@
 <p align="center">
-  <strong><kbd>English</kbd></strong>
-  ·
-  <a href="https://github.com/LoseYoung/loseyoung-digital-islands/tree/doc-zh"><kbd>简体中文</kbd></a>
-  ·
+  <strong><kbd>English</kbd></strong> ·
+  <a href="https://github.com/LoseYoung/loseyoung-digital-islands/tree/doc-zh"><kbd>简体中文</kbd></a> ·
   <a href="https://github.com/LoseYoung/loseyoung-digital-islands/tree/doc-ja"><kbd>日本語</kbd></a>
 </p>
 
@@ -10,142 +8,64 @@
 
 > Somewhere Between Real and Imagined
 
-Digital Islands is LoseYoung's personal web portal and a continuously growing index of creative work. Each “island” is an independent site for photography, games, imagined worlds, AI experiences, or future experiments. The portal is not designed to flatten them into one product. Instead, it behaves more like an exhibition catalogue: different worlds, gathered under one entrance while keeping their own identities.
+Digital Islands is LoseYoung's personal portal and a growing exhibition catalogue. Each island is an independent world for photography, games, imagined places, or AI-assisted travel. The homepage gathers them without flattening their identities into one product.
 
-This repository contains the portal homepage, island index, visual motion system, responsive layout, sharing metadata, and deployment configuration. The business logic and actual content of each island remain in their own projects.
+This repository maintains the portal, its visual system and optional playable cover experiments. The actual games, photo collection and travel services remain in their separate projects.
 
-**Live**
-
-- [OpenAI Sites · Digital Islands](https://loseyoung-digital-islands.lzy793222567.chatgpt.site)
-- [GitHub Pages · Digital Islands](https://loseyoung.github.io/loseyoung-digital-islands/)
+[GitHub Pages](https://loseyoung.github.io/loseyoung-digital-islands/) · [Sites](https://loseyoung-digital-islands.lzy793222567.chatgpt.site)
 
 ## Current Experience
 
-### Moonlit Hero
+The photographic moonlit-ocean Hero retains breathing light bands, scroll-responsive moonlight and subtle sea reflections. Below it, the page returns to deep blue-black with transparent silver-blue water ripples. Each island occupies a single row, with a complete, uncropped cover on the left and its introduction on the right; narrow screens stack the two. The catalogue shares the Hero's margins.
 
-The first screen uses a real moonlit-ocean photograph as the visual anchor, with restrained exhibition-style motion layered on top.
+### A star you can throw
 
-- The moonlight entering from the upper-right is built from several light bands and continues to breathe and drift while the page is idle.
-- As the Hero scrolls away, the light direction, position, and spread change more noticeably, while the sea reflection, moon haze, and horizon glow respond with it.
-- The title and introduction enter slowly with a subtle parallax treatment, then recede as the page scrolls.
-- The active background image is `public/moonlit-ocean-pramod-tiwari.jpg`. Earlier generated backgrounds are still kept in `public/` as historical assets, but they are no longer used as the main Hero artwork.
+Drag the star toward the sea and release it. Gesture speed changes the flight and one to six skips; a gentle drop makes one splash. A first-impact guide appears only while dragging. Brief contact light and bounded droplets precede the transparent perspective rings. After a round, try landing the last skip in the moonlit target. Click or Enter provides an alternative throw; Esc cancels.
 
-### Transparent Ripple Interaction
+### Playable islands
 
-Below the Hero, the interface returns to a clean deep blue-black background with a full-screen WebGL2 ripple layer.
+| Island | Cover experiment | Full project |
+| --- | --- | --- |
+| Photos Island · A Softer Gaze | Reveal a photograph with light, undo a stroke, fix a partial composition and save a PNG. | [Photography archive](https://photos-island.lzy793222567.chatgpt.site/) |
+| Faerie Britain Echoes · Another Reality | Draw moon, spark and breeze runes. Their order changes a persistent forest scene. | [Fantasy / RPG](https://faerie-britain-echoes.lzy793222567.chatgpt.site/) |
+| Gridwake · Further Out | Six-target aim practice with center hits, round statistics, same-sequence replay and challenge links. | [Sci-Fi / FPS](https://digital-island-gridwake.lzy793222567.chatgpt.site/) |
+| RoamIsle · A Journey, in Conversation | Reorder a route, or try a fictional before-moonset journey with choices and different endings. | [AI travel / Agent](https://roamisle.lzy793222567.chatgpt.site/) |
 
-- Ripples are simulated with a double-buffer height field rather than DOM circles or a mouse trail.
-- Pointer movement only injects local disturbances; the wave field itself handles propagation, interference, and decay.
-- The current visual target is transparent glass / moonlit water: the body of the effect is nearly invisible, leaving mostly silver-blue, cold cyan, and a very subtle violet refraction.
-- Ripple intensity grows gradually as the page moves from the Hero into the body instead of switching between two abrupt opacity levels.
-- Simulation resolution, pointer sampling, and idle shutdown are intentionally limited for performance. Touch devices and reduced-motion environments receive a simplified fallback.
+The experiments are not embedded versions of the external applications. The photo exercise currently offers three framings of **one existing Pramod Tiwari photograph**, not three new photos or access to a personal library. Route costs and ferry deadlines are fictional game rules, not geography, transportation data or AI-generated travel advice.
 
-### Single-Row Island Index
+Moon → breeze → spark illuminates the forest gate; moon → spark → breeze sends a constellation into the branches. Clear the spell sequence to experiment without erasing the rune journal. The route's free mode remains unrestricted; challenge mode exposes its rules and can end with an early letter, a watchkeeper's light or an overnight stop elsewhere.
 
-Selected Islands has moved away from a three-column card wall to a more scalable **Media Object / Editorial Project Index**.
+### Continuity, not forced restarts
 
-- Each island occupies one complete row. On desktop, the cover sits on the left and the number, category, title, description, and link sit on the right.
-- Islands 5, 6, 7, and beyond can simply be appended vertically, without any dependency on multiples of three.
-- Covers are always shown in full with `object-fit: contain`; the layout does not crop or artificially zoom artwork into a shared aspect ratio.
-- Cover width is capped at roughly 720px on desktop, scales down proportionally at intermediate widths, and stacks above the copy on narrow screens.
-- The island section uses the same page margins as the Hero, keeping the visual baseline continuous while scrolling.
-- Island descriptions are intentionally richer than one-line taglines so each entry carries more narrative and context.
+Closing a cover, switching experiments, scrolling away or hiding the tab pauses work and retains the current page session. Only **Restart** or unloading the page resets it. **Expand** uses a native modal dialog without duplicating the engine; Esc returns to the embedded size. Motion off removes animation rather than deleting the user's work.
 
-### Motion and Accessibility
+Aim rounds interrupted by a pause or a field-size change are labeled interrupted practice. Comparisons require the same sequence, field and target size, input method, and uninterrupted rounds. Keyboard-assisted and mixed-input rounds are not compared with pointer precision. `?aim=v1-<uint32>` shares a sequence, not scores or a trusted leaderboard.
 
-- Core content is rendered first; motion is progressive enhancement. Main content and navigation remain readable without JavaScript.
-- A `Motion on / off` control lets visitors pause or enable motion and remembers the choice.
-- The default behavior follows the system `prefers-reduced-motion` setting.
-- Some continuous animation pauses when the page is in the background to avoid unnecessary GPU work.
-- Images include alternative text, and in-page navigation, focus, and anchor jumps retain basic accessibility handling.
+Session data stays in page memory; it does not survive a reload and is not synchronized across devices or between Pages and Sites. PNG generation happens in the browser without uploading brush strokes.
 
-## Open Islands
+## Performance and Accessibility
 
-| Island | Type | Summary | Link |
-| --- | --- | --- | --- |
-| Photos Island · A Softer Gaze | Photography | A growing personal image archive collecting travel, cities, nature, and accidental encounters, allowing memory to settle slowly through photographs. | [Enter Photos Island](https://photos-island.lzy793222567.chatgpt.site/) |
-| Faerie Britain Echoes · Another Reality | Fantasy / RPG | A space for preserving the echoes of Faerie Britain, its characters, and its journeys, reassembling the atmosphere that remains after the story ends. | [Enter Faerie Britain Echoes](https://faerie-britain-echoes.lzy793222567.chatgpt.site/) |
-| Gridwake · Further Out | Sci-Fi / FPS | A colder, sharper digital territory shaped by the rhythm of sci-fi and FPS design, bringing together combat, space, residual order, and unfamiliar environments. | [Enter Gridwake](https://digital-island-gridwake.lzy793222567.chatgpt.site/) |
-| RoamIsle · A Journey, in Conversation | AI Travel / Agent | An AI-assisted travel space where destination ideas, route planning, and scattered thoughts can gradually become a journey that is easier to discuss, reshape, and actually take. | [Enter RoamIsle](https://roamisle.lzy793222567.chatgpt.site/) |
+Core content and external links remain server-rendered and readable without JavaScript. Engines are loaded separately on demand, one active experiment at a time. Pausing stops drawing, timers and pending feedback; retained content does not require a continuously running loop.
 
-Island names, descriptions, covers, and destinations are maintained centrally in `app/islands.ts`. The portal is responsible for presentation and navigation only; it does not perform live availability monitoring of the external island sites.
+The full-screen water simulation uses a fixed 60Hz time step, at most three catch-up steps, a simulation long-edge cap of 460 and display cap of 1920. High-refresh screens therefore do not speed up the simulation. The star uses a separate, local Canvas 2D perspective surface rather than another full-screen WebGL simulation.
 
-## Tech Stack
+The Motion preference follows `prefers-reduced-motion` by default. Pointer, touch and keyboard alternatives are provided; disabled JavaScript hides experiment launch controls while keeping project navigation. Expanding uses native dialog focus behavior and explicit close controls. No audio, account system, iframe or new game-engine runtime dependency is required.
 
-| Category | Current stack |
+## Technology
+
+| Area | Stack |
 | --- | --- |
 | UI | React 19.2.6, TypeScript 5.9.3 |
-| Routing / Rendering | Next.js 16.2.6 App Router; vinext 0.0.50 on the Sites build path |
+| Rendering | Next.js 16.2.6 App Router; vinext 0.0.50 for Sites |
 | Build | Vite 8.0.13, Cloudflare Vite plugin |
 | Styling | Custom CSS, Tailwind CSS 4.2.1 / PostCSS |
-| Motion | CSS Transform / Opacity, IntersectionObserver, requestAnimationFrame, WebGL2 height-field ripples |
-| Hosting | OpenAI Sites / Cloudflare Workers, GitHub Pages |
-| Checks | ESLint 9, Node.js built-in test runner |
-| Optional foundation | Drizzle ORM / Kit, Cloudflare D1 / R2, ChatGPT auth helper |
+| Interaction | Canvas 2D, SVG, WebGL2, Pointer Events, requestAnimationFrame |
+| Hosting | GitHub Pages static export; separate Sites / Cloudflare Workers build |
+| Optional foundation | Drizzle, D1 / R2, ChatGPT auth helper; not active homepage features |
 
-The default development and Sites build commands use `vinext`. `build:pages` uses a Next.js static export to produce the GitHub Pages version. D1, R2, and the login helper are not currently connected to the homepage experience.
+## Development and Checks
 
-## Project Structure
-
-```text
-.
-├── app/
-│   ├── page.tsx                  # Hero, curatorial note, island index, future index, footer
-│   ├── islands.ts                # Island data, descriptions, covers, URLs, automatic numbering
-│   ├── catalogue-motion.tsx      # Scroll progress, reveals, Motion toggle, moonlight variables
-│   ├── fluid-cursor.tsx          # WebGL2 double-buffer ripple simulation
-│   ├── globals.css               # Base visual system and shared responsive styles
-│   ├── exhibition-motion.css     # Hero, section, sea, and exhibition-style motion
-│   ├── ambient-background.css    # Dark body background and ripple canvas layering
-│   ├── hero-light-motion.css     # Moonlight breathing, scroll deflection, sea response
-│   ├── island-index.css          # Single-row cover + description layout
-│   ├── layout.tsx                # Metadata and style entry point
-│   ├── fonts/                    # Local fonts and licenses
-│   └── chatgpt-auth.ts           # Reserved ChatGPT auth helper
-├── public/
-│   ├── moonlit-ocean-pramod-tiwari.jpg # Current Hero photograph
-│   ├── photos-island.png         # Photos Island cover
-│   ├── faerie-britain.png        # Faerie Britain Echoes cover
-│   ├── gridwake.png              # Gridwake cover
-│   ├── roamisle.svg              # RoamIsle cover
-│   ├── og.png                    # Open Graph image
-│   ├── quiet-horizon.webp        # Legacy Hero asset, currently unused
-│   └── moonlit-ocean-4k.svg      # Legacy generated background, currently unused
-├── worker/
-│   └── index.ts                  # Worker request handling and image optimization entry
-├── build/
-│   └── sites-vite-plugin.ts      # Sites build helper
-├── .openai/
-│   └── hosting.json              # OpenAI Sites project binding and optional resources
-├── db/
-│   ├── index.ts                  # Optional D1 / Drizzle access helpers
-│   └── schema.ts                 # No business tables at present
-├── drizzle/                      # Database migration metadata
-├── .github/workflows/pages.yml  # GitHub Pages build and deployment
-├── scripts/build-pages.mjs       # Pages static export and publish URL handling
-├── tests/
-│   ├── rendered-html.test.mjs    # Sites / server-rendered output checks
-│   └── pages-export.test.mjs     # Pages export checks
-├── README.md                     # English README on main
-├── vite.config.ts
-├── next.config.ts
-├── eslint.config.mjs
-├── postcss.config.mjs
-├── tsconfig.json
-├── tsconfig.pages.json
-├── package.json
-└── package-lock.json
-```
-
-## Local Development
-
-### Requirements
-
-- Node.js **>= 22.13.0**
-- npm
-- Git
-
-### Start the development server
+Requires Node.js **>=22.13.0**, npm and Git. The current portal needs no mandatory business environment variables, database, object storage or login configuration.
 
 ```bash
 git clone https://github.com/LoseYoung/loseyoung-digital-islands.git
@@ -154,92 +74,56 @@ npm ci
 npm run dev
 ```
 
-The current homepage does not require a database, object storage, login configuration, or any mandatory business environment variables.
-
-### Common commands
-
 | Command | Purpose |
 | --- | --- |
-| `npm run dev` | Start the vinext development server |
-| `npm run build` | Build the OpenAI Sites production output |
-| `npm run build:pages` | Generate the GitHub Pages static export in `out/` |
-| `npm run test:pages` | Validate the Pages export and asset paths |
-| `npm start` | Start the production preview after building |
-| `npm run lint` | Run ESLint |
-| `npm test` | Build first, then run portal HTML and resource checks |
-| `npm run db:generate` | Generate Drizzle migrations only after introducing DB schema changes |
+| `npm run dev` | vinext development server |
+| `npm run build` | Sites production build |
+| `npm start` | Production preview after build |
+| `npm run build:pages` | Next.js static export to `out/` |
+| `npm run test:pages` | Export and base-path resource checks |
+| `npm run test:play` | Pure gameplay and fixed-step tests |
+| `npm test` | Sites build, rendered content checks and gameplay tests |
+| `npm run lint` | ESLint |
+| `npm run db:generate` | Drizzle migrations only when adding database schema |
 
-Recommended before committing:
+GitHub Actions runs builds and production-browser regressions on cloud runners. The browser dependency is installed in CI, not shipped to visitors. Checks cover the original interactions plus session retention, partial prints, spell combinations, route outcomes, comparable aim rounds, keyboard alternatives, mobile expansion and no-JavaScript navigation. CI software rendering is not a claim about real-device FPS.
 
-```bash
-npm run lint
-npm test
-npm run build:pages
-npm run test:pages
+## Maintenance Map
+
+```text
+app/page.tsx                     Homepage and catalogue structure
+app/islands.ts                   Island data, covers and automatic numbering
+app/catalogue-motion.tsx         Scroll progress, moonlight and Motion control
+app/fluid-cursor.tsx             Fixed-step transparent WebGL2 ripples
+app/star-skipping.tsx            Star interaction adapter
+app/playable-cover.tsx           Retained sessions and expanded play
+app/play/*-engine.ts             Independently loaded interaction engines
+app/play/continuity-model.ts     Timing, rune combinations and journey rules
+app/play/session.ts              Pause/resume contract and pointer sampling
+app/play/*-model.ts              Existing pure gameplay rules
+app/*motion.css                  Hero and exhibition motion
+app/continuity.css               Local continuity / expanded-play styling
+app/layout.tsx                   Metadata and stylesheet entry
+app/build-stamp.tsx              Published source identifier
+public/                         Photographic and cover assets
+scripts/write-build-info.mjs     Build-time source SHA and target
+scripts/build-pages.mjs          Pages subpath-aware export
+.github/workflows/               Builds, deployment and browser regressions
+tests/                          Render, resource, model and browser checks
 ```
 
-## Content Maintenance
+Add projects in `app/islands.ts` and put their complete covers in `public/`. Each item includes `id`, `title`, `description`, `name`, `category`, `url`, `cover` and `coverAlt`. Numbering continues automatically, including More to Arrive. A new island does not need a mini-game to be listed.
 
-To add or update an island, edit `app/islands.ts`:
+[Interaction rules and technical boundaries](https://github.com/LoseYoung/loseyoung-digital-islands/blob/main/docs/interactive-continuity.md) · [Original playground notes](https://github.com/LoseYoung/loseyoung-digital-islands/blob/main/docs/playgrounds.md) · [Aim statistics](https://github.com/LoseYoung/loseyoung-digital-islands/blob/main/docs/aim-trainer.md)
 
-```ts
-{
-  id: "new-island",
-  title: "Project Title",
-  description: "Write a fuller island summary here instead of a one-line tagline.",
-  name: "New Island",
-  category: "Category",
-  url: "https://example.com/",
-  cover: "/new-island.png",
-  coverAlt: "Alternative text for the cover image",
-}
-```
+Older design documents describe earlier iterations; current source and the continuity notes take precedence where behaviors changed.
 
-Then add the cover to `public/`. Catalogue numbering continues automatically, and the single-row index simply grows downward without requiring a complete grid row.
+## Deployment and Version Identity
 
-Other common entry points:
+Pushing to `main` triggers `.github/workflows/pages.yml`, including the Sites build check, Pages export, resource checks and Pages deployment. The default static base path is `/loseyoung-digital-islands`.
 
-- Page structure and static copy: `app/page.tsx`
-- Island index layout: `app/island-index.css`
-- Hero and section motion: `app/exhibition-motion.css`
-- Moonlight motion: `app/hero-light-motion.css`
-- WebGL ripples: `app/fluid-cursor.tsx`
-- Ripple layering and body background: `app/ambient-background.css`
-- Metadata and sharing information: `app/layout.tsx`
+Sites is associated through `.openai/hosting.json`, but a GitHub commit is **not** a Sites deployment. Rebuild and publish the Sites project separately. Never infer synchronization from a successful Pages workflow.
 
-## Deployment
+Build scripts generate `public/build-info.json` with the real source SHA, target and build time. The footer displays that identifier. When a hosting environment supplies no Git metadata, it explicitly reports the source as unavailable; `BUILD_SOURCE_SHA` can provide it. Compare identifiers to check whether two deployments share a source revision.
 
-### OpenAI Sites
-
-`.openai/hosting.json` is linked to the existing “LoseYoung · Digital Islands” project. The current portal does not require D1 or R2; actual deployment resources and project bindings are managed by Sites.
-
-A GitHub commit and a Sites deployment are separate steps. Updating the repository does not automatically replace the existing Sites version; the corresponding Sites workflow must rebuild and redeploy it.
-
-### GitHub Pages
-
-The repository includes `.github/workflows/pages.yml`. A push to `main` automatically installs dependencies, builds the project, performs the static export, checks assets, and deploys GitHub Pages.
-
-To generate the same static version locally:
-
-```bash
-npm ci
-npm run build:pages
-npm run test:pages
-```
-
-The default Pages base path is `/loseyoung-digital-islands`. The export scripts and tests handle covers, fonts, scripts, styles, and sharing assets under that subpath.
-
-## Current Status
-
-- Version: **0.1.0**
-- Four islands are currently open, with a More to Arrive section reserved for future work.
-- The homepage now includes a moonlit photographic Hero, dynamic moonlight, transparent WebGL ripples, scroll-progressive ripple intensity, and a single-row island index.
-- Portal content is still maintained directly in source code; there is no CMS, user account system, photo upload flow, or business database.
-- `db/`, Drizzle, D1 / R2, and `app/chatgpt-auth.ts` are foundations for future extension, not currently active product features.
-- New islands can be added primarily through `app/islands.ts` and `public/` without redesigning the catalogue layout.
-
-## Design Notes
-
-The current visual direction is a personal exhibition catalogue built around **night ocean × starlight**. Real photography carries the emotion of the Hero, the body returns to a restrained deep blue-black, and motion is limited to a few layers such as moonlight, sea response, and transparent ripples. Compared with the earlier three-column card wall and colorful ambient background, the current design emphasizes negative space, continuous reading, and long-term extensibility.
-
-`docs/curated-homepage.md` records the earlier evolution of the curated homepage and motion system. Some layout and asset notes there have been superseded by later iterations; the current `app/` implementation and this README are the source of truth.
+Version **0.1.0**. Four islands are open. No CMS, global player leaderboard, cross-device save system, portal photo-upload service or business database is implied by the optional scaffolding.
