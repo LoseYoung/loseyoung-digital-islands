@@ -40,7 +40,7 @@ with sync_playwright() as p:
         rune.get_by_role('button',name='绘制'+text,exact=True).click();expect(rune.locator('.rune-lab')).to_have_attribute('data-rune',kind);expect(rune.locator('.play-status')).to_contain_text(text)
     assert rune.locator('.rune-token[data-discovered="true"]').count()==3;expect(rune.locator('.craft-counter')).to_have_text('03 / 03')
     rune.screenshot(path=str(OUT/'rune-collected.png'))
-    # 先把真实画布置于可操作视口，避免上一个按钮的原生焦点滚动使笔画落在工具栏上。
+    # 坐标输入前先定位真实可见画布，避免原生焦点滚动改变测试坐标。
     canvas=rune.locator('.rune-canvas');canvas.scroll_into_view_if_needed();expect(canvas).to_be_in_viewport(ratio=1)
     page.wait_for_timeout(180)
     b=canvas.bounding_box();cx=b['x']+b['width']/2;cy=b['y']+b['height']*.48;rad=min(b['width'],b['height'])*.20
@@ -56,9 +56,19 @@ with sync_playwright() as p:
     rune.get_by_role('button',name='绘制月环',exact=True).click();assert '手绘共鸣' in rune.get_by_role('button',name='绘制月环',exact=True).inner_text()
     ok('三种施法反馈、共鸣收集、真实手绘与辅助输入区分')
     route=opened(page,'roamisle');buttons=route.locator('.route-stop');old=buttons.all_text_contents()
-    a=buttons.first.bounding_box();b=buttons.last.bounding_box()
-    page.mouse.move(a['x']+a['width']/2,a['y']+a['height']/2);page.mouse.down();page.mouse.move(b['x']+b['width']/2,b['y']+b['height']/2,steps=10)
-    assert route.locator('.route-stop.drop-here').count()==1;page.mouse.up();assert buttons.all_text_contents()!=old
+    # mouse.move 不会像 locator.click 自动滚动和等待稳定，显式检查两个落点。
+    route.locator('.route-stops').scroll_into_view_if_needed()
+    expect(buttons.first).to_be_in_viewport(ratio=1);expect(buttons.last).to_be_in_viewport(ratio=1)
+    buttons.first.hover()
+    points=route.locator('.route-stops').evaluate('''el=>[el.firstElementChild,el.lastElementChild].map(b=>{const r=b.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;return{x,y,hit:b.contains(document.elementFromPoint(x,y))};})''')
+    assert all(v['hit'] for v in points),points
+    a,b=points
+    page.mouse.move(a['x'],a['y']);page.mouse.down();page.mouse.move(b['x'],b['y'],steps=10)
+    try:expect(route.locator('.route-stop.drop-here')).to_have_count(1)
+    except Exception:
+        page.screenshot(path=str(OUT/'route-drag-failure.png'))
+        print('拖动诊断：',points,route.get_attribute('data-running'),route.locator('.route-stops').evaluate('(el)=>[...el.children].map(b=>({text:b.textContent,cls:b.className,style:b.getAttribute("style"),rect:b.getBoundingClientRect().toJSON()}))'),flush=True);raise
+    page.mouse.up();assert buttons.all_text_contents()!=old
     route.get_by_role('button',name='沿途出发',exact=True).click();page.wait_for_timeout(400);route.get_by_role('button',name='暂停行进',exact=True).click()
     expect(route.locator('.route-lab')).to_have_attribute('data-phase','paused');position=route.locator('.route-traveller').get_attribute('transform');page.wait_for_timeout(250)
     assert position==route.locator('.route-traveller').get_attribute('transform')
