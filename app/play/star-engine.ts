@@ -4,8 +4,10 @@ import { motionAllowed, PLAY_EVENT, watchRest } from "./runtime";
 
 /** 保留局部透视海面：抓取预览、接触闪光与有限水珠，不增加全屏模拟。 */
 export function mountStar(host: HTMLElement, report: (message: string) => void) {
-  const button = host.querySelector<HTMLButtonElement>(".throw-star")!, canvas = host.querySelector<HTMLCanvasElement>("canvas")!, ctx = canvas.getContext("2d");
-  if (!ctx) { button.hidden = true; return () => {}; }
+  const button = host.querySelector<HTMLButtonElement>(".throw-star")!, canvas = host.querySelector<HTMLCanvasElement>("canvas")!;
+  const context = canvas.getContext("2d");
+  if (!context) { button.hidden = true; return () => {}; }
+  const ctx: CanvasRenderingContext2D = context;
   const abort = new AbortController(), { signal } = abort;
   let width = 1, height = 1, frame = 0, previewFrame = 0, plan: Hop[] = [], index = 0, hopStart = 0, busy = false, throws = 0;
   let rings: { x: number; y: number; at: number; scale: number; precise: boolean }[] = [], trail: Point[] = [];
@@ -37,7 +39,6 @@ export function mountStar(host: HTMLElement, report: (message: string) => void) 
     rings=rings.filter(r=>now-r.at<2100);
     for(const ring of rings){
       const t=Math.max(0,(now-ring.at)/2100),x=ring.x*width,y=ring.y*height;
-      // 先与水面接触，再展开透明波纹；远处的落点更小。
       if(t<.075){ctx.fillStyle=`rgba(232,240,229,${(1-t/.075)*.65})`;ctx.beginPath();ctx.ellipse(x,y,10*ring.scale,2.5*ring.scale,0,0,Math.PI*2);ctx.fill();}
       if(t<.35)for(let i=0;i<8;i++){
         const a=i*Math.PI/4,age=t/.35;
