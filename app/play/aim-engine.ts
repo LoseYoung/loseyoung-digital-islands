@@ -11,7 +11,7 @@ export function mountCover(host: HTMLElement, { status }: PlayOptions) {
   let disposed = false, tick: ReturnType<typeof setInterval> | undefined, started: number | null = null, shownAt = 0, misses = 0, accepting = true;
   let paused = false, pausedAt = 0, interrupted = false, layout = "", input = "", latestInput = "mouse", previous: RoundRecord | null = null, completed: RoundRecord | null = null;
   const hits: AimHit[] = [], random = new Uint32Array(1);
-  if (globalThis.crypto?.getRandomValues) crypto.getRandomValues(random); else random[0] = Date.now() >>> 0;
+  if (typeof globalThis.crypto?.getRandomValues === "function") crypto.getRandomValues(random); else random[0] = Date.now() >>> 0;
   const seed = readAimSeed(new URL(location.href).searchParams.get("aim")) ?? random[0], positions = aimSequence(seed);
   function node<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text = "") { const el = document.createElement(tag); el.className = cls; el.textContent = text; return el; }
   function later(fn: () => void, ms: number) { const id = setTimeout(() => { timers.delete(id); if (!disposed && !paused) fn(); }, ms); timers.add(id); }
@@ -36,7 +36,8 @@ export function mountCover(host: HTMLElement, { status }: PlayOptions) {
   const target = node("button", "grid-target aim-target"); target.type = "button";
   target.innerHTML = '<svg viewBox="0 0 64 64" aria-hidden="true"><path class="aim-brackets" d="M20 3H10L3 10V20 M44 3H54L61 10V20 M61 44V54L54 61H44 M20 61H10L3 54V44"/><circle class="aim-ring" cx="32" cy="32" r="23"/><circle class="aim-inner" cx="32" cy="32" r="11"/><path class="aim-sights" d="M32 10V17 M32 47V54 M10 32H17 M47 32H54"/><circle class="aim-core" cx="32" cy="32" r="3"/></svg>';
   const label = node("span", "aim-target-label"); target.append(label); field.append(target);
-  const spec = () => `${field.clientWidth}x${field.clientHeight}/${target.offsetWidth}`;
+  // 使用样式尺寸，目标切换时的 hidden 不应被误判成靶标尺寸变化。
+  const spec = () => `${field.clientWidth}x${field.clientHeight}/${parseFloat(getComputedStyle(target).width)}`;
   const setStats = () => { counter.textContent = `${String(hits.length).padStart(2,"0")} / 06`; accuracy.textContent = hits.length + misses ? `${Math.round(hits.length/(hits.length+misses)*100)}%` : "—"; };
   const startTicker = () => { clearInterval(tick); if (started !== null && hits.length < 6 && !paused) tick = setInterval(() => { if (!disposed && !paused && started !== null) clock.textContent = `${((performance.now()-started)/1000).toFixed(2)}s`; }, 100); };
   function drawTarget(focus = false) {
