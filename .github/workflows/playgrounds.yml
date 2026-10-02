@@ -6,6 +6,7 @@ on:
     paths:
       - 'app/**'
       - 'tests/**'
+      - 'scripts/**'
       - 'package*.json'
       - '.github/workflows/playgrounds.yml'
   workflow_dispatch:
@@ -20,7 +21,7 @@ concurrency:
 jobs:
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
@@ -30,12 +31,11 @@ jobs:
       - run: npm ci
       - run: npm run test:play
       - run: npm run build:pages
-      # 浏览器仅装在 CI 环境，不新增网页运行时依赖。
       - name: 安装回归浏览器
         run: |
           python -m pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
-      - name: 验证桌面、触屏、键盘和动效降级
+      - name: 验证桌面、触屏、会话保留与动效降级
         run: |
           mkdir -p "$RUNNER_TEMP/playgrounds-web"
           ln -s "$GITHUB_WORKSPACE/out" "$RUNNER_TEMP/playgrounds-web/${GITHUB_REPOSITORY#*/}"
@@ -47,6 +47,7 @@ jobs:
           python tests/browser-playgrounds.py
           python tests/browser-aim.py
           python tests/browser-crafts.py
+          python tests/browser-continuity.py
       - name: 保存交互截图与报告
         if: always()
         uses: actions/upload-artifact@v4

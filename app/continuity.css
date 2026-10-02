@@ -1,0 +1,62 @@
+/* 新能力只作用于互动层，摄影、列表版心与静态封面不变。 */
+.cover-playground { box-sizing: border-box; margin: 0; padding: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; color: inherit; overflow: hidden; }
+.cover-playground:modal { position: fixed; inset: 0; margin: auto; width: min(100% - 48px, 1100px); height: min(88dvh, 820px); max-height: calc(100dvh - 32px); container-type: inline-size; border: 1px solid #bed1ce40; background: #09141b; border-radius: 8px; box-shadow: 0 28px 100px #000a; }
+.cover-playground::backdrop { background: #03090edf; }
+html:has(.cover-playground:modal) { overflow: hidden; }
+.cover-playground:modal .cover-engine { background: #09141b; }
+.cover-playground .play-toolbar { flex-wrap: wrap; gap: 4px 12px; }
+.cover-playground .play-toolbar > div { flex-wrap: wrap; }
+.cover-playground .play-toolbar button { min-height: 40px; white-space: nowrap; }
+.play-resume { position: absolute; inset: var(--playbar-height, 70px) 0 70px; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; background: #08141bee; color: #d7e1d7; text-align: center; }
+.play-resume > span { font: 26px var(--display); }
+.play-resume > p { font-size: 12px; color: #a3b7b2; margin: 0; line-height: 1.8; }
+.play-resume > button { background: #1b302d; color: #e2e6cd; border: 1px solid #b8c3a963; padding: 11px 22px; cursor: pointer; }
+.cover-playground .craft-lab { top: var(--playbar-height, 76px); }
+.cover-playground .aim-range { top: var(--playbar-height, 76px); }
+.collection .playable-cover[data-kind="photos"][data-playing="true"] { min-height: 610px; }
+.collection .playable-cover[data-kind="faerie"][data-playing="true"] { min-height: 630px; }
+.collection .playable-cover[data-kind="roamisle"][data-playing="true"] { min-height: 650px; }
+.collection .playable-cover[data-kind="gridwake"][data-playing="true"] { min-height: 530px; }
+.craft-button:disabled { opacity: .4; cursor: default; }
+.photo-negatives, .photo-finishing, .route-modes { display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0; }
+.photo-negatives .craft-button { min-height: 34px; padding: 5px 12px; }
+.photo-lab .craft-tools { flex-wrap: wrap; }
+.photo-lab .craft-actions { flex-wrap: wrap; }
+.photo-finishing { justify-content: flex-end; }
+.photo-lab .photo-stage { min-height: 130px; }
+.rune-chain { font: 10px/1.6 var(--body); color: #c8d1b4; letter-spacing: .08em; min-height: 20px; flex-shrink: 0; }
+.rune-story { font-size: 11px; min-height: 38px; line-height: 1.8; }
+.rune-clear { align-self: flex-start; min-height: 34px; font-size: 10px; }
+.rune-lab[data-forest="awakened"] .rune-chain, .rune-lab[data-forest="drifting"] .rune-chain { color: #e1c68d; }
+.rune-lab .rune-stage { min-height: 130px; }
+.route-lab .route-stage { min-height: 125px; }
+.route-mission { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #cbd2b7; flex-shrink: 0; }
+.route-rules { position: relative; }
+.route-rules summary { cursor: pointer; color: #dfd4b2; min-height: 24px; white-space: nowrap; }
+.route-rules > p { position: absolute; right: 0; top: 100%; z-index: 6; width: min(290px, 72vw); padding: 16px; margin: 4px 0; border: 1px solid #9eaa8763; background: #132723; color: #d7dec5; font-size: 11px; line-height: 1.9; box-shadow: 0 8px 32px #0006; }
+.route-moon { fill: #eadcaf; }
+.route-fog { fill: #adc0b0; }
+.route-ferry { stroke: #c8d6c0; stroke-width: 1.5; fill: #b1c3a922; }
+.route-lab[data-challenge="true"] .route-journal-note { max-width: 70%; min-height: 36px; }
+.route-lab[data-ending="letter"] .route-arrival { border-color: #eed098; box-shadow: 0 0 24px #eed09814; }
+.aim-range .aim-results { justify-content: flex-start; overflow-y: auto; padding-block: 18px; }
+.aim-result-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; flex-shrink: 0; }
+.aim-splits { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px 10px; padding: 10px 0 0; color: #b8ccc0; font: 9px ui-monospace, monospace; }
+.aim-share-url { box-sizing: border-box; width: 100%; min-height: 36px; margin-top: 10px; border: 1px solid #88ac9670; background: #0c1d18; color: #c8d8bd; font-size: 11px; }
+.throw-star[data-dragging="true"] .star-glyph { transform: scale(.78); text-shadow: 0 0 5px #fff, 0 0 22px #cbddec; }
+.build-stamp { font: 10px/1.6 ui-monospace, monospace; color: var(--quiet); opacity: .8; }
+@media(max-width:640px) {
+  .cover-playground:modal { width: calc(100% - 16px); height: calc(100dvh - 24px); max-height: none; border-radius: 5px; }
+  .cover-playground .play-toolbar { padding-inline: 8px; }
+  .cover-playground .play-toolbar > span { font-size: 10px; }
+  .cover-playground .play-toolbar button { padding-inline: 8px; font-size: 11px; min-height: 40px; }
+  .cover-playground .craft-lab { bottom: 88px; }
+  .collection .playable-cover[data-kind="photos"][data-playing="true"] { min-height: 660px; }
+  .collection .playable-cover[data-kind="faerie"][data-playing="true"] { min-height: 670px; }
+  .collection .playable-cover[data-kind="roamisle"][data-playing="true"] { min-height: 685px; }
+  .collection .playable-cover[data-kind="gridwake"][data-playing="true"] { min-height: 550px; }
+  .photo-finishing { justify-content: flex-start; }
+  .rune-story { min-height: 52px; }
+  .aim-result-title { font-size: 21px; }
+}
+@media(max-height:640px) { .cover-playground:modal .cover-engine { overflow-y: auto; } .cover-playground:modal .craft-lab { position: relative; margin: var(--playbar-height,76px) 16px 90px; inset: auto; min-height: 420px; } .cover-playground:modal .aim-range { position: relative; margin: var(--playbar-height,76px) 16px 80px; inset: auto; height: 390px; } }
