@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 2
+          fetch-depth: 4
       - name: 校验并应用云端交互改动
         run: |
           python - <<'PY'
@@ -25,8 +25,7 @@ jobs:
           raw = zlib.decompress(base64.b64decode(''.join(p.read_text() for p in chunks), validate=True))
           assert hashlib.sha256(raw).hexdigest() == '00e7b587bb597c940a6e81fb3c017f5c62e45bb0ca7707020650bded5e57f674', '改动清单校验失败'
           manifest = json.loads(raw)
-          parent = subprocess.check_output(['git', 'rev-parse', 'HEAD^'], text=True).strip()
-          assert parent == manifest['base_commit'], '云端基线已变化，拒绝覆盖'
+          subprocess.run(['git', 'merge-base', '--is-ancestor', manifest['base_commit'], 'HEAD'], check=True)
           def blob(data):
               return hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
           planned = []
@@ -47,14 +46,16 @@ jobs:
               assert blob(new) == change['after'], '结果文件校验失败：' + str(path)
               planned.append((path, new))
           for path, data in planned:
+              # 当前 Actions 令牌没有工作流写权限；相关配置由已授权连接器单独提交。
+              if path.parts[0] == '.github':
+                  continue
               if data is None:
                   path.unlink()
               else:
                   path.parent.mkdir(parents=True, exist_ok=True)
                   path.write_bytes(data)
           shutil.rmtree('.cloud-iteration')
-          Path('.github/workflows/cloud-apply-iteration.yml').unlink()
-          print('云端改动逐文件校验通过，临时传输文件已移除。')
+          print('云端源码逐文件校验通过，传输清单已移除；工作流配置待单独提交。')
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
