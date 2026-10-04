@@ -19,6 +19,16 @@
 - [OpenAI Sites · LoseYoung 数字岛屿](https://loseyoung-digital-islands.lzy793222567.chatgpt.site)
 - [GitHub Pages · LoseYoung 数字岛屿](https://loseyoung.github.io/loseyoung-digital-islands/)
 
+## 交互版本 · IJ-01
+
+小游戏会保留本次页面访问中的成果：收起、滚离视口、切换标签页后可继续；“展开”使用同一画布，只有“重来”或刷新/离开整个页面才清空。关闭 Motion 不会关闭正在玩的封面。
+
+暗房可撤销最近四笔、在任意进度定影，并加入三张只在浏览器处理的自选底片，不上传到服务器。林间符文支持“月环→微风→星芒”点亮遗迹，换成“月环→星芒→微风”则留下光种子。路线纸增加“赶在月落之前”的虚构规则与三种结尾。六点瞄准支持同题重试、同规格连续回合比较与种子挑战链接；中断、键盘辅助或规格不同的成绩不混排。星光增加首次落点提示、接触高光、水珠与最后一跳的月光落点。
+
+水波改为固定 60Hz 模拟并限制卡顿追赶，不能据此保证任意设备的实际帧率。页脚显示 `IJ-01`，GitHub Actions 发布附加短 SHA；GitHub Pages 与 Sites 仍须分别发布。
+
+[实现、玩法边界与云端验证说明](https://github.com/LoseYoung/loseyoung-digital-islands/blob/main/docs/interactive-journeys.md)
+
 ## 当前页面体验
 
 ### 月夜 Hero
