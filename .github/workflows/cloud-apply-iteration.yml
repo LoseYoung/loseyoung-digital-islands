@@ -1,0 +1,63 @@
+name: Apply cloud iteration
+on:
+  push:
+    branches: [feat/interactive-journeys]
+    paths:
+      - '.cloud-iteration/**'
+      - '.github/workflows/cloud-apply-iteration.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: 校验并应用云端交互改动
+        run: |
+          python - <<'PY'
+          import base64, hashlib, json, shutil, subprocess, zlib
+          from pathlib import Path
+          chunks = sorted(Path('.cloud-iteration').glob('part-*.b64'))
+          assert len(chunks) == 19, '改动传输片段不完整'
+          raw = zlib.decompress(base64.b64decode(''.join(p.read_text() for p in chunks), validate=True))
+          assert hashlib.sha256(raw).hexdigest() == '00e7b587bb597c940a6e81fb3c017f5c62e45bb0ca7707020650bded5e57f674', '改动清单校验失败'
+          manifest = json.loads(raw)
+          parent = subprocess.check_output(['git', 'rev-parse', 'HEAD^'], text=True).strip()
+          assert parent == manifest['base_commit'], '云端基线已变化，拒绝覆盖'
+          def blob(data):
+              return hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          planned = []
+          for change in manifest['changes']:
+              path = Path(change['path'])
+              assert not path.is_absolute() and '..' not in path.parts, '不安全的文件路径'
+              assert path.parts[0] in ('app', 'tests', 'docs', '.github') or str(path) in ('package.json', 'README.md', 'README.zh-CN.md', 'README.ja.md'), '超出本次修改范围'
+              old = path.read_bytes() if path.exists() else None
+              assert (blob(old) if old is not None else None) == change['before'], '基线文件不一致：' + str(path)
+              if change.get('delete'):
+                  planned.append((path, None))
+                  continue
+              lines = (old or b'').decode('utf-8').splitlines(keepends=True)
+              for start, end, replacement in reversed(change['edits']):
+                  assert 0 <= start <= end <= len(lines), '改动行范围无效'
+                  lines[start:end] = [replacement]
+              new = ''.join(lines).encode('utf-8')
+              assert blob(new) == change['after'], '结果文件校验失败：' + str(path)
+              planned.append((path, new))
+          for path, data in planned:
+              if data is None:
+                  path.unlink()
+              else:
+                  path.parent.mkdir(parents=True, exist_ok=True)
+                  path.write_bytes(data)
+          shutil.rmtree('.cloud-iteration')
+          Path('.github/workflows/cloud-apply-iteration.yml').unlink()
+          print('云端改动逐文件校验通过，临时传输文件已移除。')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: 增加可续玩的岛屿互动与多结局体验'
+          git push origin HEAD:feat/interactive-journeys
