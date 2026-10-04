@@ -19,6 +19,16 @@
 - [OpenAI Sites · Digital Islands](https://loseyoung-digital-islands.lzy793222567.chatgpt.site)
 - [GitHub Pages · Digital Islands](https://loseyoung.github.io/loseyoung-digital-islands/)
 
+## インタラクティブ版 · IJ-01
+
+カバーの操作結果は現在のページセッションに保持されます。閉じる、画面外へスクロールする、別タブへ移動する場合は一時停止し、再度開くと続行できます。「拡大」は同じキャンバスを使用します。リスタート、ページの再読み込み、ページから離れる操作で初期化されます。
+
+暗室では直近4筆を取り消し、部分的な露光のまま定着できます。利用者が選んだ画像は最大3枚までブラウザー内で処理し、アップロードしません。森では「月環→微風→星芒」が遺跡を照らし、「月環→星芒→微風」は光の種を残します。旅の紙には架空の渡船・月没ルールと3つの結末を追加しました。照準では同じターゲット配置を再挑戦でき、条件が一致する中断なしのラウンドのみ比較します。星投げには最初の着水予測、短い反射、水滴、最後の着地点の月光を加えました。
+
+水紋のシミュレーションは固定60Hzで進み、遅延後の追いつき処理に上限があります。端末の実FPSを保証するものではありません。フッターは `IJ-01` と、GitHub Actionsビルドの場合は短いSHAを表示します。GitHub PagesとSitesの公開は別工程です。
+
+[実装・操作・制限・クラウド検証](https://github.com/LoseYoung/loseyoung-digital-islands/blob/main/docs/interactive-journeys.md)
+
 ## 現在の体験
 
 ### 月夜の Hero
