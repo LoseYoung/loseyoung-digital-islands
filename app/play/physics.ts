@@ -35,7 +35,22 @@ export function pointOnHop(hop: Hop, progress: number): Point {
 }
 
 export function recognizeRune(points: Point[]): "moon" | "spark" | "breeze" | "none" {
-  if (points.length < 5) return "none";
+  if (points.length < 5 || points.some(p => !Number.isFinite(p.x + p.y))) return "none";
+  const minX = Math.min(...points.map(p => p.x)), minY = Math.min(...points.map(p => p.y));
+  const extent = Math.max(Math.max(...points.map(p => p.x)) - minX, Math.max(...points.map(p => p.y)) - minY);
+  if (extent < 20) return "none";
+  // 统一尺度并按弧长重采样，手势识别不依赖设备事件密度。
+  const input = points.map(p => ({ x: (p.x - minX) / extent * 300, y: (p.y - minY) / extent * 300 }));
+  const distances = [0];
+  for (let i = 1; i < input.length; i++) distances.push(distances[i - 1] + Math.hypot(input[i].x - input[i - 1].x, input[i].y - input[i - 1].y));
+  const total = distances.at(-1)!; if (total < 1) return "none";
+  let at = 1;
+  points = Array.from({ length: 81 }, (_, index) => {
+    const d = total * index / 80;
+    while (at < input.length - 1 && distances[at] < d) at++;
+    const t = (d - distances[at - 1]) / (distances[at] - distances[at - 1] || 1);
+    return { x: input[at - 1].x + (input[at].x - input[at - 1].x) * t, y: input[at - 1].y + (input[at].y - input[at - 1].y) * t };
+  });
   const xs = points.map(p => p.x), ys = points.map(p => p.y);
   const width = Math.max(...xs) - Math.min(...xs), height = Math.max(...ys) - Math.min(...ys);
   let length = 0, turns = 0;

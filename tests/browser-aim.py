@@ -82,10 +82,10 @@ with sync_playwright() as p:
     expect(c.locator('.cover-launch')).to_be_focused()
     page.wait_for_timeout(250)
     assert page.evaluate('window.__aimIntervals.size') == 0
-    assert c.locator('.aim-range').count() == 0
-    ok('切换目标期间收起：计时、延迟任务和 DOM 全部清理')
+    assert c.locator('.aim-range').count() == 1 and not c.locator('.aim-range').is_visible()
+    ok('切换目标期间收起：计时和延迟停止，训练内容保留')
 
-    c = open_range(page); hit(c, 1).click()
+    c = open_range(page); hit(c, 2).click()
     page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
     expect(c).to_have_attribute('data-playing','false')
     assert page.evaluate('window.__aimIntervals.size') == 0

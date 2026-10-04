@@ -1,3 +1,5 @@
+import { session } from "./session";
+import { moonJourney } from "./story-model";
 import { moveStop } from "./physics";
 import { routeStops, routeSample, nearestStop } from "./craft-model";
 import { motionAllowed } from "./runtime";
@@ -8,6 +10,7 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
   const abort = new AbortController(), { signal } = abort;
   const { root, head } = lab(host, "ROUTE STUDY / 04", "给下一次出发，排个顺序"); root.classList.add("route-lab");
   const progress = node("div", "craft-counter", "00 / 04"); head.append(progress);
+  const modes = node("div", "craft-toggle route-modes"); root.append(modes);
   const stage = node("div", "route-stage"); root.append(stage);
   const map = svg("svg", { viewBox: "0 0 900 400", class: "route-map", "aria-hidden": "true" }); stage.append(map);
   const terrain = svg("g", { class: "route-terrain" }); map.append(terrain);
@@ -34,10 +37,32 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
   const tools = node("div", "craft-tools"), log = node("span", "route-journal-note", "先选一个起点，再把沿途串起来。");
   tools.append(log); root.append(tools);
   root.append(node("div", "craft-footnote route-disclaimer", "示例路线纸 · 非真实地图或 AI 行程"));
+  let challenge = false, suspended = false;
+  const sky = node("span", "route-moon", "☾"), ferry = node("span", "route-ferry", "末班渡船"), deadline = node("span", "route-deadline", "灯塔在第 14 刻熄灯");
+  sky.setAttribute("aria-hidden", "true"); stage.append(sky);
+  const storyHud = node("div", "route-challenge-hud"); storyHud.append(deadline, ferry); root.insertBefore(storyHud, stage);
+  const rules = node("details", "route-rules");
+  rules.append(node("summary", "", "查看月落规则"), node("p", "", "想象时间，不是真实行程：旧城取信并获得山路图，停留 3 刻；山林、海湾各停留 1 刻。旧城↔山林 3 刻，旧城↔海湾 7 刻，旧城↔灯塔 11 刻，山林↔海湾 3 刻，山林↔灯塔 5 刻；携山路图从山林去灯塔只需 2 刻。海湾在第 11 刻以前（含）开船，去灯塔需 2 刻；错过后绕行 8 刻。第 14 刻到达灯塔仍来得及。顺序决定结尾。"));
+  root.append(rules);
   let route = [0, 1, 2, 3], frame = 0, phase: "ready" | "moving" | "paused" | "done" = "ready", elapsed = 0, start = 0, lastVisit = -1;
   const stop = () => { cancelAnimationFrame(frame); frame = 0; };
   const paint = (t: number) => {
-    const points = route.map(i => routeStops[i]), p = routeSample(points, t), visited = t >= 1 ? 4 : p.segment + 1;
+    const points = route.map(i => routeStops[i]);
+    const itinerary = moonJourney(route), storyTime = t * itinerary.total;
+    // 挑战模式按公开的旅行/停留规则行进，停留时标记不再匀速穿过节点。
+    let positionProgress = t;
+    if (challenge) {
+      let segment = 0;
+      while (segment < 3 && storyTime >= itinerary.arrivals[segment + 1]) segment++;
+      const lengths = points.slice(1).map((p, i) => Math.hypot(p.x - points[i].x, p.y - points[i].y));
+      const fraction = segment === 3 ? 1 : Math.max(0, Math.min(1, (storyTime - itinerary.departures[segment]) / Math.max(1, itinerary.arrivals[segment + 1] - itinerary.departures[segment])));
+      positionProgress = segment === 3 ? 1 : (lengths.slice(0, segment).reduce((a, b) => a + b, 0) + lengths[segment] * fraction) / lengths.reduce((a, b) => a + b, 0);
+      sky.style.transform = `translateY(${Math.min(1, storyTime / 14) * 42}px)`;
+      stage.dataset.light = storyTime <= 14 ? "on" : "off";
+      ferry.textContent = storyTime <= 11 ? "渡船候着 · 11 刻离港" : "渡船已离港";
+      deadline.textContent = `${storyTime.toFixed(1)} / 14 刻 · ${storyTime <= 14 ? "灯还亮着" : "月已落下"}`;
+    }
+    const p = routeSample(points, positionProgress), visited = t >= 1 ? 4 : challenge ? itinerary.arrivals.filter(at => storyTime >= at).length : p.segment + 1;
     traveller.setAttribute("visibility", "visible"); traveller.setAttribute("transform", `translate(${p.x} ${p.y}) rotate(${p.angle})`);
     travelled.setAttribute("points", [...points.slice(0, p.segment + 1), p].map(v => `${v.x},${v.y}`).join(" "));
     markers.forEach((m, id) => m.classList.toggle("is-visited", route.indexOf(id) < visited));
@@ -46,13 +71,16 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
     if (visited !== lastVisit) { lastVisit = visited; log.textContent = routeStops[route[visited - 1]].note; }
     if (t >= 1) {
       phase = "done"; root.dataset.phase = phase; seal.hidden = false;
-      seal.replaceChildren(node("span", "", "ARRIVED"), node("strong", "", `抵达 · ${routeStops[route[3]].name}`));
+      seal.replaceChildren(node("span", "", challenge ? { delivered: "BEFORE MOONSET", late: "AFTER MOONSET", elsewhere: "ANOTHER SHORE" }[itinerary.ending] : "ARRIVED"), node("strong", "", `抵达 · ${routeStops[route[3]].name}`));
+      root.dataset.ending = challenge ? itinerary.ending : "free";
+      if (challenge) log.textContent = itinerary.note;
       go.textContent = "再走一次";
-      options.status(`已抵达${routeStops[route[3]].name}，沿途四站已留下印记。这是示例路线；真实旅行规划请进入 RoamIsle。`);
+      options.status(challenge ? `${itinerary.note} 共 ${itinerary.total} 刻。可以重排路线尝试不同结尾；这不是实际交通规划。` : `已抵达${routeStops[route[3]].name}，沿途四站已留下印记。这是示例路线；真实旅行规划请进入 RoamIsle。`);
     }
   };
-  const render = (now: number) => { const t = Math.min(1, (elapsed + now - start) / 4200); paint(t); if (phase === "moving" && t < 1) frame = requestAnimationFrame(render); else frame = 0; };
+  const render = (now: number) => { if (suspended) { frame = 0; return; } const t = Math.min(1, (elapsed + now - start) / (challenge ? 6500 : 4200)); paint(t); if (phase === "moving" && t < 1) frame = requestAnimationFrame(render); else frame = 0; };
   const go = button(tools, "沿途出发", () => {
+    if (suspended) return;
     if (phase === "moving") { elapsed += performance.now() - start; stop(); phase = "paused"; go.textContent = "继续行进"; root.dataset.phase = phase; options.status("行程已暂停。继续行进，或调整地点签重新出发。"); return; }
     if (phase !== "paused") { elapsed = 0; lastVisit = -1; seal.hidden = true; }
     phase = "moving"; root.dataset.phase = phase;
@@ -65,6 +93,9 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
     go.textContent = "沿途出发"; seal.hidden = true; traveller.setAttribute("visibility", "hidden"); travelled.setAttribute("points", "");
     line.setAttribute("points", route.map(i => `${routeStops[i].x},${routeStops[i].y}`).join(" "));
     progress.textContent = "00 / 04";
+    stage.dataset.light = "on"; sky.style.transform = "";
+    deadline.textContent = "灯塔在第 14 刻熄灯"; ferry.textContent = "末班渡船 · 11 刻离港";
+    root.dataset.challenge = String(challenge); root.removeAttribute("data-ending"); rules.hidden = !challenge;
     Array.from(list.children).forEach((el, i) => {
       const b = el as HTMLButtonElement, stop = routeStops[route[i]];
       b.dataset.visited = "false"; b.replaceChildren(node("span", "route-stop-number", String(i + 1).padStart(2, "0")), node("strong", "", stop.name), node("span", "route-stop-grip", "⠿"));
@@ -72,6 +103,14 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
     });
     markers.forEach(m => m.classList.remove("is-visited")); log.textContent = `从${routeStops[route[0]].name}出发，在${routeStops[route[3]].name}停靠。`;
   };
+  let free: HTMLButtonElement, moon: HTMLButtonElement;
+  const selectMode = (on: boolean) => {
+    challenge = on; update(); free.setAttribute("aria-pressed", String(!on)); moon.setAttribute("aria-pressed", String(on));
+    options.status(on ? "赶在月落之前：按规则安排四站，最后去灯塔。路线不同，结尾不同。" : "自由路线纸：把沿途串起来，随时暂停与重排。");
+  };
+  free = button(modes, "自由漫游", () => selectMode(false), signal);
+  moon = button(modes, "赶在月落之前", () => selectMode(true), signal);
+  free.setAttribute("aria-pressed", "true"); moon.setAttribute("aria-pressed", "false");
   for (let index = 0; index < 4; index++) {
     let drag: { id: number; x: number; y: number } | null = null, moved = false;
     const b = button(list, "", () => { route = moveStop(route, index, (index + 1) % 4); update(); options.status(`新的顺序：${route.map(i => routeStops[i].name).join(" → ")}`); }, signal);
@@ -103,5 +142,15 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
     }, { signal });
   }
   update(); options.status("拖动地点签重排路线；点击可轮换，左右方向键也可排序。排列好后，沿途出发。");
-  return () => { abort.abort(); stop(); host.replaceChildren(); };
+  const rest = () => {
+    if (phase === "moving") {
+      elapsed += performance.now() - start; stop(); phase = "paused"; root.dataset.phase = phase;
+      go.textContent = "继续行进";
+    }
+    suspended = true;
+    list.querySelectorAll<HTMLElement>(".dragging").forEach(b => { b.style.transform = ""; b.classList.remove("dragging"); });
+  };
+  return session(() => { abort.abort(); stop(); host.replaceChildren(); }, rest, () => { suspended = false; }, () => {
+    if (phase === "moving" && !motionAllowed()) { stop(); paint(1); }
+  });
 }
