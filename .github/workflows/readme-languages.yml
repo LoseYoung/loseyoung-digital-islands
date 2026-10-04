@@ -1,0 +1,27 @@
+name: Sync README language sections
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'README.zh-CN.md'
+      - 'README.ja.md'
+      - 'scripts/sync-readme-sections.py'
+      - 'tests/readme-sections.test.py'
+      - '.github/workflows/readme-languages.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: readme-language-sections
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v6
+      - name: 检查章节保留与幂等行为
+        run: python tests/readme-sections.test.py
+      - name: 同步中文和日文分支的交互说明
+        run: python scripts/sync-readme-sections.py

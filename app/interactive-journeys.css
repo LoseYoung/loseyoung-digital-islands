@@ -89,3 +89,7 @@ html[data-motion="off"] .forest-orb { transition: none; }
 .collection .playable-cover[data-kind="roamisle"][data-playing="true"] { min-height: 640px; }
 .route-lab { overflow-y: auto; }
 .route-lab .route-stage { flex: 1 0 140px; }
+
+/* 开始操作后不再让目录入场动画移动画布，避免笔迹坐标跟着漂移。 */
+.collection .island-entry:has(.playable-cover[data-playing="true"]) { opacity: 1; transform: none; filter: none; transition: none; }
+.collection .island-entry .playable-cover[data-playing="true"] { clip-path: none; transition: none; }
