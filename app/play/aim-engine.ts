@@ -1,9 +1,11 @@
 import { AIM_COUNT, aimSequence, aimSummary, hitKind, type AimHit } from "./aim-model";
+import { session } from "./session";
+import { challengeSeed, compareAttempt, type Attempt } from "./story-model";
 import { motionAllowed, type Dispose } from "./runtime";
 
 type Options = { kind: string; basePath: string; status: (message: string) => void };
 
-/** 只在 Gridwake 封面激活时运行；外层仍负责离屏、后台及 Motion 切换时销毁。 */
+/** 可暂停的瞄准练习；中断、尺寸变化及混合输入不进入同题比较。 */
 export function mountCover(host: HTMLElement, { status }: Options): Dispose {
   const abort = new AbortController();
   const { signal } = abort;
@@ -15,7 +17,14 @@ export function mountCover(host: HTMLElement, { status }: Options): Dispose {
   const seed = new Uint32Array(1);
   if (typeof globalThis.crypto?.getRandomValues === "function") crypto.getRandomValues(seed);
   else seed[0] = Date.now() >>> 0;
-  const positions = aimSequence(seed[0]);
+  const linkedSeed = challengeSeed(new URL(location.href).searchParams.get("aim"));
+  if (linkedSeed !== null) seed[0] = linkedSeed;
+  let positions = aimSequence(seed[0]), previous: Attempt | null = null, completed: Attempt | null = null;
+  let pausedAt: number | null = null, pausedMs = 0, interrupted = false, suspended = false;
+  let spec = "", viewSize = "";
+  const inputs = new Set<string>();
+  const elapsed = (now = performance.now()) => started === null ? 0 : Math.max(0, now - started - pausedMs - (pausedAt === null ? 0 : now - pausedAt));
+  const countInput = (event: MouseEvent) => inputs.add(event.detail === 0 ? "keyboard" : (event as PointerEvent).pointerType || "mouse");
 
   function node<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text = "") {
     const el = document.createElement(tag); el.className = cls; el.textContent = text; return el;
@@ -59,7 +68,8 @@ export function mountCover(host: HTMLElement, { status }: Options): Dispose {
   const guide = node("span", "aim-rail-note", "中心命中 · 冷金色反馈");
   rail.append(guide);
   field.append(backdrop, watermark);
-  range.append(hud, field, rail); host.replaceChildren(range);
+  const actions = node("div", "aim-actions");
+  range.append(hud, field, rail, actions); host.replaceChildren(range);
 
   const target = node("button", "grid-target aim-target"); target.type = "button";
   // 静态的本地矢量靶标：分段准星、双环、中心点，没有光标追赶或连续旋转。
@@ -72,7 +82,7 @@ export function mountCover(host: HTMLElement, { status }: Options): Dispose {
     accuracy.textContent = total ? `${Math.round(hits.length / total * 100)}%` : "—";
   }
   function drawTarget(focus = false) {
-    if (disposed || hits.length >= AIM_COUNT) return;
+    if (disposed || suspended || hits.length >= AIM_COUNT) return;
     const p = positions[hits.length];
     target.style.left = `${p.x * 100}%`; target.style.top = `${p.y * 100}%`;
     targetLabel.textContent = String(hits.length + 1).padStart(2, "0");
@@ -103,7 +113,7 @@ export function mountCover(host: HTMLElement, { status }: Options): Dispose {
     range.dataset.phase = "complete"; phase.textContent = "校准完成";
     field.querySelectorAll(".aim-impact").forEach(mark => mark.remove());
     lamps.forEach(lamp => lamp.classList.remove("is-current"));
-    const result = aimSummary(hits, misses, started === null ? 0 : now - started);
+    const result = aimSummary(hits, misses, elapsed(now));
     clock.textContent = `${(result.elapsedMs / 1000).toFixed(2)}s`;
     const panel = node("div", "aim-results"); panel.setAttribute("tabindex", "-1");
     panel.setAttribute("aria-label", "本轮六点瞄准成绩");
@@ -116,7 +126,17 @@ export function mountCover(host: HTMLElement, { status }: Options): Dispose {
       ["中心命中", result.pointerHits ? `${result.centers} / ${result.pointerHits}` : "—"],
     ]) { const cell = node("div", "aim-result-stat"); cell.append(node("strong", "", value), node("span", "", label)); summary.append(cell); }
     panel.append(summary);
-    panel.append(node("p", "aim-result-note", result.assisted ? "含键盘辅助操作 · 不与鼠标精度比较" : "再试一次，看看能否更从容地命中中心。"));
+    const key = `${seed[0]}:v2:${spec}:${[...inputs].sort().join("+")}`;
+    completed = { key, elapsed: result.elapsedMs, responses: hits.map(h => h.responseMs), interrupted: interrupted || inputs.size !== 1 || result.assisted };
+    const comparison = compareAttempt(previous, completed);
+    panel.append(node("p", "aim-result-note", interrupted ? "中断练习 / 场地变化 · 本轮不参与成绩比较" : result.assisted ? "含键盘辅助操作 · 不与鼠标精度比较" : "同题再来一局，比较这六次动作。"));
+    const delta = node("p", "aim-comparison", comparison ? `比上一局${comparison.elapsed <= 0 ? "快" : "慢"} ${Math.abs(comparison.elapsed / 1000).toFixed(2)} 秒` : "同种子、同尺寸、同输入的连续回合才比较。");
+    panel.append(delta);
+    if (comparison) {
+      const splits = node("div", "aim-splits");
+      comparison.responses.forEach((v, i) => splits.append(node("span", "", `${i + 1}: ${v === null ? "—" : `${v > 0 ? "+" : ""}${Math.round(v)}ms`}`)));
+      panel.append(splits);
+    }
     field.append(panel);
     // 最后一次键盘命中后把焦点留在结果，不丢回文档顶部。
     if (hits.at(-1)?.kind === "keyboard") panel.focus({ preventScroll: true });
@@ -124,7 +144,8 @@ export function mountCover(host: HTMLElement, { status }: Options): Dispose {
   }
   target.addEventListener("click", e => {
     e.stopPropagation();
-    if (!accepting || disposed || hits.length >= AIM_COUNT) return;
+    if (!accepting || disposed || suspended || hits.length >= AIM_COUNT) return;
+    countInput(e);
     accepting = false;
     const now = performance.now();
     const keyboard = e.detail === 0;
@@ -133,9 +154,11 @@ export function mountCover(host: HTMLElement, { status }: Options): Dispose {
     const kind = hitKind(e.clientX - cx, e.clientY - cy, bounds.width / 2, keyboard);
     hits.push({ kind, responseMs: started === null ? null : Math.max(0, now - shownAt) });
     if (started === null) {
-      started = now; phase.textContent = "校准进行中"; range.dataset.phase = "active";
+      started = now;
+      spec = `${Math.round(surface.width)}x${Math.round(surface.height)}:${Math.round(bounds.width)}:${motionAllowed()}`;
+      phase.textContent = "校准进行中"; range.dataset.phase = "active";
       // HUD 只每 100ms 更新一次，不新增常驻 RAF。
-      tick = setInterval(() => { if (!disposed && started !== null) clock.textContent = `${((performance.now() - started) / 1000).toFixed(2)}s`; }, 100);
+      tick = setInterval(() => { if (!disposed && started !== null) clock.textContent = `${(elapsed() / 1000).toFixed(2)}s`; }, 100);
     }
     const lamp = lamps[hits.length - 1]; lamp.dataset.hit = kind;
     lamp.setAttribute("aria-label", `节点 ${hits.length}：${kind === "center" ? "中心命中" : kind === "keyboard" ? "键盘命中" : "命中"}`);
@@ -148,17 +171,69 @@ export function mountCover(host: HTMLElement, { status }: Options): Dispose {
   }, { signal });
   field.addEventListener("click", e => {
     // 目标切换期间不把双击第二下误判为空击；结果面板也不会再计分。
-    if (!accepting || disposed || hits.length >= AIM_COUNT) return;
+    if (!accepting || disposed || suspended || hits.length >= AIM_COUNT) return;
+    countInput(e);
     misses++; setStats();
     const bounds = field.getBoundingClientRect(); impact(e.clientX - bounds.left, e.clientY - bounds.top, "miss");
     status(`${hits.length} / 6 节点 · 空击 ${misses} 次。目标中心的细点更精确。`);
   }, { signal });
-  drawTarget();
-  status("依次点亮六个信标，中心命中会留下冷金色印记。首击后计时；也支持 Tab / Enter。");
-  return () => {
-    disposed = true; abort.abort(); clearInterval(tick);
+  function clearWork() {
+    clearInterval(tick); tick = undefined;
     timers.forEach(id => clearTimeout(id)); timers.clear();
     animations.forEach(animation => { animation.onfinish = null; animation.cancel(); }); animations.clear();
-    host.replaceChildren();
+    field.querySelectorAll(".aim-impact").forEach(el => el.remove());
+  }
+  const action = (label: string, run: () => void) => {
+    const b = node("button", "craft-button", label); b.type = "button";
+    b.addEventListener("click", run, { signal }); actions.append(b); return b;
   };
+  action("同题再试", () => {
+    clearWork(); previous = completed; completed = null;
+    hits.length = 0; misses = 0; started = null; pausedMs = 0; pausedAt = null; interrupted = false; inputs.clear();
+    range.dataset.phase = "ready"; phase.textContent = "同题 · 等待首击"; clock.textContent = "0.00s";
+    field.querySelector(".aim-results")?.remove();
+    lamps.forEach(lamp => { delete lamp.dataset.hit; lamp.removeAttribute("title"); });
+    positions = aimSequence(seed[0]); setStats(); drawTarget();
+    status("已保留同一组目标。新的连续回合完成后，将与上一局同规格成绩比较。");
+  });
+  const share = action("复制挑战链接", () => {
+    const link = new URL(location.href); link.searchParams.set("aim", String(seed[0])); link.hash = "islands";
+    const manual = () => { shareLink.hidden = false; shareLink.value = link.href; shareLink.focus(); shareLink.select(); status("可选中下方链接后手动复制；同一链接会使用同种子目标。不同场地规格不比较成绩。"); };
+    if (!navigator.clipboard?.writeText) { manual(); return; }
+    navigator.clipboard.writeText(link.href).then(() => { if (!disposed) status("挑战链接已复制。同一种子，不同设备仍会按各自场地显示，不上传成绩。"); }).catch(() => { if (!disposed) manual(); });
+  });
+  share.title = `本轮种子 ${seed[0]} · 不上传成绩`;
+  const shareLink = node("input", "aim-share-link"); shareLink.type = "text"; shareLink.readOnly = true;
+  shareLink.hidden = true; shareLink.setAttribute("aria-label", "手动复制挑战链接"); actions.append(shareLink);
+  const resize = new ResizeObserver(() => {
+    const size = `${Math.round(field.clientWidth)}x${Math.round(field.clientHeight)}`;
+    if (viewSize && size !== viewSize && started !== null && hits.length < AIM_COUNT) interrupted = true;
+    viewSize = size;
+  }); resize.observe(field);
+  drawTarget();
+  status("依次点亮六个信标，中心命中会留下冷金色印记。首击后计时；也支持 Tab / Enter。");
+  const pause = () => {
+    if (suspended) return;
+    suspended = true; pausedAt = performance.now();
+    if (started !== null && hits.length < AIM_COUNT) { interrupted = true; phase.textContent = "中断练习 · 已暂停"; }
+    clearWork();
+  };
+  const resume = () => {
+    if (!suspended) return;
+    const gap = pausedAt === null ? 0 : performance.now() - pausedAt;
+    if (started !== null) pausedMs += gap;
+    shownAt += gap; pausedAt = null; suspended = false;
+    if (hits.length < AIM_COUNT) {
+      if (target.hidden) drawTarget();
+      if (started !== null) {
+        phase.textContent = "中断练习 · 继续";
+        tick = setInterval(() => { clock.textContent = `${(elapsed() / 1000).toFixed(2)}s`; }, 100);
+      }
+    }
+  };
+  return session(() => { disposed = true; abort.abort(); clearWork(); resize.disconnect(); host.replaceChildren(); }, pause, resume, () => {
+    if (started !== null && hits.length < AIM_COUNT) interrupted = true;
+    animations.forEach(a => { a.onfinish = null; a.cancel(); }); animations.clear();
+    field.querySelectorAll(".aim-impact").forEach(el => el.remove());
+  });
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { FixedStep } from "./play/fixed-step";
 
 const vertexShaderSource = `#version 300 es
 in vec2 a_position;
@@ -283,6 +284,7 @@ export default function FluidCursor() {
     let lastInjectedPointer: PointerSample | null = null;
     let queuedImpulse: RippleImpulse | null = null;
     const startedAt = performance.now();
+    const clock = new FixedStep();
 
     const motionEnabled = () => {
       const explicit = document.documentElement.dataset.motion;
@@ -440,10 +442,13 @@ export default function FluidCursor() {
         }
       }
 
-      const impulse = queuedImpulse ?? undefined;
-      queuedImpulse = null;
-      simulationStep(impulse);
-      display(now);
+      const steps = clock.take(now);
+      if (steps > 0) {
+        const impulse = queuedImpulse ?? undefined;
+        queuedImpulse = null;
+        for (let i = 0; i < steps; i++) simulationStep(i === 0 ? impulse : undefined);
+        display(now);
+      }
 
       if (now < activeUntil || latestPointer || queuedImpulse) {
         frame = window.requestAnimationFrame(render);
@@ -455,7 +460,7 @@ export default function FluidCursor() {
     };
 
     const ensureFrame = () => {
-      if (!frame) frame = window.requestAnimationFrame(render);
+      if (!frame) { clock.reset(performance.now() - clock.step); frame = window.requestAnimationFrame(render); }
     };
 
     const wake = (milliseconds = 3400) => {
@@ -496,7 +501,15 @@ export default function FluidCursor() {
       }
     };
 
+    const onVisibility = () => {
+      if (document.hidden) {
+        window.cancelAnimationFrame(frame); frame = 0;
+        latestPointer = null; queuedImpulse = null; lastInjectedPointer = null;
+        clearCanvas(); resetSimulation(); activeUntil = 0;
+      }
+    };
     resize();
+    document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
@@ -506,6 +519,7 @@ export default function FluidCursor() {
 
     return () => {
       window.cancelAnimationFrame(frame);
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerDown);

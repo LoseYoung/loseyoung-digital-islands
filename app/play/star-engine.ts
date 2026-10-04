@@ -14,6 +14,12 @@ export function mountStar(host: HTMLElement, report: (message: string) => void) 
   let pointer: number | null = null, dragged = false, origin: Point = { x: .82, y: .14 };
   let samples: { point: Point; time: number }[] = [];
   let suppressClick = false;
+  const goal = { x: .43, y: .73 };
+  const drawGoal = (alpha = .24) => {
+    ctx.strokeStyle = `rgba(215,226,200,${alpha})`; ctx.lineWidth = 1;
+    ctx.setLineDash([3, 8]); ctx.beginPath(); ctx.ellipse(goal.x * width, goal.y * height, width * .045, height * .024, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+  };
+  const landsInMoonlight = (p: Point) => Math.hypot((p.x - goal.x) / .045, (p.y - goal.y) / .024) <= 1;
 
   const restore = () => {
     button.style.removeProperty("left"); button.style.removeProperty("top");
@@ -45,6 +51,20 @@ export function mountStar(host: HTMLElement, report: (message: string) => void) 
     rings = rings.filter(r => now - r.at < 2000);
     for (const ring of rings) {
       const t = Math.max(0, (now - ring.at) / 2000);
+      // 接触高光先出现，然后少量水珠回落，最后只剩透明透视涟漪。
+      if (t < .24) {
+        const impact = t / .24;
+        ctx.globalAlpha = 1 - impact;
+        ctx.fillStyle = "#e1edf0";
+        ctx.beginPath(); ctx.ellipse(ring.x * width, ring.y * height, (2 + impact * 15) * ring.scale, 1.5 * ring.scale, 0, 0, Math.PI * 2); ctx.fill();
+        for (let i = 0; i < 9; i++) {
+          const a = i * 2.39996;
+          const dx = Math.cos(a) * impact * 30 * ring.scale;
+          const dy = Math.sin(a) * impact * 6 - Math.sin(impact * Math.PI) * (12 + i % 3 * 5) * ring.scale;
+          ctx.beginPath(); ctx.arc(ring.x * width + dx, ring.y * height + dy, .7 + (i % 2) * .3, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
       for (let band = 0; band < 3; band++) {
         const age = t - band * .10; if (age <= 0) continue;
         const radius = (8 + age * Math.min(width * .14, 190)) * ring.scale;
@@ -61,15 +81,17 @@ export function mountStar(host: HTMLElement, report: (message: string) => void) 
       hopStart += plan[index].duration * 1000;
       rings.push({ ...plan[index].to, at: hopStart, scale: 1 - index * .085 }); index++;
     }
-    drawRings(now);
+    drawGoal(busy ? .23 : .1); drawRings(now);
     if (index < plan.length) {
       const position = pointOnHop(plan[index], (now - hopStart) / (plan[index].duration * 1000));
       trail.push(position); if (trail.length > 8) trail.shift();
       trail.forEach((p, i) => { ctx.fillStyle = `rgba(202,223,235,${i / trail.length * .18})`; ctx.beginPath(); ctx.arc(p.x * width, p.y * height, 1.3, 0, Math.PI * 2); ctx.fill(); });
       star(position);
     } else if (busy) {
+      const reached = plan.length > 0 && landsInMoonlight(plan.at(-1)!.to);
       busy = false; restore(); trail = [];
-      report(plan.length === 1 ? "轻轻落水，一圈涟漪。横着甩得更快，可以跳得更远。" : `这颗星，跳过了 ${plan.length} 次海面。再试一次，让它去往不同的地方。`);
+      report((plan.length === 1 ? "轻轻落水，一圈涟漪。" : `这颗星，跳过了 ${plan.length} 次海面。`) + (reached ? "最后一跳，停在了月光里。" : "试着让最后一跳，停进那片月光。"));
+      if (reached) rings.push({ ...goal, at: now, scale: 1.6 });
     }
     if (busy || rings.length) frame = requestAnimationFrame(render);
   };
@@ -88,7 +110,7 @@ export function mountStar(host: HTMLElement, report: (message: string) => void) 
   const announce = () => window.dispatchEvent(new CustomEvent(PLAY_EVENT, { detail: "star" }));
   button.addEventListener("pointerdown", event => {
     if (!event.isPrimary || event.button !== 0 || busy) return;
-    event.stopPropagation(); announce(); pointer = event.pointerId; dragged = false; suppressClick = false;
+    event.stopPropagation(); announce(); cancelAnimationFrame(frame); frame = 0; rings = []; trail = []; ctx.clearRect(0, 0, width, height); drawGoal(); pointer = event.pointerId; dragged = false; suppressClick = false;
     origin = local(event); samples = [{ point: origin, time: event.timeStamp }];
     button.setPointerCapture(pointer); button.dataset.dragging = "true";
   }, { signal });
@@ -99,7 +121,15 @@ export function mountStar(host: HTMLElement, report: (message: string) => void) 
     samples.push({ point: p, time });
     // 不能把低帧率下超过采样窗口的前一点全部删掉，否则快甩会被误算为零速度。
     while (samples.length > 2 && (time - samples[1].time > 150 || samples.length > 16)) samples.shift();
-    if (dragged) { button.style.left = `${p.x * 100}%`; button.style.top = `${p.y * 100}%`; }
+    if (dragged) {
+      button.style.left = `${p.x * 100}%`; button.style.top = `${p.y * 100}%`;
+      ctx.clearRect(0, 0, width, height); drawGoal(.4);
+      const landing = makeSkipPlan(p, releaseVelocity(samples, p, time))[0].to;
+      ctx.strokeStyle = "rgba(219,234,230,.34)"; ctx.lineWidth = 1; ctx.setLineDash([2,6]);
+      ctx.beginPath(); ctx.moveTo(p.x * width, p.y * height); ctx.lineTo(landing.x * width, landing.y * height); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.ellipse(landing.x * width, landing.y * height, 16, 4, 0, 0, Math.PI * 2); ctx.stroke();
+      report("松手投掷 · 虚线提示首次落点，月光圈等待最后一跳。");
+    }
   }, { signal });
   button.addEventListener("pointerup", event => {
     if (pointer !== event.pointerId) return;

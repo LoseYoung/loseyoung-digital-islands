@@ -19,6 +19,20 @@ This repository contains the portal homepage, island index, visual motion system
 - [OpenAI Sites · Digital Islands](https://loseyoung-digital-islands.lzy793222567.chatgpt.site)
 - [GitHub Pages · Digital Islands](https://loseyoung.github.io/loseyoung-digital-islands/)
 
+## Interactive edition · IJ-01
+
+The covers now remember the current session: close, scroll away, or switch tabs without discarding the photograph, runes, route, or hits. Expand the same play surface for more room; only **Restart** clears the round. Reloading the page still starts a fresh session.
+
+- **Darkroom:** undo the last four strokes, fix a deliberately partial composition, and optionally add up to three browser-only images. No photo is uploaded or synced to a private gallery.
+- **Forest:** combine Moon → Breeze → Spark to light the ruins; Moon → Spark → Breeze leaves light-seeds instead.
+- **RoamIsle:** keep free exploration or try **Before Moonset**, a fictional four-stop route with a ferry deadline and three possible endings. This is not real travel advice or an AI itinerary.
+- **Gridwake:** retry the same target sequence, compare uninterrupted rounds with matching field/input specifications, or copy a seed-only challenge link. No global ranking or score upload.
+- **Star skipping:** a first-impact guide while dragging, a brief contact glint and droplets, and a moonlit landing area for the final skip.
+
+Body ripples advance on a fixed 60Hz simulation clock with bounded catch-up. Motion preferences no longer close an active cover. The footer shows content edition `IJ-01` and, in GitHub Actions builds, the short commit SHA. GitHub Pages and Sites must still be published independently.
+
+[Implementation, controls, limits, and cloud verification](https://github.com/LoseYoung/loseyoung-digital-islands/blob/main/docs/interactive-journeys.md)
+
 ## Current Experience
 
 ### Moonlit Hero

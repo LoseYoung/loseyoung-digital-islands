@@ -3,6 +3,9 @@ import { runeTemplate, type Rune } from "./craft-model";
 import { motionAllowed } from "./runtime";
 import { lab, node, button, sketch, fitSheet, type CraftOptions } from "./craft-ui";
 
+import { session } from "./session";
+import { weaveSpell, forestNotes, type ForestState } from "./story-model";
+
 const spells = {
   moon: { name: "月环", glyph: "☾", color: "#dce9dd", note: "月环闭合，林间的萤火向光靠拢。" },
   spark: { name: "星芒", glyph: "✧", color: "#e5c994", note: "折线里的星火，沿着枝梢散开。" },
@@ -19,6 +22,14 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
   const whisper = node("span", "rune-whisper", "圆环 · 折线 · 长弧"); stage.append(whisper);
   const journal = node("div", "rune-journal"); journal.setAttribute("aria-label", "符文记录与辅助施法"); root.append(journal);
   const foot = node("div", "craft-footnote", "直接描画以探索 · 下方按钮可辅助施法"); root.append(foot);
+  const scene = node("div", "forest-scene"); scene.setAttribute("aria-hidden", "true");
+  scene.innerHTML = '<span class="forest-orb"></span><span class="forest-ruin"><svg viewBox="0 0 150 170"><path d="M12 150H139 M22 146V89L30 84V65L37 52 46 44 59 36 69 34 M90 37L106 47 116 64 121 83V146 M45 144V83Q47 61 68 57 M87 58Q100 66 99 86V145 M17 149L26 137H43L53 149 M91 149L102 138H125L135 149"/><path d="M27 100H45 M27 121H45 M99 107H119 M99 128H119 M33 76L47 80 M100 78L117 74 M41 53L52 67 M96 66L105 52"/><path class="forest-vines" d="M17 145Q7 128 23 121Q37 110 23 91 M119 144Q144 126 125 110 M75 89L89 106 75 126 61 106Z"/></svg></span><span class="forest-seeds">✧ · ✧ · ✧</span>';
+  stage.append(scene);
+  const outcome = node("p", "forest-note", forestNotes.quiet); root.insertBefore(outcome, journal);
+  let forest: ForestState = "quiet", suspended = false;
+  const weave = (kind: Rune) => {
+    forest = weaveSpell(forest, kind); root.dataset.forest = forest; outcome.textContent = forestNotes[forest];
+  };
   const records = new Map<Rune, "drawn" | "assisted">(), buttons = new Map<Rune, HTMLButtonElement>();
   let path: Point[] = [], pointer: number | null = null, frame = 0, current: Rune | null = null;
   const circle = (x: number, y: number, radius: number) => { ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.stroke(); };
@@ -45,16 +56,17 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
     if (records.size === 3) foot.textContent = "三种共鸣已记录 · 再画一次，让森林回应";
   };
   const cast = (assisted = false) => {
-    const kind = recognizeRune(path); cancelAnimationFrame(frame);
+    if (suspended) return;
+    const kind = recognizeRune(path); cancelAnimationFrame(frame); frame = 0;
     if (kind === "none") { guide(); stroke(.6); options.status("笔迹再舒展一些。试着闭合圆环、画一道折线，或留下一条长弧。"); return; }
-    current = kind; root.dataset.rune = kind;
+    current = kind; root.dataset.rune = kind; weave(kind);
     if (!records.has(kind) || !assisted) records.set(kind, assisted ? "assisted" : "drawn"); updateJournal();
     whisper.textContent = `${spells[kind].glyph}  ${spells[kind].name} / ${assisted ? "辅助施法" : "手绘共鸣"}`;
     options.status(`${spells[kind].name} · ${spells[kind].note}${records.size === 3 ? "三种符文都已留下回应。" : `已记录 ${records.size} / 3 种符文。`}`);
     const center = path.reduce((sum, p) => ({ x: sum.x + p.x / path.length, y: sum.y + p.y / path.length }), { x: 0, y: 0 });
     const start = performance.now();
     const render = (now: number) => {
-      const moving = motionAllowed(), t = moving ? Math.min(1, (now - start) / 1900) : .36;
+      const moving = motionAllowed() && !suspended, t = moving ? Math.min(1, (now - start) / 1900) : .36;
       guide(); stroke(.8 - t * .45, spells[kind].color);
       ctx.strokeStyle = spells[kind].color; ctx.lineWidth = 1.4; ctx.globalAlpha = (1 - t) * .8;
       if (kind === "moon") { circle(center.x, center.y, 104 + t * 112); circle(center.x, center.y, 112 + t * 133); }
@@ -80,13 +92,16 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
     b.append(node("span", "rune-token-symbol", spells[kind].glyph), node("strong", "", spells[kind].name), node("span", "rune-token-state", "尚待唤醒")); buttons.set(kind, b);
   });
   canvas.addEventListener("pointerdown", e => {
-    if (!e.isPrimary || e.button !== 0) return; cancelAnimationFrame(frame); frame = 0;
+    if (!e.isPrimary || e.button !== 0 || suspended) return; cancelAnimationFrame(frame); frame = 0;
     path = [point(e)]; pointer = e.pointerId; canvas.setPointerCapture(pointer); whisper.textContent = "正在书写 · 松手施法"; guide();
   }, { signal });
   canvas.addEventListener("pointermove", e => {
     if (pointer !== e.pointerId) return;
     const p = point(e), last = path.at(-1)!;
-    if (path.length < 420 && Math.hypot(p.x - last.x, p.y - last.y) > 3) { path.push(p); guide(); stroke(); }
+    if (path.length < 420 && Math.hypot(p.x - last.x, p.y - last.y) > 3) {
+      path.push(p);
+      if (!frame) frame = requestAnimationFrame(() => { frame = 0; guide(); stroke(); });
+    }
   }, { signal });
   canvas.addEventListener("pointerup", e => {
     if (pointer !== e.pointerId) return; pointer = null;
@@ -96,5 +111,11 @@ export function mountCover(host: HTMLElement, options: CraftOptions) {
   const cancel = () => { if (pointer !== null) { pointer = null; guide(); whisper.textContent = "笔迹已放下 · 可以重新描画"; } };
   canvas.addEventListener("pointercancel", cancel, { signal }); canvas.addEventListener("lostpointercapture", cancel, { signal });
   guide(); options.status("描画圆环、折线或长弧，松手唤醒不同的光。三个按钮可辅助施法，不要求必须绘画。");
-  return () => { abort.abort(); cancelAnimationFrame(frame); unfit(); host.replaceChildren(); };
+  const rest = () => {
+    suspended = true; cancelAnimationFrame(frame); frame = 0;
+    if (pointer !== null && canvas.hasPointerCapture(pointer)) canvas.releasePointerCapture(pointer);
+    pointer = null; guide(); stroke(.65, current ? spells[current].color : "#dce9dd");
+  };
+  return session(() => { rest(); abort.abort(); unfit(); host.replaceChildren(); }, rest,
+    () => { suspended = false; }, () => { cancelAnimationFrame(frame); frame = 0; guide(); stroke(.65); });
 }

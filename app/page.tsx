@@ -103,7 +103,7 @@ export default function Home() {
       <footer className="site-footer shell">
         <div><a className="brand" href="#top" lang="en">Digital Islands<span className="brand-period">.</span></a><p lang="en">A growing index of personal worlds.</p></div>
         <p className="footer-note" lang="en">Made slowly.<br /><em>Kept for longer.</em></p>
-        <div className="footer-bottom"><span>© 2026 LoseYoung</span><span>慢慢生成，也慢慢留下。</span><a href="#top" lang="en">Back to the beginning <span aria-hidden="true">↑</span></a></div>
+        <div className="footer-bottom"><span>© 2026 LoseYoung <small className="build-version" title="内容版本 · 两个发布入口可据此核对">/ IJ-01{process.env.NEXT_PUBLIC_BUILD_SHA ? ` · ${process.env.NEXT_PUBLIC_BUILD_SHA.slice(0, 7)}` : ""}</small></span><span>慢慢生成，也慢慢留下。</span><a href="#top" lang="en">Back to the beginning <span aria-hidden="true">↑</span></a></div>
       </footer>
     </main>
   );
